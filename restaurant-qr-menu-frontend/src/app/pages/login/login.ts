@@ -4,9 +4,11 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
+import { BackButton } from '../../components/back-button/back-button';
+
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, BackButton],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })

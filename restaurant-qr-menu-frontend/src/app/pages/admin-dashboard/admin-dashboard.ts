@@ -4,24 +4,32 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminRestaurantData } from '../../services/admin.service';
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
+import { ToastService } from '../../services/toast.service';
+import { ModalService } from '../../services/modal.service';
+import { BackButton } from '../../components/back-button/back-button';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BackButton],
   templateUrl: './admin-dashboard.html',
 })
 export class AdminDashboard implements OnInit, OnDestroy {
   authService   = inject(AuthService);
   adminService  = inject(AdminService);
   ticketService = inject(TicketService);
+  toastService  = inject(ToastService);
+  modalService  = inject(ModalService);
   router        = inject(Router);
 
   // ── Tab navigation ────────────────────────────────────────────────────────
   activeTab = signal<'restaurants' | 'tickets'>('restaurants');
 
-  // ── Restaurants ───────────────────────────────────────────────────────────
+  // ── Restaurants & Pagination ─────────────────────────────────────────────
   searchQuery = signal<string>('');
   expandedId  = signal<string | null>(null);
+
+  currentPage = signal<number>(1);
+  pageSize    = signal<number>(8);
 
   restaurants = computed(() => this.adminService.restaurantsList());
 
@@ -34,6 +42,28 @@ export class AdminDashboard implements OnInit, OnDestroy {
       r.location.toLowerCase().includes(q)
     );
   });
+
+  paginatedRestaurants = computed(() => {
+    const list = this.filteredRestaurants();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return list.slice(start, start + this.pageSize());
+  });
+
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredRestaurants().length / this.pageSize()) || 1;
+  });
+
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
 
   // Summary stats
   totalRestaurants  = computed(() => this.restaurants().length);
@@ -55,10 +85,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
   openTicketsCount     = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'open').length);
   resolvedTicketsCount = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'resolved').length);
 
-  // ── Toast ─────────────────────────────────────────────────────────────────
-  toastMessage = signal<string>('');
-  toastType    = signal<'success' | 'error'>('success');
-  private toastTimer: any;
   private autoRefreshTimer: any;
 
   ngOnInit() {
@@ -81,13 +107,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
     this.ticketService.fetchAdminTickets().subscribe();
   }
 
-  showToast(message: string, type: 'success' | 'error' = 'success') {
-    clearTimeout(this.toastTimer);
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.toastTimer = setTimeout(() => this.toastMessage.set(''), 3000);
-  }
-
   toggleRestaurant(id: string) {
     this.expandedId.set(this.expandedId() === id ? null : id);
   }
@@ -97,24 +116,31 @@ export class AdminDashboard implements OnInit, OnDestroy {
   }
 
   toggleStatus(id: string) {
-    this.adminService.toggleRestaurantStatus(id).subscribe(() => {
-      const r = this.restaurants().find((r: AdminRestaurantData) => r.id === id);
-      const msg = r?.status === 'active'
-        ? `✓ ${r?.name} is now Active`
-        : `⏸ ${r?.name} has been Suspended`;
-      this.showToast(msg, r?.status === 'active' ? 'success' : 'error');
+    const r = this.restaurants().find((r: AdminRestaurantData) => r.id === id);
+    const actionName = r?.status === 'active' ? 'Suspend' : 'Activate';
+
+    this.modalService.confirm({
+      title: `${actionName} Venue Account`,
+      message: `Are you sure you want to ${actionName.toLowerCase()} ${r?.name}?`,
+      type: r?.status === 'active' ? 'warning' : 'info',
+      confirmText: actionName,
+      onConfirm: () => {
+        this.adminService.toggleRestaurantStatus(id).subscribe(() => {
+          this.toastService.success('Status Updated', `${r?.name} is now ${r?.status === 'active' ? 'Suspended' : 'Active'}`);
+        });
+      }
     });
   }
 
   resolveTicket(id: string) {
     this.ticketService.resolveTicket(id).subscribe(() => {
-      this.showToast('✓ Ticket marked as resolved');
+      this.toastService.success('Ticket Resolved', 'Support ticket marked as resolved.');
     });
   }
 
   reopenTicket(id: string) {
     this.ticketService.reopenTicket(id).subscribe(() => {
-      this.showToast('Ticket reopened', 'error');
+      this.toastService.info('Ticket Reopened', 'Ticket moved back to open queue.');
     });
   }
 
@@ -150,7 +176,16 @@ export class AdminDashboard implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.modalService.confirm({
+      title: 'Sign Out Admin',
+      message: 'Are you sure you want to log out of Super Admin portal?',
+      type: 'warning',
+      confirmText: 'Sign Out',
+      onConfirm: () => {
+        this.authService.logout();
+        this.toastService.info('Signed Out', 'Super Admin logged out.');
+        this.router.navigate(['/login']);
+      }
+    });
   }
 }

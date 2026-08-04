@@ -86,8 +86,9 @@
     <!-- TOP WORKSPACE DESKTOP OVERLAY BAR -->
     <header class="h-20 border-b border-white/5 bg-[#08090b]/40 backdrop-blur px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20">
       
-      <!-- Left side: Venue branding -->
+      <!-- Left side: Venue branding & Back Button -->
       <div class="flex items-center space-x-3.5">
+        <app-back-button label="Back"></app-back-button>
         <!-- Restaurant photo or fallback icon -->
         @if (authService.currentUser()?.restaurantPhoto) {
           <img [src]="authService.currentUser()!.restaurantPhoto!"
@@ -383,7 +384,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div *ngFor="let dish of filteredMenuItems()"
+              <div *ngFor="let dish of paginatedMenuItems()"
                    class="p-4 rounded-2xl bg-[#0f1117] border border-white/5 flex flex-col justify-between h-[300px] relative">
                 
                 <div class="space-y-3">
@@ -427,6 +428,21 @@
                   </div>
                 </div>
 
+              </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div *ngIf="totalPages() > 1" class="flex items-center justify-between pt-4 border-t border-white/5">
+              <span class="text-xs text-gray-500 font-mono">Page {{currentPage()}} of {{totalPages()}}</span>
+              <div class="flex items-center space-x-2">
+                <button (click)="prevPage()" [disabled]="currentPage() === 1"
+                        class="px-3 py-1.5 rounded-lg border border-white/10 bg-zinc-900 text-xs font-semibold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-zinc-800 cursor-pointer">
+                  ← Prev
+                </button>
+                <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+                        class="px-3 py-1.5 rounded-lg border border-white/10 bg-zinc-900 text-xs font-semibold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-zinc-800 cursor-pointer">
+                  Next →
+                </button>
               </div>
             </div>
 

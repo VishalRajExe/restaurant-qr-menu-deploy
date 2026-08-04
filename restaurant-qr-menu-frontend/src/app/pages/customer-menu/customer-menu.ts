@@ -12,6 +12,10 @@ import { Category } from '../../models/category.model';
 import { MenuItem } from '../../models/menu-item.model';
 import { Offer } from '../../models/offer.model';
 
+import { ToastService } from '../../services/toast.service';
+import { ModalService } from '../../services/modal.service';
+import { BackButton } from '../../components/back-button/back-button';
+
 export interface CartItem {
   menuItem: MenuItem;
   quantity: number;
@@ -19,7 +23,7 @@ export interface CartItem {
 
 @Component({
   selector: 'app-customer-menu',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BackButton],
   templateUrl: './customer-menu.html',
   styleUrls: ['./customer-menu.css']
 })
@@ -30,6 +34,8 @@ export class CustomerMenu implements OnInit {
   menuService       = inject(MenuService);
   offerService      = inject(OfferService);
   publicMenuService = inject(PublicMenuService);
+  toastService      = inject(ToastService);
+  modalService      = inject(ModalService);
 
   // ── Restaurant data ──────────────────────────────────────────────────────────
   restaurant = signal<Restaurant | undefined>(undefined);

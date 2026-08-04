@@ -9,7 +9,9 @@
     
     <!-- Header: Portal Selector tabs (Only if not on success screen) -->
     <div class="flex items-center justify-between border-b border-white/5 pb-6 mb-8" *ngIf="currentStep() < 4">
-      <a routerLink="/" class="flex items-center space-x-3 z-10">
+      <div class="flex items-center space-x-3">
+        <app-back-button label="Back"></app-back-button>
+        <a routerLink="/" class="flex items-center space-x-3">
       <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
         <img
           src="/AuraMenuLogo-dark.png"

@@ -5,19 +5,22 @@
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
     <!-- Left -->
-    <a routerLink="/" class="flex items-center space-x-3 z-10">
-      <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
-        <img
-          src="/AuraMenuLogo-dark.png"
-          alt="AuraMenu"
-          class="w-full h-full object-contain"
-        />
-      </div>
+    <div class="flex items-center space-x-3 z-10">
+      <app-back-button label="Back"></app-back-button>
+      <a routerLink="/" class="flex items-center space-x-3">
+        <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
+          <img
+            src="/AuraMenuLogo-dark.png"
+            alt="AuraMenu"
+            class="w-full h-full object-contain"
+          />
+        </div>
 
-      <span class="font-display font-medium text-lg leading-none">
-        Aura<span class="text-orange-500 font-bold">Menu</span>
-      </span>
-    </a>
+        <span class="font-display font-medium text-lg leading-none">
+          Aura<span class="text-orange-500 font-bold">Menu</span>
+        </span>
+      </a>
+    </div>
 
     <!-- Center -->
     <div class="absolute inset-0 flex justify-center items-center pointer-events-none">

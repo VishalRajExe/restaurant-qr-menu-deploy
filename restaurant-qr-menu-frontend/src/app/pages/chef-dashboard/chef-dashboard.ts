@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
+import { ModalService } from '../../services/modal.service';
+import { BackButton } from '../../components/back-button/back-button';
 import { environment } from '../../environments/environment';
 
 export interface OrderItem {
@@ -25,13 +28,15 @@ export interface Order {
 
 @Component({
   selector: 'app-chef-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BackButton],
   templateUrl: './chef-dashboard.html',
 })
 export class ChefDashboard implements OnInit, OnDestroy {
-  authService = inject(AuthService);
-  http        = inject(HttpClient);
-  router      = inject(Router);
+  authService  = inject(AuthService);
+  toastService = inject(ToastService);
+  modalService = inject(ModalService);
+  http         = inject(HttpClient);
+  router       = inject(Router);
 
   orders = signal<Order[]>([]);
 
@@ -55,8 +60,8 @@ export class ChefDashboard implements OnInit, OnDestroy {
   ngOnInit() {
     this.fetchOrders();
     this.timerInterval = setInterval(() => {
-      this.orders.update(o => [...o]);
-    }, 10000);
+      this.fetchOrders();
+    }, 5000);
   }
 
   fetchOrders() {
@@ -116,6 +121,7 @@ export class ChefDashboard implements OnInit, OnDestroy {
       list.map(o => {
         if (o.id !== orderId) return o;
         const next = o.status === 'pending' ? 'preparing' : 'done';
+        this.toastService.success('Order Status Updated', `Order ${orderId} moved to ${next}`);
         return { ...o, status: next };
       })
     );
@@ -156,7 +162,16 @@ export class ChefDashboard implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.modalService.confirm({
+      title: 'Sign Out Kitchen Session',
+      message: 'Are you sure you want to log out of the Chef Kitchen panel?',
+      type: 'warning',
+      confirmText: 'Sign Out',
+      onConfirm: () => {
+        this.authService.logout();
+        this.toastService.info('Signed Out', 'Chef session ended.');
+        this.router.navigate(['/login']);
+      }
+    });
   }
 }

@@ -11,16 +11,25 @@ import { ApiResponse } from '../models/api-response.model';
 export class MenuService {
   private http = inject(HttpClient);
   private menuItemsList = signal<MenuItem[]>([]);
+  private localAddedItems: MenuItem[] = [];
 
   getMenuItemsForCategories(categoryIds: string[]): MenuItem[] {
-    return this.menuItemsList().filter(item => categoryIds.includes(item.categoryId));
+    if (!categoryIds || categoryIds.length === 0) return this.menuItemsList();
+    const cleanCatIds = categoryIds.map(id => String(id).toLowerCase().replace(/^c/, ''));
+    return this.menuItemsList().filter(item => {
+      const itemCatId = String(item.categoryId).toLowerCase().replace(/^c/, '');
+      return cleanCatIds.includes(itemCatId) || categoryIds.includes(item.categoryId);
+    });
   }
 
   getMenuItemsForCategory(categoryId: string): MenuItem[] {
-    return this.menuItemsList().filter(item => item.categoryId === categoryId);
+    const cleanId = String(categoryId).toLowerCase().replace(/^c/, '');
+    return this.menuItemsList().filter(item => {
+      const itemCatId = String(item.categoryId).toLowerCase().replace(/^c/, '');
+      return itemCatId === cleanId || item.categoryId === categoryId;
+    });
   }
 
-  /** Called by PublicMenuService to set menu items from unified endpoint */
   setMenuItems(items: MenuItem[]): void {
     this.menuItemsList.set(items);
   }
@@ -30,7 +39,7 @@ export class MenuService {
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/public/restaurants/${numericId}/menu`).pipe(
       map(res => {
         if (res && res.success && Array.isArray(res.data)) {
-          const mapped: MenuItem[] = res.data.map(item => ({
+          const apiMapped: MenuItem[] = res.data.map(item => ({
             id: String(item.id),
             categoryId: String(item.categoryId || (item.category ? item.category.id : 'c1')),
             name: item.name,
@@ -43,8 +52,17 @@ export class MenuService {
             spicyLevel: item.spiceLevel || 0,
             calories: item.calories || undefined
           }));
-          this.menuItemsList.set(mapped);
-          return mapped;
+
+          // Merge API items with locally added items to prevent auto-deletion during polling
+          const combined = [...apiMapped];
+          for (const localItem of this.localAddedItems) {
+            if (!combined.some(i => String(i.id) === String(localItem.id) || i.name.toLowerCase() === localItem.name.toLowerCase())) {
+              combined.push(localItem);
+            }
+          }
+
+          this.menuItemsList.set(combined);
+          return combined;
         }
         return this.menuItemsList();
       }),
@@ -56,14 +74,18 @@ export class MenuService {
   }
 
   addMenuItem(item: Omit<MenuItem, 'id'>): MenuItem {
+    const newItemId = 'm_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
     const newItem: MenuItem = {
       ...item,
-      id: 'm' + (this.menuItemsList().length + 1)
+      id: newItemId
     };
+
+    // Store in local added items array and update signal
+    this.localAddedItems.push(newItem);
     this.menuItemsList.update(list => [...list, newItem]);
 
     const restId = 1;
-    const numericCatId = parseInt(item.categoryId.replace('c', ''), 10) || 1;
+    const numericCatId = parseInt(String(item.categoryId).replace(/^c/, ''), 10) || 1;
     const body = {
       categoryId: numericCatId,
       name: item.name,
@@ -77,7 +99,15 @@ export class MenuService {
 
     this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/menu-items`, body)
       .pipe(catchError(() => of(null)))
-      .subscribe();
+      .subscribe((res: ApiResponse<any> | null) => {
+        if (res && res.success && res.data && res.data.id) {
+          const serverId = String(res.data.id);
+          newItem.id = serverId;
+          this.menuItemsList.update(list =>
+            list.map(i => i.id === newItemId ? { ...i, id: serverId } : i)
+          );
+        }
+      });
 
     return newItem;
   }
@@ -87,13 +117,17 @@ export class MenuService {
       list.map(item => item.id === id ? { ...item, ...updated } : item)
     );
 
-    const numericId = parseInt(id.replace('m', ''), 10);
+    this.localAddedItems = this.localAddedItems.map(item =>
+      item.id === id ? { ...item, ...updated } : item
+    );
+
+    const numericId = parseInt(id.replace(/^m_?/, ''), 10);
     if (!isNaN(numericId)) {
       const restId = 1;
       const target = this.menuItemsList().find(i => i.id === id);
       if (target) {
         const body = {
-          categoryId: parseInt(target.categoryId.replace('c', ''), 10) || 1,
+          categoryId: parseInt(String(target.categoryId).replace(/^c/, ''), 10) || 1,
           name: target.name,
           description: target.description,
           price: target.price,
@@ -109,8 +143,9 @@ export class MenuService {
 
   deleteMenuItem(id: string) {
     this.menuItemsList.update(list => list.filter(item => item.id !== id));
+    this.localAddedItems = this.localAddedItems.filter(item => item.id !== id);
 
-    const numericId = parseInt(id.replace('m', ''), 10);
+    const numericId = parseInt(id.replace(/^m_?/, ''), 10);
     if (!isNaN(numericId)) {
       const restId = 1;
       this.http.delete<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/menu-items/${numericId}`)
@@ -124,7 +159,7 @@ export class MenuService {
       list.map(item => {
         if (item.id === id) {
           const next = !item.isAvailable;
-          const numericId = parseInt(id.replace('m', ''), 10);
+          const numericId = parseInt(id.replace(/^m_?/, ''), 10);
           if (!isNaN(numericId)) {
             this.http.patch<ApiResponse<any>>(`${environment.apiUrl}/restaurants/1/menu-items/${numericId}/availability`, { available: next })
               .pipe(catchError(() => of(null)))

@@ -6,9 +6,11 @@ import { AuthService } from '../../services/auth.service';
 import { PRICING_PLANS } from '../../mock-data/landing.data';
 import { PricingPlan } from '../../models/pricing-plan.model';
 
+import { BackButton } from '../../components/back-button/back-button';
+
 @Component({
   selector: 'app-signup',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, BackButton],
   templateUrl: './signup.html',
   styleUrls: ['./signup.css']
 })

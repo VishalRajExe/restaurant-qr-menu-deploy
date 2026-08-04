@@ -10,6 +10,8 @@ import { OwnerDashboard } from './pages/owner-dashboard/owner-dashboard';
 import { ChefDashboard }  from './pages/chef-dashboard/chef-dashboard';
 import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
 import { CustomerMenu }   from './pages/customer-menu/customer-menu';
+import { NotFound }       from './pages/not-found/not-found';
+import { ServerError }    from './pages/server-error/server-error';
 
 // ── Guards ─────────────────────────────────────────────────────────────────
 
@@ -102,6 +104,10 @@ export const routes: Routes = [
     canActivate: [adminGuard],
   },
 
-  // Catch-all
-  { path: '**', redirectTo: '' },
+  // Error pages
+  { path: '500', component: ServerError },
+  { path: '404', component: NotFound },
+
+  // Catch-all 404
+  { path: '**', component: NotFound },
 ];
