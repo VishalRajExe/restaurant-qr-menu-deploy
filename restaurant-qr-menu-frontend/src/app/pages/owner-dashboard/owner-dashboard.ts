@@ -89,6 +89,18 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   totalMenuItemsCount  = computed(() => this.menuItems().length);
   totalCategoriesCount = computed(() => this.categories().length);
 
+  popularDishName = computed(() => {
+    const list = this.menuItems();
+    return list.length > 0 ? list[0].name : 'Featured Menu Item';
+  });
+
+  totalScanCount = computed(() => {
+    const kpiScans = this.analyticsService.dashboardKpi().totalScans;
+    if (kpiScans > 0) return kpiScans;
+    const qrScans = this.qrCodesList().reduce((sum: number, q: QrCodeData) => sum + (q.scansCount || 0), 0);
+    return qrScans;
+  });
+
   selectedFilterCategoryId = signal<string>('all');
 
   // Support ticket

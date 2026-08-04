@@ -148,7 +148,7 @@
         <!-- Welcome Toast -->
         <div class="p-6 rounded-3xl bg-gradient-to-r from-[#1c120c] to-[#0f1117] border border-orange-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 class="font-display font-black text-xl text-white">Welcome, Chef Laurent!</h3>
+            <h3 class="font-display font-black text-xl text-white">Welcome, {{ authService.currentUser()?.name || 'Restaurant Owner' }}!</h3>
             <p class="text-xs text-gray-400 mt-1">Here is a curated report of guest scanning volumes across your table networks.</p>
           </div>
           <button (click)="selectTab('qr')" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-xs text-white font-bold rounded-xl shadow cursor-pointer">
@@ -163,7 +163,7 @@
             <p class="text-[10px] text-gray-500 tracking-wider font-bold">TOTAL DISHES</p>
             <div class="flex items-baseline justify-between mt-2">
               <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalMenuItemsCount()}}</span>
-              <span class="text-[10px] text-emerald-400 font-mono font-semibold">+6 additions</span>
+              <span class="text-[10px] text-emerald-400 font-mono font-semibold">Active items</span>
             </div>
           </div>
 
@@ -171,23 +171,23 @@
             <p class="text-[10px] text-gray-500 tracking-wider font-bold">CATEGORIES</p>
             <div class="flex items-baseline justify-between mt-2">
               <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalCategoriesCount()}}</span>
-              <span class="text-[10px] text-orange-400 font-mono font-semibold">Active divisions</span>
+              <span class="text-[10px] text-orange-400 font-mono font-semibold">Live divisions</span>
             </div>
           </div>
 
           <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
             <p class="text-[10px] text-gray-500 tracking-wider font-bold">QR CODES SCANS</p>
             <div class="flex items-baseline justify-between mt-2">
-              <span class="font-display font-black text-2xl sm:text-3xl text-white">462</span>
-              <span class="text-[10px] text-emerald-400 font-mono font-semibold">↑ 18% today</span>
+              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalScanCount()}}</span>
+              <span class="text-[10px] text-emerald-400 font-mono font-semibold">Live metric</span>
             </div>
           </div>
 
           <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
-            <p class="text-[10px] text-gray-500 tracking-wider font-bold">POPULAR GOLD SELECTION</p>
+            <p class="text-[10px] text-gray-500 tracking-wider font-bold">POPULAR SELECTION</p>
             <div class="mt-2">
-              <p class="text-xs font-bold text-orange-400 truncate">King Scallops</p>
-              <span class="block text-[9px] text-gray-500 mt-0.5">38% from total views</span>
+              <p class="text-xs font-bold text-orange-400 truncate">{{popularDishName()}}</p>
+              <span class="block text-[9px] text-gray-500 mt-0.5">Top menu selection</span>
             </div>
           </div>
 
@@ -632,39 +632,6 @@
             </div>
 
             <div class="space-y-5 pt-4 border-t border-white/5">
-              
-              <!-- QR Style shape -->
-              <div class="space-y-2.5">
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display font-display">Pattern shape</label>
-                <div class="grid grid-cols-3 gap-3 bg-zinc-950 p-1 rounded-xl border border-white/5">
-                  <button (click)="qrStyle.set('square')"
-                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
-                          [ngClass]="qrStyle() === 'square' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
-                    Square
-                  </button>
-                  <button (click)="qrStyle.set('rounded')"
-                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
-                          [ngClass]="qrStyle() === 'rounded' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
-                    Rounded
-                  </button>
-                  <button (click)="qrStyle.set('dots')"
-                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
-                          [ngClass]="qrStyle() === 'dots' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
-                    Chiseled Dots
-                  </button>
-                </div>
-              </div>
-
-              <!-- Foreground color -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">FOREGROUND ACCENT COLOR</label>
-                <div class="flex items-center space-x-3.5">
-                  <input type="color" [ngModel]="qrFgColor()" (ngModelChange)="qrFgColor.set($event)" title="Foreground Accent Color" placeholder="#fc6011"
-                         class="w-12 h-12 rounded-xl bg-zinc-950 border border-white/10 p-1 cursor-pointer" />
-                  <span class="text-xs font-mono bg-zinc-950 px-3.5 py-2.5 border border-white/5 text-gray-300 rounded-xl leading-none uppercase">{{qrFgColor()}}</span>
-                </div>
-              </div>
-
               <!-- Print/download operations row -->
               <div class="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center gap-4">
                 <button (click)="simulateQrDownload()" [disabled]="qrDownloadSimulated()"
