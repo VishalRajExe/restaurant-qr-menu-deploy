@@ -141,6 +141,7 @@
           <div class="space-y-2">
             <label class="block text-xs font-semibold tracking-wide text-gray-400">CUISINE CLASSIFICATION</label>
             <select [ngModel]="cuisineType()" (ngModelChange)="cuisineType.set($event)"
+                    title="Cuisine Classification" aria-label="Cuisine Classification"
                     class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans">
               <option value="Modern French Fine Dining">Modern French Fine Dining</option>
               <option value="Asian Fusion & Craft Mixology">Asian Fusion & Craft Mixology</option>
