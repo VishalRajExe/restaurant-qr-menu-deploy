@@ -113,14 +113,13 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        // Customer-facing restaurant lookups (used by the public menu page) — read-only, no auth.
-                        .requestMatchers(HttpMethod.GET, "/restaurants/slug/*").permitAll()
+                        // Customer-facing restaurant lookups & public read queries (used by frontend dashboard & menu pages) — read-only, no auth required.
+                        .requestMatchers(HttpMethod.GET, "/restaurants/**").permitAll()
                         // Public pricing/plan comparison
                         .requestMatchers(HttpMethod.GET, "/subscriptions/plans").permitAll()
                         // Super admin only
                         .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
-                        // Restaurant owner, manager and staff (controller methods further
-                        // narrow individual actions via @PreAuthorize)
+                        // Restaurant owner, manager and staff (mutating actions like POST/PUT/DELETE)
                         .requestMatchers("/restaurants/**").hasAnyRole("RESTAURANT_OWNER", "MANAGER", "STAFF", "SUPER_ADMIN")
                         .requestMatchers("/subscriptions/**").hasAnyRole("RESTAURANT_OWNER", "SUPER_ADMIN")
                         // All authenticated

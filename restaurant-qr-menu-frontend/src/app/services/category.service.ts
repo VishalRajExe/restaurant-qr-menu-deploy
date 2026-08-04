@@ -12,10 +12,8 @@ export class CategoryService {
   private http = inject(HttpClient);
   private categoriesList = signal<Category[]>([]);
 
-  getCategoriesForRestaurant(restaurantId: string): Category[] {
-    return this.categoriesList()
-      .filter(c => String(c.restaurantId) === String(restaurantId) || !c.restaurantId)
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  getCategoriesForRestaurant(restaurantId?: string): Category[] {
+    return this.categoriesList().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
   /** Called by PublicMenuService to set categories from unified endpoint */
@@ -27,7 +25,7 @@ export class CategoryService {
     const numericId = parseInt(restaurantId, 10) || 1;
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/restaurants/${numericId}/categories`).pipe(
       map(res => {
-        if (res && res.success && Array.isArray(res.data)) {
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
           const mapped: Category[] = res.data.map(item => ({
             id: String(item.id),
             restaurantId: String(restaurantId),
