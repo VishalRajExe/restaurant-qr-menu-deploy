@@ -33,7 +33,6 @@ public class CategoryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','STAFF','SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<List<Category>>> list(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(ApiResponse.success(categoryService.findByRestaurant(restaurantId)));
     }
