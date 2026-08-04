@@ -1,0 +1,486 @@
+<div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#0b0c0e] relative overflow-hidden font-sans">
+  
+  <!-- Backdrops -->
+  <div class="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none"></div>
+  <div class="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-amber-500/5 blur-[100px] pointer-events-none"></div>
+
+  <!-- Central Card -->
+  <div class="max-w-3xl w-full rounded-3xl glass-panel relative z-10 p-8 sm:p-12 shadow-2xl">
+    
+    <!-- Header: Portal Selector tabs (Only if not on success screen) -->
+    <div class="flex items-center justify-between border-b border-white/5 pb-6 mb-8" *ngIf="currentStep() < 4">
+      <a routerLink="/" class="flex items-center space-x-3 z-10">
+      <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
+        <img
+          src="/AuraMenuLogo-dark.png"
+          alt="AuraMenu"
+          class="w-full h-full object-contain"
+        />
+      </div>
+
+      <span class="font-display font-medium text-lg leading-none text-white">
+        Aura<span class="text-orange-500 font-bold">Menu</span>
+      </span>
+    </a>
+      
+      <div class="flex space-x-2 bg-zinc-900/60 p-1 rounded-xl border border-white/5">
+        <button (click)="setPortal('owner')" type="button" 
+                class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activePortal() === 'owner' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'">
+          Owner Join
+        </button>
+        <button (click)="setPortal('chef')" type="button" 
+                class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activePortal() === 'chef' ?'bg-green-500 text-white border border-white/10' : 'text-gray-400 hover:text-white'">
+          Chef Join
+        </button>
+        <button (click)="setPortal('super-admin')" type="button" 
+                class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activePortal() === 'super-admin' ? 'bg-zinc-800 text-white' : 'text-gray-400 hover:text-white'">
+          Super Admin
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN OWNER SIGNUP FLOW (MULTI-STEP) -->
+    <ng-container *ngIf="activePortal() === 'owner'">
+      
+      <!-- Top Step Progress Bar (Hidden on Success) -->
+      <div class="mb-12" *ngIf="currentStep() < 4">
+        <div class="flex items-center justify-between max-w-md mx-auto relative">
+          <!-- Connective background line -->
+          <div class="absolute h-[2px] bg-zinc-800 top-1/2 left-0 right-0 -translate-y-1/2 z-0"></div>
+          <div class="absolute h-[2px] bg-orange-500 top-1/2 left-0 -translate-y-1/2 z-0 transition-all duration-300"
+               [style.width.%]="(currentStep() - 1) * 50"></div>
+
+          <!-- Step 1 Circle -->
+          <div class="w-10 h-10 rounded-full flex items-center justify-center z-10 border transition-all duration-300 font-display font-bold text-sm"
+               [ngClass]="currentStep() >= 1 ? 'bg-orange-500 border-orange-500 text-white shadow shadow-orange-500/20' : 'bg-zinc-950 border-zinc-800 text-gray-500'">
+            1
+          </div>
+          <!-- Step 2 Circle -->
+          <div class="w-10 h-10 rounded-full flex items-center justify-center z-10 border transition-all duration-300 font-display font-bold text-sm"
+               [ngClass]="currentStep() >= 2 ? 'bg-orange-500 border-orange-500 text-white shadow shadow-orange-500/20' : 'bg-zinc-950 border-zinc-800 text-gray-500'">
+            2
+          </div>
+          <!-- Step 3 Circle -->
+          <div class="w-10 h-10 rounded-full flex items-center justify-center z-10 border transition-all duration-300 font-display font-bold text-sm"
+               [ngClass]="currentStep() >= 3 ? 'bg-orange-500 border-orange-500 text-white shadow shadow-orange-500/20' : 'bg-zinc-950 border-zinc-800 text-gray-500'">
+            3
+          </div>
+        </div>
+        
+        <!-- Step Titles -->
+        <div class="flex justify-between items-center max-w-sm mx-auto text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mt-2 z-10 relative">
+          <span [ngClass]="currentStep() === 1 ? 'text-orange-500' : ''">Personal</span>
+          <span [ngClass]="currentStep() === 2 ? 'text-orange-500' : ''">Restaurant</span>
+          <span [ngClass]="currentStep() === 3 ? 'text-orange-500' : ''">Licensing</span>
+        </div>
+      </div>
+
+      <!-- Errors feedback -->
+      <div *ngIf="errorMessage()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs sm:text-sm text-rose-400 mb-8 font-semibold">
+        {{errorMessage()}}
+      </div>
+
+      <!-- STEP 1: OWNER BASIC INFORMATION -->
+      <div class="space-y-6" *ngIf="currentStep() === 1">
+        <div class="space-y-1 mb-6 text-center">
+          <h2 class="font-display font-bold text-xl sm:text-2xl text-white">Create Owner Credentials</h2>
+          <p class="text-xs text-gray-500 font-sans">Introduce yourself to establish your executive SaaS security credentials.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">FULL NAME</label>
+            <input type="text" [ngModel]="ownerName()" (ngModelChange)="ownerName.set($event)" placeholder="e.g. Antoine Laurent"
+                   class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">PERSONAL EMAIL</label>
+            <input type="email" [ngModel]="ownerEmail()" (ngModelChange)="ownerEmail.set($event)" placeholder="e.g. chef@domain.com"
+                   class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">DESIRED SECURE PASSWORD</label>
+          <input type="password" [ngModel]="ownerPassword()" (ngModelChange)="ownerPassword.set($event)" placeholder="Minimum 8 characters"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+        </div>
+
+        <!-- Next button -->
+        <div class="pt-6">
+          <button (click)="nextStep()" type="button"
+                  class="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs sm:text-sm font-semibold hover:scale-[1.01] transition-transform flex items-center justify-center space-x-2 shadow cursor-pointer">
+            <span>Proceed to Venue Profile</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: RESTAURANT PROFILE -->
+      <div class="space-y-6" *ngIf="currentStep() === 2">
+        <div class="space-y-1 mb-6 text-center">
+          <h2 class="font-display font-bold text-xl sm:text-2xl text-white">Configure Fine-Dining Venue</h2>
+          <p class="text-xs text-gray-500 font-sans">Establish your restaurant name, branding variables and locations.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">RESTAURANT NAME</label>
+            <input type="text" [ngModel]="restaurantName()" (ngModelChange)="restaurantName.set($event)" placeholder="e.g. Le Jardin de Provence"
+                   class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">CUISINE CLASSIFICATION</label>
+            <select [ngModel]="cuisineType()" (ngModelChange)="cuisineType.set($event)"
+                    class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans">
+              <option value="Modern French Fine Dining">Modern French Fine Dining</option>
+              <option value="Asian Fusion & Craft Mixology">Asian Fusion & Craft Mixology</option>
+              <option value="Artisanal Mexican & Mezcalerí­a">Artisanal Mexican & Mezcalerí­a</option>
+              <option value="Luxury Steakhouse & Raw Grill">Luxury Steakhouse & Raw Grill</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">HEADQUARTER ADDRESS</label>
+          <input type="text" [ngModel]="venueAddress()" (ngModelChange)="venueAddress.set($event)" placeholder="e.g. 42 Avenue de Champagne, Reims, France"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">HOTLINE PHONE NUMBER</label>
+          <input type="text" [ngModel]="venuePhone()" (ngModelChange)="venuePhone.set($event)" placeholder="e.g. +33 3 26 12 34 56"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+        </div>
+
+        <!-- GSTIN Input -->
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">
+            GSTIN 
+            <span class="text-gray-600 font-normal normal-case tracking-normal">
+              (Business Tax Identification)
+            </span>
+          </label>
+          <input type="text" 
+                [ngModel]="gstin()" (ngModelChange)="gstin.set($event.toUpperCase())"
+                placeholder="e.g. 27AAPFU0939F1ZV" maxlength="15"
+                class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 
+                        text-gray-100 placeholder-gray-600 focus:outline-none 
+                        focus:border-orange-500/50 text-xs sm:text-sm transition-colors 
+                        font-mono tracking-widest" />
+          <p class="text-[10px] text-gray-600">
+            15-character GST Identification Number issued by the Government of India.
+          </p>
+        </div>
+
+        <!-- Optional: Restaurant Photo Upload -->
+         <div class="space-y-3">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">
+            RESTAURANT PHOTO
+            <span class="text-gray-600 font-normal normal-case tracking-normal ml-1">
+              (optional)
+            </span>
+          </label>
+
+          @if (restaurantPhoto()) {
+            <div class="relative rounded-xl overflow-hidden border border-white/10 bg-zinc-950">
+              <img [src]="restaurantPhoto()" alt="Restaurant preview"
+                  class="w-full h-36 object-cover" />
+              <button type="button" (click)="clearRestaurantPhoto()"
+                      class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 
+                            hover:bg-red-500/80 text-white text-xs flex items-center 
+                            justify-center transition-colors cursor-pointer">
+                ✕
+              </button>
+              <div class="px-3 py-2 text-[10px] text-green-400 font-semibold">
+                ✓ Photo ready
+              </div>
+            </div>
+          } @else {
+            <label class="flex flex-col items-center justify-center gap-3 w-full h-28 
+                          rounded-xl border-2 border-dashed border-white/10 bg-zinc-950/60 
+                          hover:border-orange-500/40 hover:bg-zinc-900 transition-all 
+                          cursor-pointer group">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                  class="w-6 h-6 text-gray-600 group-hover:text-orange-500 transition-colors" 
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" 
+                      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 
+                        1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 
+                        0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v13.5
+                        a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V10.5Zm.375 0a.375.375 
+                        0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+              </svg>
+              <span class="text-xs text-gray-500 group-hover:text-white transition-colors">
+                Upload restaurant photo
+              </span>
+              <input type="file" accept="image/*" class="hidden"
+                    (change)="handleRestaurantPhotoSelected($event)" />
+            </label>
+          }
+        </div>
+
+        <!-- Nav actions -->
+        <div class="flex items-center space-x-4 pt-6">
+          <button (click)="prevStep()" type="button"
+                  class="flex-1 py-4 border border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-gray-300 hover:bg-white/5 cursor-pointer">
+            Go Back
+          </button>
+          <button (click)="nextStep()" type="button"
+                  class="flex-1 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs sm:text-sm font-semibold hover:scale-[1.01] transition-transform flex items-center justify-center space-x-2 cursor-pointer shadow">
+            <span>Select License Plan</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: LICENSING PLAN SELECTION -->
+      <div class="space-y-6" *ngIf="currentStep() === 3">
+        <div class="space-y-1 mb-6 text-center">
+          <h2 class="font-display font-bold text-xl sm:text-2xl text-white">Select Subscription Plan</h2>
+          <p class="text-xs text-gray-500 font-sans">You will start with a 14-day premium free trial period. Cancel any time.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+          
+          <div *ngFor="let p of plans" 
+               (click)="selectPlan(p.id)"
+               class="p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between cursor-pointer relative"
+               [ngClass]="selectedPlanId() === p.id ? 'bg-orange-500/10 border-orange-500 shadow shadow-orange-500/5' : 'bg-zinc-950/50 border-white/5 hover:border-white/10'">
+            
+            <div class="flex items-start space-x-4">
+              <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center shrink-0 mt-1">
+                <div class="w-3.5 h-3.5 rounded-full bg-orange-500" *ngIf="selectedPlanId() === p.id"></div>
+              </div>
+              <div>
+                <h4 class="font-display font-bold text-sm text-white flex items-center space-x-2">
+                  <span>{{p.name}}</span>
+                  <span *ngIf="p.isPopular" class="px-2 py-0.5 rounded bg-orange-500 text-[8px] font-extrabold text-white uppercase tracking-wider">POPULAR</span>
+                </h4>
+                <p class="text-[11px] text-gray-400 mt-0.5">{{p.description}}</p>
+              </div>
+            </div>
+
+            <!-- Price tag -->
+            <div class="text-right shrink-0 ml-4">
+              <p class="font-display font-black text-lg text-white">{{p.price}}</p>
+              <p class="text-[9px] text-gray-500 font-mono">{{p.billing}}</p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Nav actions -->
+        <div class="flex items-center space-x-4 pt-6">
+          <button (click)="prevStep()" [disabled]="isLoading()" type="button"
+                  class="flex-1 py-4 border border-white/10 rounded-xl text-xs sm:text-sm font-semibold text-gray-300 hover:bg-white/5 cursor-pointer">
+            Go Back
+          </button>
+          
+          <button (click)="onRegister()" [disabled]="isLoading()" type="button"
+                  class="flex-1 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs sm:text-sm font-semibold hover:scale-[1.01] transition-transform flex items-center justify-center space-x-2 cursor-pointer shadow">
+            
+            <span class="flex items-center justify-center space-x-2" *ngIf="!isLoading()">
+              <span>Publish Account</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            </span>
+
+            <span class="flex items-center justify-center space-x-3 text-xs" *ngIf="isLoading()">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Provisioning Cloud Run...</span>
+            </span>
+
+          </button>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- SUPER ADMIN REGISTRATION FORM -->
+    <ng-container *ngIf="activePortal() === 'super-admin'">
+      <div class="space-y-6" *ngIf="currentStep() < 4">
+        <div class="space-y-1 mb-6 text-center">
+          <h2 class="font-display font-bold text-xl sm:text-2xl text-white">Register Super Admin Details</h2>
+          <p class="text-xs text-gray-500 font-sans">Establish backoffice cloud metrics viewing controls.</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">ADMINISTRATIVE FULL NAME</label>
+          <input type="text" [ngModel]="ownerName()" (ngModelChange)="ownerName.set($event)" placeholder="e.g. Operations Manager"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">ADMINISTRATORS EMAIL</label>
+          <input type="email" [ngModel]="ownerEmail()" (ngModelChange)="ownerEmail.set($event)" placeholder="e.g. ops@spicyqr.io"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors text-sans" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">VERIFICATION SECURE KEY</label>
+          <input type="password" [ngModel]="ownerPassword()" (ngModelChange)="ownerPassword.set($event)" placeholder="SaaS token signature mapping"
+                 class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm" />
+        </div>
+
+        <button (click)="onRegister()" [disabled]="isLoading()" type="button"
+                class="w-full py-4 rounded-xl bg-zinc-100 text-zinc-950 font-bold hover:bg-neutral-200 transition-all text-xs sm:text-sm flex items-center justify-center space-x-2 cursor-pointer">
+          <span *ngIf="!isLoading()">Publish Backoffice Key</span>
+          <span class="flex items-center justify-center space-x-2 text-xs" *ngIf="isLoading()">
+            <svg class="animate-spin h-5 w-5 text-zinc-950" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Verifying key handshake...</span>
+          </span>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- CHEF FORM -->
+     <!-- CHEF REGISTRATION FORM -->
+    <ng-container *ngIf="activePortal() === 'chef'">
+      <div class="space-y-6" *ngIf="currentStep() < 4">
+        <div class="space-y-1 mb-6 text-center">
+          <h2 class="font-display font-bold text-xl sm:text-2xl text-white">Create Chef Account</h2>
+          <p class="text-xs text-gray-500 font-sans">Join your restaurant's kitchen team on AuraMenu.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">FULL NAME</label>
+            <input type="text" [ngModel]="chefName()" (ngModelChange)="chefName.set($event)" placeholder="e.g. Marco Rossi"
+                  class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors" />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold tracking-wide text-gray-400">EMAIL ADDRESS</label>
+            <input type="email" [ngModel]="chefEmail()" (ngModelChange)="chefEmail.set($event)" placeholder="e.g. chef@restaurant.com"
+                  class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors" />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">PASSWORD</label>
+          <input type="password" [ngModel]="chefPassword()" (ngModelChange)="chefPassword.set($event)" placeholder="Minimum 8 characters"
+                class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold tracking-wide text-gray-400">
+            RESTAURANT CODE 
+            <span class="text-gray-600 font-normal normal-case tracking-normal">(optional — get this from your owner)</span>
+          </label>
+          <input type="text" [ngModel]="restaurantCode()" (ngModelChange)="restaurantCode.set($event)" placeholder="e.g. JARDIN-2024"
+                class="w-full px-4 py-3.5 rounded-xl bg-zinc-950/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 text-xs sm:text-sm transition-colors" />
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="errorMessage()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400 font-semibold">
+          {{errorMessage()}}
+        </div>
+
+        <button (click)="onRegister()" [disabled]="isLoading()" type="button"
+                class="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:scale-[1.01] transition-transform text-xs sm:text-sm flex items-center justify-center space-x-2 cursor-pointer shadow">
+          <span *ngIf="!isLoading()">Join Kitchen Team</span>
+          <span class="flex items-center space-x-2 text-xs" *ngIf="isLoading()">
+            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Setting up your account...</span>
+          </span>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- STEP 4: REGISTRATION SUCCESS SCREEN -->
+    <div class="text-center py-10 space-y-8" *ngIf="currentStep() === 4">
+      
+      <!-- Checkmark scale glow -->
+      <div class="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center text-white text-3xl mx-auto shadow-xl shadow-emerald-500/20 scale-110 animate-bounce">
+        ✓
+      </div>
+
+      <div class="space-y-3">
+        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white">
+          {{ activePortal() === 'chef' ? 'Kitchen Access Granted!' : 'SaaS Client Activated!' }}
+        </h2>
+        <p class="text-xs sm:text-sm text-gray-400 max-w-sm mx-auto font-sans">
+          {{ activePortal() === 'chef' 
+            ? 'Your chef account is ready. Head to your kitchen dashboard to start managing orders.' 
+            : 'Welcome to the elite tier of digital table hospitality. Your secure restaurant backend database is initialized successfully on our server.' 
+          }}
+        </p>
+      </div>
+
+
+      <!-- Detail listing review -->
+      <div class="p-6 rounded-2xl bg-zinc-950/80 border border-white/5 max-w-sm mx-auto text-left text-xs space-y-3 font-mono text-gray-500">
+  
+        <div>
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">NAME:</span>
+          <span class="text-orange-400 ml-2">{{ activePortal() === 'chef' ? chefName() : ownerName() }}</span>
+        </div>
+
+        <div>
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">EMAIL:</span>
+          <span class="text-amber-400 ml-2">{{ activePortal() === 'chef' ? chefEmail() : ownerEmail() }}</span>
+        </div>
+
+        <div *ngIf="activePortal() === 'owner'">
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">RESTAURANT:</span>
+          <span class="text-white ml-2">{{ restaurantName() }}</span>
+        </div>
+
+        <div *ngIf="activePortal() === 'chef' && restaurantCode()">
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">RESTAURANT CODE:</span>
+          <span class="text-white ml-2">{{ restaurantCode() }}</span>
+        </div>
+
+        <div>
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">ROLE:</span>
+          <span class="text-emerald-400 ml-2">
+            {{ activePortal() === 'owner' ? 'Restaurant Owner' : activePortal() === 'chef' ? 'Chef' : 'Super Admin' }}
+          </span>
+        </div>
+
+        <div *ngIf="activePortal() === 'owner'">
+          <span class="text-gray-400 font-semibold text-[10px] sm:text-xs">ACTIVE PLAN:</span>
+          <span class="text-emerald-400 ml-2">Gourmet Growth (Trial active)</span>
+        </div>
+
+      </div>
+
+      <div>
+        <button (click)="enterDashboard()" type="button"
+                class="w-full sm:w-auto px-10 py-4 rounded-xl bg-orange-500 hover:bg-orange-600 font-bold text-xs sm:text-sm text-white hover:scale-[1.01] transition-transform shadow shadow-orange-500/10 cursor-pointer">
+          Enter Your Dashboard Workspace
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Sign in redirect links -->
+    <p class="text-xs text-center text-gray-500 mt-8 font-sans" *ngIf="currentStep() < 4">
+      Already registered with us? 
+      <a routerLink="/login" class="text-orange-400 hover:underline font-semibold">Sign In</a>
+    </p>
+
+  </div>
+
+</div>

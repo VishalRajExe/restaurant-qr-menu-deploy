@@ -1,0 +1,86 @@
+<section id="features" class="py-24 transition-colors duration-500"
+         [ngClass]="isDarkMode ? 'bg-[#0f1117] border-y border-white/5' : 'bg-white border-y border-black/5'">
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Title / Headline Header -->
+    <div class="text-center max-w-3xl mx-auto space-y-4 mb-20">
+      <p class="text-sm font-bold uppercase tracking-widest text-orange-500 font-display">Aesthetic Powerhouse</p>
+      <h2 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl"
+          [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+        Designed For Fine Dining. <br />
+        <span class="text-gold animate-glow bg-gradient-to-r from-orange-400 via-amber-500 to-yellow-300">
+          Engineered For Seamless Conversion.
+        </span>
+      </h2>
+      <p class="text-base sm:text-lg"
+         [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+        Why deploy generic, clunky PDF files or boring templates? Provide a cinematic, responsive web utility that matches the caliber of your premium dishes perfectly.
+      </p>
+    </div>
+
+    <!-- Features Bento Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      
+      <div *ngFor="let item of featuresList"
+           class="card-hover p-8 rounded-3xl transition-transform duration-300 pointer-events-auto"
+           [ngClass]="isDarkMode ? 'bg-[#181a20]/40 border border-white/5 shadow-inner' : 'bg-gray-50 border border-black/5 shadow-sm'">
+        
+        <!-- Icon Badge -->
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-6">
+          
+          <!-- Sparkles -->
+          <svg *ngIf="item.icon === 'sparkles'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15.187l5.096-.813L9 9.25l.813 5.096L15 15.187l-5.187.813ZM18.094 6.228 17.5 10l-.594-3.772L13 5.625l3.813-.594L17.5 1.25l.594 3.813L22 5.641l-3.906.587Z" />
+          </svg>
+
+          <!-- QR -->
+          <svg *ngIf="item.icon === 'qr'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+          </svg>
+
+          <!-- Chart -->
+          <svg *ngIf="item.icon === 'chart'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+          </svg>
+
+          <!-- Gift -->
+          <svg *ngIf="item.icon === 'gift'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25h-3.75a.75.75 0 0 1-.75-.75V6.75a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0-.75.75v3.75a.75.75 0 0 1-.75.75H3a.75.75 0 0 0-.75.75v7.5c0 .414.336.75.75.75h18a.75.75 0 0 0 .75-.75v-7.5a.75.75 0 0 0-.75-.75ZM12 6.75v10.5m-3-10.5h6" />
+          </svg>
+
+          <!-- Shield -->
+          <svg *ngIf="item.icon === 'shield'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+          </svg>
+
+          <!-- Drag -->
+          <svg *ngIf="item.icon === 'drag'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 15.75h16.5m-16.5-6h16.5m-16.5-3.75h16.5" />
+          </svg>
+
+        </div>
+
+        <!-- Tag badge -->
+        <span *ngIf="item.highlight" 
+              class="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-orange-500 bg-orange-500/10 rounded-full mb-3 shrink-0">
+          {{item.highlight}}
+        </span>
+
+        <!-- Card content -->
+        <h3 class="font-display font-bold text-lg sm:text-xl mb-3"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          {{item.title}}
+        </h3>
+        
+        <p class="text-sm font-sans leading-relaxed"
+           [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          {{item.description}}
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>

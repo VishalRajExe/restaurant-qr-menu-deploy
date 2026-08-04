@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+nav {
+  transition: all 0.3s ease;
+}
+
+a {
+  transition: color 0.3s ease;
+}
+
+.glass {
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease,
+    border 0.3s ease;
+}
+
+.glass:hover {
+  transform: translateY(-2px);
+}

@@ -1,0 +1,145 @@
+<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-auto"
+     [ngClass]="isDarkMode() ? 'bg-[#0f1117]/80 border-b border-white/5 backdrop-blur-xl' : 'bg-white/80 border-b border-black/5 backdrop-blur-xl'">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      
+      <!-- Brand Logo -->
+      <a routerLink="/" class="flex items-center space-x-3 group">
+        <img
+          [src]="isDarkMode()
+          ? '/AuraMenuLogo-dark.png'
+          : '/AuraMenuLogo-light.png'"
+          alt="AuraMenu"
+          class="w-15 h-15 object-contain group-hover:scale-105 transition-transform duration-300"
+        />
+        <span class="font-display font-bold text-xl tracking-tight"
+              [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+          Aura<span class="text-orange-500">Menu</span>
+        </span>
+      </a>
+
+      <!-- Desktop Links -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#features" class="font-medium text-sm transition-colors duration-200"
+           [ngClass]="isDarkMode() ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'">Features</a>
+        <a href="#how-it-works" class="font-medium text-sm transition-colors duration-200"
+           [ngClass]="isDarkMode() ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'">How It Works</a>
+        <a href="#testimonials" class="font-medium text-sm transition-colors duration-200"
+           [ngClass]="isDarkMode() ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'">Reviews</a>
+        <a href="#pricing" class="font-medium text-sm transition-colors duration-200"
+           [ngClass]="isDarkMode() ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'">Pricing</a>
+        <a routerLink="/menu/r1" class="font-medium text-sm text-orange-500 hover:text-orange-600 transition-colors duration-200 flex items-center space-x-1">
+          <span>Live Menu Demo</span>
+          <span class="block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        </a>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="hidden md:flex items-center space-x-4">
+        
+        <!-- Theme Toggle -->
+        <button (click)="toggleTheme()" type="button" 
+                class="p-2.5 rounded-xl transition-all duration-300 cursor-pointer"
+                [ngClass]="isDarkMode() ? 'text-amber-400 hover:bg-white/5' : 'text-amber-600 hover:bg-black/5'">
+          <!-- Sun (if dark mode) -->
+          <svg *ngIf="isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.22 4.22l1.63 1.63m12.3 12.3l1.63 1.63m-16.5 0l1.63-1.63m12.3-12.3l1.63-1.63M3 12h2.25m13.5 0H21m-9-9a9 9 0 1 0 9 9 9 9 0 0 0-9-9Z" />
+          </svg>
+          <!-- Moon (if light mode) -->
+          <svg *ngIf="!isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        </button>
+
+        <ng-container *ngIf="authService.isLoggedIn(); else guestButtons">
+          <a routerLink="/dashboard" 
+             class="px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 shadow bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-orange-500/10 hover:shadow-orange-500/20 hover:scale-[1.02]">
+            Enter Dashboard
+          </a>
+          <button (click)="logout()" 
+                  class="px-4 py-2.5 text-sm font-medium border rounded-xl cursor-pointer"
+                  [ngClass]="isDarkMode() ? 'text-gray-300 border-white/10 hover:bg-white/5' : 'text-gray-700 border-black/10 hover:bg-black/5'">
+            Sign Out
+          </button>
+        </ng-container>
+
+        <ng-template #guestButtons>
+          <a routerLink="/login" class="font-medium text-sm px-4 py-2.5 transition-all duration-200"
+             [ngClass]="isDarkMode() ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'">Sign In</a>
+          <a routerLink="/signup"
+             class="px-5  py-2.5 rounded-xl font-medium text-sm transition-all duration-300 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 hover:scale-[1.02]">
+            Start Free Trial
+          </a>
+        </ng-template>
+
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <div class="md:hidden flex items-center space-x-3">
+        
+        <!-- Theme Toggle on Mobile -->
+        <button (click)="toggleTheme()" type="button" 
+                class="p-2 rounded-xl"
+                [ngClass]="isDarkMode() ? 'text-amber-400' : 'text-amber-600'">
+          <svg *ngIf="isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.22 4.22l1.63 1.63m12.3 12.3l1.63 1.63m-16.5 0l1.63-1.63m12.3-12.3l1.63-1.63M3 12h2.25m13.5 0H21m-9-9a9 9 0 1 0 9 9 9 9 0 0 0-9-9Z" />
+          </svg>
+          <svg *ngIf="!isDarkMode()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5.5 h-5.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        </button>
+
+        <button (click)="toggleMobileMenu()" type="button" 
+                class="p-2 rounded-xl"
+                [ngClass]="isDarkMode() ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'">
+          <svg *ngIf="!isMobileMenuOpen()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          <svg *ngIf="isMobileMenuOpen()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Grid -->
+  <div *ngIf="isMobileMenuOpen()" 
+       class="md:hidden border-t-2" 
+       [ngClass]="isDarkMode() ? 'bg-[#0f1117] border-white/5 text-gray-200' : 'bg-white border-black/5 text-gray-800'">
+    <div class="px-4 pt-3 pb-6 space-y-3 shadow-xl">
+      <a href="#features" (click)="isMobileMenuOpen.set(false)" class="block px-3 py-2 rounded-xl text-base font-medium hover:bg-white/5">Features</a>
+      <a href="#how-it-works" (click)="isMobileMenuOpen.set(false)" class="block px-3 py-2 rounded-xl text-base font-medium hover:bg-white/5">How It Works</a>
+      <a href="#testimonials" (click)="isMobileMenuOpen.set(false)" class="block px-3 py-2 rounded-xl text-base font-medium hover:bg-white/5">Reviews</a>
+      <a href="#pricing" (click)="isMobileMenuOpen.set(false)" class="block px-3 py-2 rounded-xl text-base font-medium hover:bg-white/5">Pricing</a>
+      <a routerLink="/menu/r1" (click)="isMobileMenuOpen.set(false)" class="block px-3 py-2 rounded-xl text-base font-medium text-orange-500 hover:bg-orange-50/10">Live Menu Demo</a>
+      
+      <div class="pt-4 border-t border-dashed" [ngClass]="isDarkMode() ? 'border-white/10' : 'border-black/10'">
+        <ng-container *ngIf="authService.isLoggedIn(); else mobileGuests">
+          <a routerLink="/dashboard" (click)="isMobileMenuOpen.set(false)" 
+             class="block w-full text-center px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium text-sm">
+            Dashboard
+          </a>
+          <button (click)="logout(); isMobileMenuOpen.set(false)" 
+                  class="mt-2 block w-full text-center px-4 py-2.5 border rounded-xl text-sm font-medium"
+                  [ngClass]="isDarkMode() ? 'border-white/10 hover:bg-white/5' : 'border-black/10 hover:bg-black/5'">
+            Sign Out
+          </button>
+        </ng-container>
+        <ng-template #mobileGuests>
+          <a routerLink="/login" (click)="isMobileMenuOpen.set(false)" 
+             class="block w-full text-center px-4 py-2.5 rounded-xl font-medium text-sm"
+             [ngClass]="isDarkMode() ? 'hover:bg-white/5' : 'hover:bg-black/5'">
+            Sign In
+          </a>
+          <a routerLink="/signup" (click)="isMobileMenuOpen.set(false)" 
+             class="mt-2 block w-full text-center px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium text-sm shadow-md">
+            Start Free Trial
+          </a>
+        </ng-template>
+      </div>
+
+    </div>
+  </div>
+</nav>

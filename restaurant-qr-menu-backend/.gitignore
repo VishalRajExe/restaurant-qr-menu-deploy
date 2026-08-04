@@ -1,0 +1,66 @@
+# ─── Maven Build Output ────────────────────────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+
+# ─── Java Executables & Class Files ───────────────────────────────────────────
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# ─── IDE Configuration & Metadata ─────────────────────────────────────────────
+# Eclipse & STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ─── Local Secrets, Keys & Environment Files ──────────────────────────────────
+.env
+*.env
+!.env.example
+application-local.yml
+src/main/resources/application-local.yml
+*.key
+*.pem
+*.keystore
+*.jks
+
+# ─── Logs & Scratch Output ───────────────────────────────────────────────────
+log.txt
+*.log
+logs/
+.claude/
+graphify-out/
+AuthenticationManager
+authorization.
+JWT
+PasswordEncoder
+SecurityContext
+UserDetailsService
+
+# ─── OS Artifacts ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

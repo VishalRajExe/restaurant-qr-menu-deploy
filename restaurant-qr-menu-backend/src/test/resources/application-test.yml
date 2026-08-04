@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+
+jwt:
+  secret: 7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
+cloudinary:
+  cloud-name: test
+  api-key: test
+  api-secret: test
+
+qr:
+  base-url: http://localhost:4200/menu
+  image-width: 300
+  image-height: 300
+
+app:
+  frontend-url: http://localhost:4200
+  admin-url: http://localhost:4201
+
+logging:
+  level:
+    com.restaurantqr: WARN
+    org.springframework.security: WARN

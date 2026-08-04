@@ -1,0 +1,824 @@
+
+<div class="min-h-screen flex text-gray-100 font-sans bg-[#08090b]">
+  
+  <!-- WORKSPACE SIDEBAR -->
+  <aside class="w-64 bg-[#0d0e12]/90 border-r border-white/5 flex flex-col justify-between shrink-0 hidden lg:flex sticky top-0 h-screen p-6 z-30">
+    <div class="space-y-8">
+      
+      <!-- Brand Logo -->
+      <a routerLink="/" class="flex items-center space-x-3 px-2">
+        <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
+          <img
+            src="/AuraMenuLogo-dark.png"
+            alt="AuraMenu"
+            class="w-full h-full object-contain"
+          />
+        </div>
+        <span class="font-display font-medium text-lg leading-none">Aura<span class="text-orange-500 font-bold">Menu</span></span>
+      </a>
+
+      <!-- Navigation Tabs Selection Links -->
+      <nav class="space-y-1.5">
+        <button (click)="selectTab('overview')" type="button" 
+                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activeTab() === 'overview' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+          </svg>
+          <span>WORKSPACE OVERVIEW</span>
+        </button>
+
+        <button (click)="selectTab('categories')" type="button" 
+                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activeTab() === 'categories' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 15.75h16.5m-16.5-6h16.5m-16.5-3.75h16.5" />
+          </svg>
+          <span>DIVISIONS / GROUPS</span>
+        </button>
+
+        <button (click)="selectTab('items')" type="button" 
+                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activeTab() === 'items' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
+          <span>FOOD & DRINKS ITEMS</span>
+        </button>
+
+        <button (click)="selectTab('qr')" type="button" 
+                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activeTab() === 'qr' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM16.875 12h.75m-.75 3h.75m-.75 3h.75M13.5 15h.75m-.75 3h.75m-3-12h.75m-.75 3h.75m-.75 3h.75M13.5 12h.75m-.75 3h.75m-.75 3h.75" />
+          </svg>
+          <span>QR TEMPLATE STUDIO</span>
+        </button>
+      </nav>
+
+    </div>
+
+    <!-- Active User Session block footer -->
+    <div class="space-y-4 pt-6 border-t border-white/5">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full overflow-hidden bg-orange-500 border border-orange-500/10 shadow">
+          <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=100&auto=format&fit=crop&q=80" alt="Executive Chef" referrerPolicy="no-referrer" />
+        </div>
+        <div class="overflow-hidden">
+          <p class="font-display font-medium text-xs text-white truncate">{{authService.currentUser()?.name}}</p>
+          <span class="block text-[10px] text-gray-500">Executive Chef Owner</span>
+        </div>
+      </div>
+      
+      <button (click)="logout()" type="button"
+              class="w-full h-10 rounded-xl border border-white/5 text-xs text-rose-400 font-semibold hover:bg-rose-500/10 hover:border-rose-500/20 transition-all cursor-pointer flex items-center justify-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+        </svg>
+        <span>Sign Out Workspace</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 min-w-0 flex flex-col min-h-screen">
+    
+    <!-- TOP WORKSPACE DESKTOP OVERLAY BAR -->
+    <header class="h-20 border-b border-white/5 bg-[#08090b]/40 backdrop-blur px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20">
+      
+      <!-- Left side: Venue branding -->
+      <div class="flex items-center space-x-3.5">
+        <!-- Restaurant photo or fallback icon -->
+        @if (authService.currentUser()?.restaurantPhoto) {
+          <img [src]="authService.currentUser()!.restaurantPhoto!"
+              alt="Restaurant"
+              class="w-9 h-9 rounded-lg object-cover border border-white/10 shrink-0" />
+        } @else {
+          <div class="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/20 
+                      flex items-center justify-center text-orange-500">
+            🎪
+          </div>
+        }
+        <div>
+          <h2 class="font-display font-bold text-sm sm:text-base leading-none text-white">
+            {{ activeRestaurant()?.name }}
+          </h2>
+          <span class="block text-[10px] text-gray-500 mt-1 font-mono font-semibold text-emerald-400">
+            ● VENUE ACTIVE PORT_3000
+          </span>
+        </div>
+      </div>
+
+      <!-- Right side: Quick Links & Mobile Toggle -->
+      <div class="flex items-center space-x-4">
+
+        <!-- Center -->
+      <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
+        <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20">
+          OWNER
+        </span>
+      </div>
+        
+        <!-- Live view icon -->
+        <a [routerLink]="['/menu', activeRestaurant()?.id]" target="_blank"
+           class="px-4 py-2 bg-zinc-900/80 hover:bg-zinc-800 rounded-xl border border-white/5 text-[11px] font-bold text-orange-500 flex items-center space-x-2 shadow cursor-pointer">
+          <span>Live Guest Menu</span>
+          <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+        </a>
+
+        <!-- Mobile drawer switcher (only seen on phones/tablets) -->
+        <select (change)="selectTab($any($event.target).value)" title="Select Navigation Tab font" aria-label="Select Tab"
+                class="lg:hidden px-3 py-2 bg-zinc-900 border border-white/10 text-xs rounded-xl font-semibold text-white focus:outline-none">
+          <option value="overview">Overview</option>
+          <option value="categories">Categories</option>
+          <option value="items">Food Items</option>
+          <option value="qr">QR Studio</option>
+        </select>
+
+      </div>
+
+    </header>
+
+    <!-- CONTENT BODY CONTAINER -->
+    <div class="flex-1 p-6 sm:p-8">
+      
+      <!-- SUBSECTION TAB 1: WORKSPACE OVERVIEW & ANALYTICS CHARTS -->
+      <div class="space-y-8" *ngIf="activeTab() === 'overview'">
+        
+        <!-- Welcome Toast -->
+        <div class="p-6 rounded-3xl bg-gradient-to-r from-[#1c120c] to-[#0f1117] border border-orange-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-display font-black text-xl text-white">Welcome, Chef Laurent!</h3>
+            <p class="text-xs text-gray-400 mt-1">Here is a curated report of guest scanning volumes across your table networks.</p>
+          </div>
+          <button (click)="selectTab('qr')" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-xs text-white font-bold rounded-xl shadow cursor-pointer">
+            Publish Table QR Codes
+          </button>
+        </div>
+
+        <!-- Metric KPI Cards row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
+            <p class="text-[10px] text-gray-500 tracking-wider font-bold">TOTAL DISHES</p>
+            <div class="flex items-baseline justify-between mt-2">
+              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalMenuItemsCount()}}</span>
+              <span class="text-[10px] text-emerald-400 font-mono font-semibold">+6 additions</span>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
+            <p class="text-[10px] text-gray-500 tracking-wider font-bold">CATEGORIES</p>
+            <div class="flex items-baseline justify-between mt-2">
+              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalCategoriesCount()}}</span>
+              <span class="text-[10px] text-orange-400 font-mono font-semibold">Active divisions</span>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
+            <p class="text-[10px] text-gray-500 tracking-wider font-bold">QR CODES SCANS</p>
+            <div class="flex items-baseline justify-between mt-2">
+              <span class="font-display font-black text-2xl sm:text-3xl text-white">462</span>
+              <span class="text-[10px] text-emerald-400 font-mono font-semibold">↑ 18% today</span>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
+            <p class="text-[10px] text-gray-500 tracking-wider font-bold">POPULAR GOLD SELECTION</p>
+            <div class="mt-2">
+              <p class="text-xs font-bold text-orange-400 truncate">King Scallops</p>
+              <span class="block text-[9px] text-gray-500 mt-0.5">38% from total views</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sleek Analytical Charts & Scan Activities List -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Column left: Scanning views Bar Chart SVG -->
+          <div class="lg:col-span-7 p-6 rounded-3xl bg-[#0f1117] border border-white/5">
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white">Operational Scanning Volumes</h4>
+                <p class="text-[10px] text-gray-500 mt-0.5">Daily customer impressions tracked on smartphones</p>
+              </div>
+              <span class="text-[10px] text-gray-500 font-mono">Last 7 days</span>
+            </div>
+
+            <!-- Custom Vector Bar Chart -->
+            <div class="relative h-64 w-full flex items-end justify-between px-2 pt-6">
+              
+              <!-- Background grid dashes -->
+              <div class="absolute inset-x-0 top-6 h-[1px] border-b border-dashed border-white/5"></div>
+              <div class="absolute inset-x-0 top-20 h-[1px] border-b border-dashed border-white/5"></div>
+              <div class="absolute inset-x-0 top-36 h-[1px] border-b border-dashed border-white/5"></div>
+              <div class="absolute inset-x-0 bottom-6 h-[1px] border-b border-white/10"></div>
+
+              <!-- Bar pillars -->
+              <div *ngFor="let h of chartData()" class="flex-1 flex flex-col items-center group relative z-10">
+                <!-- Hover dialog -->
+                <div class="absolute -top-10 scale-0 group-hover:scale-100 bg-orange-500 text-[10px] font-bold text-white px-2 py-1 rounded shadow-md transition-all duration-200">
+                  scans: {{h.scans}}
+                </div>
+                <!-- Orange scanning bar -->
+                <div class="w-7 sm:w-10 rounded-t bg-gradient-to-t from-orange-500 to-amber-400 hover:opacity-90 transition-all duration-300 shadow"
+                     [style.height.px]="h.scans / 3"></div>
+                <!-- Label bottom -->
+                <span class="text-[10px] text-gray-500 font-mono mt-2.5">{{h.label}}</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Column right: Waited tables activity feed logs -->
+          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5">
+            <h4 class="font-display font-bold text-sm sm:text-base text-white mb-6">Active Table Events</h4>
+            
+            <div class="space-y-4">
+              <div *ngFor="let s of scansHistory()" 
+                   class="p-4 rounded-xl bg-zinc-950/40 border border-white/5 flex items-center justify-between gap-4">
+                
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold text-white font-display">{{s.tableNumber}}</span>
+                    <span class="text-[9px] font-mono text-gray-500">• {{s.time}}</span>
+                  </div>
+                  <p class="text-xs text-gray-400 font-sans">{{s.action}}</p>
+                </div>
+
+                <!-- Status Badge -->
+                <div>
+                  <span class="px-2 py-1 rounded text-[8px] font-bold uppercase tracking-wider block"
+                        [ngClass]="s.status === 'Requesting Assistance' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'">
+                    {{s.status}}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SUBSECTION TAB 2: DIVISION / CATEGORY MANAGEMENT -->
+      <div class="space-y-8" *ngIf="activeTab() === 'categories'">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Categories list -->
+          <div class="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
+            <div>
+              <h3 class="font-display font-bold text-base sm:text-lg text-white">Menu Groups Divisions</h3>
+              <p class="text-xs text-gray-500 mt-1">Manage active subdivisions (e.g. Appetizers, Desserts) and setup icons.</p>
+            </div>
+
+            <!-- List table format -->
+            <div class="space-y-3">
+              <div *ngFor="let cat of categories(); let i = index" 
+                   class="p-4 rounded-xl bg-zinc-950/50 border border-white/5 flex items-center justify-between gap-4">
+                
+                <div class="flex items-center space-x-3.5">
+                  <span class="text-xs font-mono text-gray-500">:: {{i+1}}</span>
+                  <div class="text-lg">🎪</div>
+                  <div>
+                    <!-- Edit container -->
+                    <input *ngIf="editingCategoryId() === cat.id"
+                           [ngModel]="editingCategoryName()" (ngModelChange)="editingCategoryName.set($event)"
+                           (keyup.enter)="handleSaveCategory()"
+                           name="editingCategoryName"
+                           title="Category Name" placeholder="Category Name"
+                           class="px-2 py-1 bg-zinc-900 border border-orange-500/40 rounded text-xs text-white" />
+                    
+                    <span *ngIf="editingCategoryId() !== cat.id" class="text-xs sm:text-sm font-bold text-white font-display">{{cat.name}}</span>
+                  </div>
+                </div>
+
+                <!-- Action Button targets -->
+                <div class="flex items-center space-x-2">
+                  <button *ngIf="editingCategoryId() === cat.id"
+                          (click)="handleSaveCategory()"
+                          class="p-1 px-2.5 bg-emerald-500 rounded text-[9px] font-bold text-white shrink-0 cursor-pointer">
+                    Save
+                  </button>
+                  <button *ngIf="editingCategoryId() !== cat.id"
+                          (click)="editCategory(cat)"
+                          class="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 text-gray-400 hover:text-white shrink-0 cursor-pointer">
+                    ✏️
+                  </button>
+                  <button (click)="deleteCategory(cat.id)"
+                          class="p-1.5 rounded bg-[#fa4c58]/10 hover:bg-[#fa4c58]/20 text-[#fa4c58] shrink-0 cursor-pointer">
+                    🗑️
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Add new category form -->
+          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
+            <h4 class="font-display font-bold text-[#ebedf0] text-sm sm:text-base">Division Creation</h4>
+            
+            <form (submit)="handleAddCategory(); $event.preventDefault()" class="space-y-5">
+              <div class="space-y-2">
+                <label class="block text-xs text-gray-400 font-semibold">DIVISION TITLE</label>
+                <input type="text" [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)" name="newCategoryName" required
+                       placeholder="e.g. High Vintage Cellars"
+                       class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 focus:border-orange-500/50 focus:outline-none text-xs sm:text-sm" />
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-xs text-gray-400 font-semibold">ICON THEME</label>
+                <select [ngModel]="newCategoryIcon()" (ngModelChange)="newCategoryIcon.set($event)" name="newCategoryIcon" title="Icon Theme" aria-label="Icon Theme"
+                        class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 focus:border-orange-500/50 text-xs text-gray-300">
+                  <option value="Utensils">Utensils Plating</option>
+                  <option value="Wine">Wine Selection</option>
+                  <option value="IceCream">Dessert Bowl</option>
+                  <option value="Soup">Soups bowl</option>
+                </select>
+              </div>
+
+              <button type="submit"
+                      class="w-full py-3.5 bg-orange-500 hover:bg-orange-600 rounded-xl text-xs font-bold text-white shadow shadow-orange-500/10 cursor-pointer transition-colors">
+                Publish Group Division
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SUBSECTION TAB 3: FOOD & DRINKS ITEM MANAGEMENT -->
+      <div class="space-y-8" *ngIf="activeTab() === 'items'">
+        
+        <!-- Horizonal scroll division selection tags -->
+        <div class="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-none">
+          <button (click)="selectedFilterCategoryId.set('all')"
+                  class="px-5 py-2 rounded-xl text-xs font-semibold tracking-wider shrink-0 transition-all cursor-pointer font-display"
+                  [ngClass]="selectedFilterCategoryId() === 'all' ? 'bg-orange-500 text-white shadow' : 'bg-zinc-900 border border-white/5 text-gray-400 hover:text-white'">
+            ALL DISHES
+          </button>
+          
+          <button *ngFor="let cat of categories()"
+                  (click)="selectedFilterCategoryId.set(cat.id)"
+                  class="px-5 py-2 rounded-xl text-xs font-semibold tracking-wider shrink-0 transition-all cursor-pointer font-display"
+                  [ngClass]="selectedFilterCategoryId() === cat.id ? 'bg-orange-500 text-white shadow' : 'bg-zinc-900 border border-white/5 text-gray-400 hover:text-white'">
+            {{cat.name | uppercase}}
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Dish Cards Grid List -->
+          <div class="lg:col-span-7 space-y-4">
+            
+            <div class="text-right pb-2">
+              <span class="text-xs text-gray-500">Showing {{filteredMenuItems().length}} items in division</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div *ngFor="let dish of filteredMenuItems()"
+                   class="p-4 rounded-2xl bg-[#0f1117] border border-white/5 flex flex-col justify-between h-[300px] relative">
+                
+                <div class="space-y-3">
+                  <!-- Image platter -->
+                  <div class="w-full h-32 rounded-xl overflow-hidden relative shadow">
+                    <!-- Veg Badge overlaid -->
+                    <span class="absolute top-2 left-2 px-2.5 py-1 text-[8px] font-bold tracking-wider rounded-md uppercase z-10"
+                          [ngClass]="dish.isVeg ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
+                      {{dish.isVeg ? 'Veg' : 'Non-Veg'}}
+                    </span>
+                    <img class="w-full h-full object-cover" [src]="dish.image" alt="Item representation" referrerPolicy="no-referrer" />
+                  </div>
+
+                  <!-- Details -->
+                  <div>
+                    <h5 class="text-xs sm:text-sm font-bold text-white truncate font-display">{{dish.name}}</h5>
+                    <p class="text-[10px] text-gray-500 line-clamp-2 mt-1 leading-relaxed font-sans">{{dish.description}}</p>
+                  </div>
+                </div>
+
+                <!-- Footer cards actions -->
+                <div class="border-t border-white/5 pt-3 flex items-center justify-between mt-3">
+                  <span class="text-xs sm:text-sm font-extrabold text-orange-400 font-mono">${{dish.price | number:'1.2-2'}}</span>
+                  
+                  <div class="flex items-center space-x-3">
+                    
+                    <!-- Availability switch toggle -->
+                    <label class="relative inline-flex items-center cursor-pointer select-none h-6">
+                      <input type="checkbox" [checked]="dish.isAvailable" 
+                             (change)="toggleItemAvailability(dish.id)" 
+                             class="sr-only peer" />
+                      <div class="w-9 h-5 bg-zinc-850 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-3 w-4 after:transition-all peer-checked:bg-orange-500"></div>
+                      <span class="text-[10px] text-gray-500 font-semibold ml-2 select-none">{{dish.isAvailable ? 'Cook' : 'OOS'}}</span>
+                    </label>
+
+                    <button (click)="deleteMenuItem(dish.id)"
+                            class="p-1 px-2.5 rounded bg-rose-500/10 text-rose-400 text-xs shrink-0 cursor-pointer hover:bg-rose-500/20">
+                      Delete
+                    </button>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Add new dishes form right columns -->
+          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
+            <h4 class="font-display font-medium text-white text-sm sm:text-base">Introduce New Dish</h4>
+            
+            <form (submit)="handleAddItem(); $event.preventDefault()" class="space-y-4">
+              
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold text-gray-400">SELECT DIVISION</label>
+                <select [ngModel]="newItemCategoryId()" (ngModelChange)="newItemCategoryId.set($event)" name="newItemCategoryId" required title="Select Division" aria-label="Select Division"
+                        class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 text-gray-200 focus:outline-none text-xs">
+                  <option value="" disabled>Choose Category</option>
+                  <option *ngFor="let cat of categories()" [value]="cat.id">{{cat.name}}</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold text-gray-400">DISH NAME</label>
+                  <input type="text" [ngModel]="newItemName()" (ngModelChange)="newItemName.set($event)" name="newItemName" required placeholder="e.g. Truffle Fries"
+                         class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold text-gray-400">PRICE ($USD)</label>
+                  <input type="number" step="0.5" [ngModel]="newItemPrice()" (ngModelChange)="newItemPrice.set($event)" name="newItemPrice" title="Price" placeholder="12.00"
+                         class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250" />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold text-gray-400">DESCRIPTION (DISH SECRETS)</label>
+                <textarea [ngModel]="newItemDescription()" (ngModelChange)="newItemDescription.set($event)" name="newItemDescription" rows="2" 
+                          placeholder="Exquisite descriptions boost table average order conversions..."
+                          class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250"></textarea>
+              </div>
+
+              <!-- Image Upload Section -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold text-gray-400">DISH IMAGE</label>
+                  <!-- Toggle between upload and URL modes -->
+                  <div class="flex items-center gap-1 p-0.5 rounded-lg bg-zinc-950 border border-white/5">
+                    <button type="button" (click)="imageInputMode.set('upload')"
+                            class="px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer"
+                            [ngClass]="imageInputMode() === 'upload' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-300'">
+                      Upload
+                    </button>
+                    <button type="button" (click)="imageInputMode.set('url')"
+                            class="px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer"
+                            [ngClass]="imageInputMode() === 'url' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-300'">
+                      URL
+                    </button>
+                  </div>
+                </div>
+
+                <!-- UPLOAD MODE -->
+                @if (imageInputMode() === 'upload') {
+
+                  <!-- Preview shown after image picked -->
+                  @if (imageUploadPreview()) {
+                    <div class="relative rounded-xl overflow-hidden border border-white/10 bg-zinc-950">
+                      <img [src]="imageUploadPreview()" alt="Dish preview"
+                          class="w-full h-32 object-cover" />
+                      <button type="button" (click)="clearImageSelection()"
+                              class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-500/80 text-white text-xs flex items-center justify-center transition-colors cursor-pointer">
+                        ✕
+                      </button>
+                      <div class="px-3 py-2 text-[10px] text-green-400 font-semibold">✓ Image ready</div>
+                    </div>
+                  }
+
+                  <!-- Drop zone shown when no image selected yet -->
+                  @if (!imageUploadPreview()) {
+                    <label class="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-xl border-2 border-dashed border-white/10 bg-zinc-950 hover:border-orange-500/40 hover:bg-zinc-900 transition-all cursor-pointer group">
+
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-600 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                      </svg>
+
+                      <div class="text-center">
+                        <span class="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors">
+                          Click to upload or drag photo here
+                        </span>
+                        <p class="text-[10px] text-gray-600 mt-0.5">JPG, PNG, WEBP · max 5MB</p>
+                      </div>
+
+                      <!-- Hidden file input — the label triggers it on click -->
+                      <input type="file" accept="image/*" class="hidden"
+                            (change)="handleImageFileSelected($event)" />
+                    </label>
+                  }
+
+                  <!-- Camera capture button — shows on mobile, gracefully on desktop -->
+                  @if (!imageUploadPreview()) {
+                    <label class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/5 bg-zinc-950 hover:border-orange-500/30 hover:bg-zinc-900 transition-all cursor-pointer group">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                      </svg>
+                      <span class="text-xs font-semibold text-gray-500 group-hover:text-gray-200 transition-colors">Take Photo with Camera</span>
+
+                      <!-- Rear camera on mobile -->
+                      <input type="file" accept="image/*" class="hidden"
+                            (change)="handleImageFileSelected($event)" />
+                    </label>
+                  }
+
+                }
+
+                <!-- URL MODE -->
+                @if (imageInputMode() === 'url') {
+                  <input type="text"
+                        [ngModel]="newItemImage()" (ngModelChange)="newItemImage.set($event)"
+                        name="newItemImage"
+                        placeholder="https://images.unsplash.com/..."
+                        class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-300 placeholder-gray-600" />
+
+                  @if (newItemImage()) {
+                    <img [src]="newItemImage()" alt="URL preview"
+                        class="w-full h-24 object-cover rounded-xl border border-white/5 mt-2"
+                        (error)="newItemImage.set('')" />
+                  }
+                }
+
+              </div>
+
+              <div class="flex items-center space-x-6 py-2">
+                <label class="flex items-center space-x-2 text-xs font-semibold text-gray-400 cursor-pointer">
+                  <input type="checkbox" [ngModel]="newItemIsVeg()" (ngModelChange)="newItemIsVeg.set($event)" name="newItemIsVeg" class="rounded bg-zinc-950 border-white/10 text-orange-500 shrink-0" />
+                  <span>Is Vegetarian compliant</span>
+                </label>
+              </div>
+
+              <button type="submit"
+                      class="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-extrabold text-white shadow shadow-orange-500/10 cursor-pointer">
+                Publish Dish Platter
+              </button>
+
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SUBSECTION TAB 4: LIVE QR TEMPLATE GENERATION STUDIO -->
+      <div class="space-y-8" *ngIf="activeTab() === 'qr'">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Custom tool panel options (Left) -->
+          <div class="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
+            <div>
+              <h3 class="font-display font-black text-lg text-white">Table QR Code Studio</h3>
+              <p class="text-xs text-gray-500 mt-1">Generate high-resolution printable QR codes for restaurant tables.</p>
+            </div>
+
+            <!-- Table creation form -->
+            <form (submit)="generateTableQr(); $event.preventDefault()" class="space-y-3 p-4 rounded-2xl bg-zinc-950 border border-white/5">
+              <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">New Table QR Code</label>
+              <div class="flex items-center gap-3">
+                <input type="text" [ngModel]="newTableNumber()" (ngModelChange)="newTableNumber.set($event)" name="newTableNumber"
+                       placeholder="e.g. Table 05"
+                       class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-white focus:outline-none" />
+                <button type="submit"
+                        class="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white shrink-0 cursor-pointer">
+                  Generate
+                </button>
+              </div>
+            </form>
+
+            <!-- Generated table codes list -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">Generated Table Codes</label>
+              <div class="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                <div *ngFor="let q of qrCodesList()"
+                     (click)="selectQr(q)"
+                     class="p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all"
+                     [ngClass]="selectedQr()?.id === q.id ? 'bg-orange-500/10 border-orange-500/50 text-white' : 'bg-zinc-950 border-white/5 text-gray-400 hover:text-white'">
+                  <div>
+                    <span class="text-xs font-bold text-white block">{{q.tableNumber}}</span>
+                    <span class="text-[10px] text-gray-500 font-mono">{{q.scansCount || 0}} Scans</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <a [href]="q.targetUrl || activeTargetMenuUrl()" target="_blank" (click)="$event.stopPropagation()"
+                       class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-orange-400 font-semibold border border-white/10">
+                      Test Scan ↗
+                    </a>
+                    <button (click)="deleteQr(q.id); $event.stopPropagation()"
+                            class="p-1 text-rose-400 hover:text-rose-300 text-xs">
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="qrCodesList().length === 0" class="p-4 text-center text-xs text-gray-500 italic bg-zinc-950/50 rounded-xl border border-white/5">
+                  No table QR codes generated yet. Enter a table number above to generate one!
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-5 pt-4 border-t border-white/5">
+              
+              <!-- QR Style shape -->
+              <div class="space-y-2.5">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display font-display">Pattern shape</label>
+                <div class="grid grid-cols-3 gap-3 bg-zinc-950 p-1 rounded-xl border border-white/5">
+                  <button (click)="qrStyle.set('square')"
+                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
+                          [ngClass]="qrStyle() === 'square' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
+                    Square
+                  </button>
+                  <button (click)="qrStyle.set('rounded')"
+                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
+                          [ngClass]="qrStyle() === 'rounded' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
+                    Rounded
+                  </button>
+                  <button (click)="qrStyle.set('dots')"
+                          class="py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer font-display"
+                          [ngClass]="qrStyle() === 'dots' ? 'bg-zinc-800 text-white' : 'text-gray-500 hover:text-white'">
+                    Chiseled Dots
+                  </button>
+                </div>
+              </div>
+
+              <!-- Foreground color -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">FOREGROUND ACCENT COLOR</label>
+                <div class="flex items-center space-x-3.5">
+                  <input type="color" [ngModel]="qrFgColor()" (ngModelChange)="qrFgColor.set($event)" title="Foreground Accent Color" placeholder="#fc6011"
+                         class="w-12 h-12 rounded-xl bg-zinc-950 border border-white/10 p-1 cursor-pointer" />
+                  <span class="text-xs font-mono bg-zinc-950 px-3.5 py-2.5 border border-white/5 text-gray-300 rounded-xl leading-none uppercase">{{qrFgColor()}}</span>
+                </div>
+              </div>
+
+              <!-- Print/download operations row -->
+              <div class="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center gap-4">
+                <button (click)="simulateQrDownload()" [disabled]="qrDownloadSimulated()"
+                        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white flex items-center justify-center space-x-2 shadow cursor-pointer">
+                  <span>{{qrDownloadSimulated() ? 'Downloading...' : 'Download QR Image'}}</span>
+                </button>
+                <button (click)="simulateQrPrint()" 
+                        class="w-full sm:w-auto px-5 py-3 border border-white/10 rounded-xl text-xs font-semibold text-gray-300 hover:bg-white/5 cursor-pointer">
+                  Print Table Standee
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Live dynamic preview canvas (Right) -->
+          <div class="lg:col-span-7 flex justify-center py-10 lg:py-16">
+            
+            <div class="p-8 sm:p-12 rounded-[36px] bg-white border shadow-2xl relative max-w-sm w-full font-sans text-neutral-900 text-center pointer-events-auto">
+              
+              <!-- Printable top guide stamp -->
+              <div class="flex justify-between items-center text-[10px] font-mono text-zinc-400 uppercase tracking-widest border-b border-dashed pb-4 mb-8">
+                <span>{{activeRestaurant()?.name || 'Gourmet Bistro'}}</span>
+                <span class="font-bold text-orange-600">{{selectedQr()?.tableNumber || 'TABLE 01'}}</span>
+              </div>
+
+              <!-- LIVE QR GENERATED IMAGE -->
+              <div class="p-6 rounded-3xl border border-zinc-150 inline-block bg-white shadow-inner mx-auto w-full max-w-[260px] relative group">
+                <img [src]="activeQrUrl()" alt="Live Table QR Code" class="w-full aspect-square object-contain mx-auto rounded-xl" />
+              </div>
+
+              <!-- Live Test Link -->
+              <div class="mt-6">
+                <a [href]="activeTargetMenuUrl()" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold transition-all border border-orange-200 shadow-sm">
+                  <span>🚀 Open Live Guest Menu</span>
+                  <span>↗</span>
+                </a>
+              </div>
+
+              <!-- Scan actions description feedback -->
+              <div class="mt-6 space-y-2">
+                <span class="inline-block px-3 py-1 font-bold tracking-widest text-[#fc6011] text-[10px] uppercase bg-orange-500/10 rounded-full font-display">SCAN TO ORDER</span>
+                <p class="text-xs text-zinc-500 leading-relaxed max-w-xs mx-auto">Place this tabletop card securely inside table blocks. Guest browsers open menu profiles instantly.</p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    
+  </main>
+    <!-- ── Floating Support Button ── -->
+  <button (click)="showSupportModal.set(true)"
+        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl
+              bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold shadow-xl
+              shadow-orange-500/30 transition-all hover:scale-105 cursor-pointer">
+  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+          d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
+  </svg>
+  <span class="hidden sm:inline">Contact Support</span>
+  </button>
+
+  <!-- ── Support Modal ── -->
+  @if (showSupportModal()) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        (click)="showSupportModal.set(false)"></div>
+
+    <div class="relative z-10 w-full max-w-md rounded-3xl bg-[#0f1117] border border-white/10
+                p-6 space-y-5 shadow-2xl">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-white">Contact Support</h3>
+          <p class="text-[10px] text-gray-500 mt-0.5">Our team responds within 4 business hours</p>
+        </div>
+        <button (click)="showSupportModal.set(false)"
+                class="w-7 h-7 rounded-xl bg-white/5 text-gray-400 flex items-center
+                      justify-center text-xs cursor-pointer hover:bg-white/10">✕</button>
+      </div>
+
+      <!-- Success state -->
+      @if (supportTicketSent()) {
+        <div class="flex flex-col items-center py-8 text-center space-y-3">
+          <div class="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30
+                      flex items-center justify-center text-2xl">✓</div>
+          <p class="text-sm font-bold text-white">Ticket Submitted!</p>
+          <p class="text-xs text-gray-400">We'll get back to you at
+            <span class="text-orange-400">{{ authService.currentUser()?.email }}</span>
+          </p>
+          <button (click)="showSupportModal.set(false); supportTicketSent.set(false)"
+                  class="mt-2 px-6 py-2.5 rounded-xl bg-orange-500 text-white text-xs
+                        font-bold cursor-pointer">Done</button>
+        </div>
+      } @else {
+        <!-- Form -->
+        <div class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Priority</label>
+            <div class="flex gap-2">
+              @for (p of ['low','medium','high']; track p) {
+                <button type="button" (click)="supportPriority.set(p)"
+                        class="flex-1 py-2 rounded-xl text-[10px] font-bold border capitalize transition-all cursor-pointer"
+                        [ngClass]="supportPriority() === p
+                          ? p === 'high' ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                            : p === 'medium' ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                            : 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                          : 'bg-white/5 border-white/5 text-gray-500'">
+                  {{ p }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Subject</label>
+            <input type="text"
+                  [value]="supportSubject()"
+                  (input)="supportSubject.set($any($event.target).value)"
+                  placeholder="Briefly describe your issue..."
+                  class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-xs
+                          text-gray-200 placeholder-gray-600 focus:outline-none focus:border-orange-500/30"/>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Message</label>
+            <textarea rows="4"
+                      [value]="supportMessage()"
+                      (input)="supportMessage.set($any($event.target).value)"
+                      placeholder="Describe the issue in detail so we can help faster..."
+                      class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-xs
+                            text-gray-200 placeholder-gray-600 focus:outline-none focus:border-orange-500/30
+                            resize-none"></textarea>
+          </div>
+
+          <button type="button" (click)="submitSupportTicket()"
+                  [disabled]="!supportSubject() || !supportMessage()"
+                  class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white
+                        text-xs font-bold transition-all cursor-pointer disabled:opacity-40">
+            Submit Ticket
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+  }
+
+</div>

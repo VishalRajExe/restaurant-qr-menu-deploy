@@ -1,0 +1,30 @@
+# Dependencies
+**/node_modules/
+**/.angular/
+
+# Build outputs
+**/dist/
+**/target/
+**/build/
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# Executables & Class files
+**/*.class
+**/*.jar
+**/*.war
+
+# Environment & Secret files
+.env
+*.env
+!.env.example
+application-local.yml
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+**/logs/

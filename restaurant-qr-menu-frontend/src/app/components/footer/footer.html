@@ -1,0 +1,75 @@
+<footer class="pt-20 pb-10 transition-colors duration-500 border-t"
+        [ngClass]="isDarkMode ? 'bg-[#0b0c0e] border-white/5' : 'bg-gray-50 border-black/5'">
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 pb-16 border-b"
+         [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
+      
+      <!-- Brand Segment -->
+      <div class="space-y-4">
+        <a routerLink="/" class="flex items-center space-x-3">
+          <img
+            [src]="isDarkMode
+            ? '/AuraMenuLogo-dark.png'
+            : '/AuraMenuLogo-light.png'"
+            alt="AuraMenu"
+            class="w-15 h-15 object-contain group-hover:scale-105 transition-transform duration-300"
+          />
+          <span class="font-display font-black text-lg tracking-tight"
+                [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+            Aura<span class="text-orange-500">Menu</span>
+          </span>
+        </a>
+        <p class="text-xs sm:text-sm leading-relaxed"
+           [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-500'">
+          The ultimate fine-dining SaaS platform for customized high-contrast QR menus. Scale from a single bistro to hundreds of global hospitality branches.
+        </p>
+      </div>
+
+      <!-- Solutions -->
+      <div>
+        <h4 class="font-display font-medium text-xs uppercase tracking-widest text-[#9ca3af] mb-4">Platform</h4>
+        <ul class="space-y-2 text-sm font-sans">
+          <li><a routerLink="/" class="hover:text-orange-500 transition-colors" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">QR Customization</a></li>
+          <li><a routerLink="/menu/r1" class="hover:text-orange-500 transition-colors" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">Diner Interactivity</a></li>
+          <li><a routerLink="/dashboard" class="hover:text-orange-500 transition-colors" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">SaaS Dashboard</a></li>
+          <li><a href="#pricing" class="hover:text-orange-500 transition-colors" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">Growth Subscriptions</a></li>
+        </ul>
+      </div>
+
+      <!-- Support -->
+      <div>
+        <h4 class="font-display font-medium text-xs uppercase tracking-widest text-[#9ca3af] mb-4">Integrations</h4>
+        <ul class="space-y-2 text-sm font-sans">
+          <li><span class="text-gray-500">Spring Boot Native APs</span></li>
+          <li><span class="text-gray-500">Cloud Run Deployment</span></li>
+          <li><span class="text-gray-500">Vite JIT Compiler</span></li>
+          <li><span class="text-gray-500">MySQL / AWS S3 Configs</span></li>
+        </ul>
+      </div>
+
+      <!-- Legal / Contact -->
+      <div>
+        <h4 class="font-display font-medium text-xs uppercase tracking-widest text-[#9ca3af] mb-4">Inquiries</h4>
+        <p class="text-sm pb-2" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Standard support channels:
+        </p>
+        <span class="block text-xs font-mono text-orange-400">support@AuraMenu.io</span>
+        <span class="block text-xs font-mono text-gray-500 mt-1">+1 (800) 555-AURA</span>
+      </div>
+
+    </div>
+
+    <!-- Copyright and compliance notes -->
+    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-gray-500">
+      <p>© {{currentYear}} AuraMenu Inc. All rights reserved.</p>
+      <div class="flex items-center space-x-6">
+        <span>Terms of Service</span>
+        <span>Privacy Policy</span>
+        <span>SLA Accord</span>
+      </div>
+    </div>
+
+  </div>
+</footer>

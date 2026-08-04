@@ -1,0 +1,189 @@
+<section class="relative min-h-screen pt-32 pb-20 flex items-center overflow-hidden transition-colors duration-500"
+         [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
+         
+  <!-- Atmospheric Glow Accents (Dark Mode Only) -->
+  <div *ngIf="isDarkMode" class="absolute top-1/4 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none"></div>
+  <div *ngIf="isDarkMode" class="absolute top-1/3 right-1/4 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] rounded-full bg-amber-500/5 blur-[100px] pointer-events-none"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <!-- Left Column: Copy & CTAs -->
+      <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+        
+        <!-- Premium Pill Tag -->
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold tracking-wider font-display"
+             [ngClass]="isDarkMode ? 'bg-[#ff6a1a]/10 border-orange-500/20 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700'">
+          <span class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+          </span>
+          <span>INTRODUCING AuraMenu V1.0</span>
+        </div>
+
+        <!-- Giant Display Title -->
+        <h1 class="font-display font-bold leading-[1.1] tracking-tight text-4xl sm:text-5xl md:text-6xl lg:text-[64px]"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          Turn Every Table Into A <br class="hidden sm:inline" />
+          <span class="text-gold animate-glow bg-gradient-to-r from-orange-400 via-amber-500 to-yellow-300">
+            Digital Culinary Experience
+          </span>
+        </h1>
+
+        <!-- Premium Subtitle -->
+        <p class="max-w-xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed font-sans"
+           [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Craft high-contrast standalone digital menus in seconds. Attract guests with stunning promotions, customized table-printed QR themes, and comprehensive live-scan analytics.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+          <a routerLink="/signup"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xl shadow-orange-500/20 hover:shadow-orange-500/35 transition-all duration-300 transform hover:scale-[1.02] text-center cursor-pointer">
+            Create Free Menu
+          </a>
+          <button (click)="toggleDemo(true)"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl font-medium border flex items-center justify-center space-x-3.5 transition-all duration-300 cursor-pointer"
+             [ngClass]="isDarkMode ? 'border-white/10 text-gray-200 bg-white/5 hover:bg-white/10' : 'border-black/10 text-gray-800 bg-black/5 hover:bg-black/10'">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5.5 h-5.5 text-orange-500 shrink-0">
+              <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+            </svg>
+            <span>Watch Executive Demo</span>
+          </button>
+        </div>
+
+        <!-- Trust Statistics Bar -->
+        <div class="pt-8 border-t" [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center lg:text-left">
+            <div>
+              <p class="font-display font-extrabold text-2xl sm:text-3xl text-orange-500">500+</p>
+              <p class="text-xs font-medium" [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-500'">Boutique Venues</p>
+            </div>
+            <div>
+              <p class="font-display font-extrabold text-2xl sm:text-3xl" [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">1.2M+</p>
+              <p class="text-xs font-medium" [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-500'">Menu Impressions</p>
+            </div>
+            <div>
+              <p class="font-display font-extrabold text-2xl sm:text-3xl text-amber-500">450K+</p>
+              <p class="text-xs font-medium" [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-500'">Table Codes Active</p>
+            </div>
+            <div>
+              <p class="font-display font-extrabold text-2xl sm:text-3xl" [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">+18%</p>
+              <p class="text-xs font-medium" [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-500'">Avg Diner Spending</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Interactive Parallax Layout of Luxury Food Cards -->
+      <div class="lg:col-span-5 relative w-full h-[400px] sm:h-[500px] flex items-center justify-center">
+        
+        <!-- Large Center QR Card -->
+        <div class="absolute w-[220px] sm:w-[260px] p-4 rounded-3xl shadow-2xl skew-x-3 -skew-y-3 transition-transform duration-500 hover:rotate-3 pointer-events-auto z-20"
+             [ngClass]="isDarkMode ? 'glass-panel text-white' : 'glass-panel-light text-gray-900'">
+             
+          <div class="p-2 sm:p-4 rounded-2xl bg-white flex items-center justify-center shadow">
+            <!-- Custom Styled SVG QR Representation -->
+            <svg class="w-full aspect-square text-[#0b0c0e]" fill="currentColor" viewBox="0 0 100 100">
+              <rect x="5" y="5" width="25" height="25" />
+              <rect x="10" y="10" width="15" height="15" fill="white" />
+              <rect x="70" y="5" width="25" height="25" />
+              <rect x="75" y="10" width="15" height="15" fill="white" />
+              <rect x="5" y="70" width="25" height="25" />
+              <rect x="10" y="75" width="15" height="15" fill="white" />
+              <!-- random dots to feel like real QR -->
+              <rect x="40" y="10" width="10" height="5" />
+              <rect x="55" y="5" width="5" height="15" />
+              <rect x="45" y="25" width="15" height="10" />
+              <rect x="15" y="45" width="15" height="5" />
+              <rect x="5" y="60" width="10" height="5" />
+              <rect x="40" y="45" width="25" height="15" />
+              <rect x="75" y="40" width="10" height="15" />
+              <rect x="85" y="65" width="10" height="25" />
+              <rect x="45" y="70" width="15" height="5" />
+              <rect x="65" y="80" width="15" height="15" />
+              <!-- brand center circle logo overlay -->
+              <circle cx="50" cy="50" r="14" fill="#fc6011" />
+              <circle cx="50" cy="50" r="10" fill="white" />
+              <polygon points="47,45 55,50 47,55" fill="#fc6011" />
+            </svg>
+          </div>
+          
+          <div class="mt-4 text-center">
+            <p class="text-xs text-orange-500 font-bold uppercase tracking-widest font-display">Scan QR Code</p>
+            <h4 class="font-display font-bold text-sm sm:text-base mt-1">Le Jardin de Provence</h4>
+            <p class="text-[10px] text-gray-500 mt-0.5">Table 5 • Reims, France</p>
+          </div>
+        </div>
+
+        <!-- Floating Food Plate Card 1 -->
+        <div class="absolute -top-4 -left-6 sm:left-2 w-[180px] p-3 rounded-2xl animate-float pointer-events-none z-10 shadow-lg"
+             [ngClass]="isDarkMode ? 'bg-[#181a20]/90 border border-white/5' : 'bg-white/90 border border-black/5'">
+          <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow">
+            <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=300&auto=format&fit=crop&q=80" alt="Plated Ribeye" referrerPolicy="no-referrer" />
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <div>
+              <p class="font-display font-bold text-xs" [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">Bordeaux Steak</p>
+              <p class="text-[10px] text-gray-500">Fine Cuts</p>
+            </div>
+            <span class="text-xs font-extrabold text-orange-500">$58.00</span>
+          </div>
+        </div>
+
+        <!-- Floating Food Plate Card 2 -->
+        <div class="absolute -bottom-8 -right-6 sm:right-2 w-[180px] p-3 rounded-2xl animate-float-delayed pointer-events-none z-30 shadow-lg"
+             [ngClass]="isDarkMode ? 'bg-[#181a20]/90 border border-white/5' : 'bg-white/90 border border-black/5'">
+          <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow">
+            <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1717815963822-3c1f1a8823e1?q=80&w=765&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Ocean Scallops" referrerPolicy="no-referrer" />
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <div>
+              <p class="font-display font-bold text-xs" [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">Ocean Scallops</p>
+              <p class="text-[10px] text-gray-500">Warm Truffle Butter</p>
+            </div>
+            <span class="text-xs font-extrabold text-orange-500">$34.00</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DEMO EXECUTIVE VIDEO PORTFOLIO OVERLAY DIALOG -->
+  <div *ngIf="showDemoVideo()" 
+       class="fixed inset-0 bg-[#070709]/95 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+    <div class="glass-panel max-w-4xl w-full rounded-3xl overflow-hidden shadow-2xl relative">
+      
+      <button (click)="toggleDemo(false)" 
+              class="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white cursor-pointer z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Simulated luxury food showcase video loop or fine dining background -->
+      <div class="relative aspect-video w-full bg-slate-900">
+        <img class="absolute inset-0 w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&auto=format&fit=crop&q=80" alt="Executive Kitchen" referrerPolicy="no-referrer" />
+        
+        <!-- Animated pulsing play overlay -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-gradient-to-t from-[#0b0c0e] via-black/40 to-transparent">
+          <div class="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/20 animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8 translate-x-0.5">
+              <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <h3 class="font-display font-bold text-xl sm:text-2xl mt-6 text-white">AuraMenu Executive Product Showcase</h3>
+          <p class="text-sm text-gray-300 max-w-sm mt-2">See how fine-dining luxury venues save thousands of dollars and elevate table operations instantly.</p>
+          <button (click)="toggleDemo(false)" class="mt-6 px-6 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-semibold text-white transition-all cursor-pointer">
+            Close Showcase
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>

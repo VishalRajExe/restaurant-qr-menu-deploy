@@ -1,0 +1,607 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Restaurant QR Menu SaaS API",
+  "collectionId": "restaurant-qr-menu-tc-collection",
+  "dateExported": "2026-07-21T00:55:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "_id": "folder-auth",
+      "name": "01 - Authentication",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-restaurants",
+      "name": "02 - Restaurants",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-branches",
+      "name": "03 - Branches",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-categories",
+      "name": "04 - Categories",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-menu-items",
+      "name": "05 - Menu Items",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-offers",
+      "name": "06 - Offers",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-qr-codes",
+      "name": "07 - QR Codes",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-public-menu",
+      "name": "08 - Public Menu Flow",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-super-admin",
+      "name": "09 - Super Admin & Subscriptions",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "folder-analytics",
+      "name": "10 - Analytics",
+      "containerId": "",
+      "created": "2026-07-21T00:55:00.000Z"
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req-auth-register",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Register User / Owner",
+      "url": "{{baseUrl}}/auth/register",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"owner@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"John Owner\",\n  \"role\": \"RESTAURANT_OWNER\",\n  \"restaurantName\": \"Winged Diner\",\n  \"restaurantSlug\": \"winged-diner\"\n}"
+      }
+    },
+    {
+      "_id": "req-auth-login",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Login",
+      "url": "{{baseUrl}}/auth/login",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"owner@example.com\",\n  \"password\": \"Password123!\"\n}"
+      }
+    },
+    {
+      "_id": "req-auth-refresh",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Refresh Token",
+      "url": "{{baseUrl}}/auth/refresh",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+      }
+    },
+    {
+      "_id": "req-auth-forgot",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Forgot Password",
+      "url": "{{baseUrl}}/auth/forgot-password",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"owner@example.com\"\n}"
+      }
+    },
+    {
+      "_id": "req-auth-reset",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Reset Password",
+      "url": "{{baseUrl}}/auth/reset-password",
+      "method": "POST",
+      "sortNum": 50000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"token\": \"sample-reset-token\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+      }
+    },
+    {
+      "_id": "req-auth-change",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-auth",
+      "name": "Change Password",
+      "url": "{{baseUrl}}/auth/change-password",
+      "method": "POST",
+      "sortNum": 60000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "headers": [],
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+      }
+    },
+    {
+      "_id": "req-rest-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-restaurants",
+      "name": "Get All Restaurants",
+      "url": "{{baseUrl}}/restaurants",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-rest-get-id",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-restaurants",
+      "name": "Get Restaurant By ID",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}",
+      "method": "GET",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-rest-get-slug",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-restaurants",
+      "name": "Get Restaurant By Slug",
+      "url": "{{baseUrl}}/restaurants/slug/{{restaurantSlug}}",
+      "method": "GET",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "req-rest-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-restaurants",
+      "name": "Create Restaurant",
+      "url": "{{baseUrl}}/restaurants",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Winged Bistro\",\n  \"slug\": \"winged-bistro\",\n  \"description\": \"Artisanal Coffee & Bistro\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"contact@wingedbistro.com\",\n  \"address\": \"123 Main Street\"\n}"
+      }
+    },
+    {
+      "_id": "req-rest-update",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-restaurants",
+      "name": "Update Restaurant",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}",
+      "method": "PUT",
+      "sortNum": 50000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Winged Diner Updated\",\n  \"description\": \"Updated Description\",\n  \"phone\": \"+1987654321\",\n  \"email\": \"info@wingeddiner.com\",\n  \"address\": \"456 Market St\"\n}"
+      }
+    },
+    {
+      "_id": "req-branch-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-branches",
+      "name": "Get All Branches",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/branches",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-branch-get-id",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-branches",
+      "name": "Get Branch By ID",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/branches/{{branchId}}",
+      "method": "GET",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-branch-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-branches",
+      "name": "Create Branch",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/branches",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Downtown Branch\",\n  \"address\": \"100 Broad St\",\n  \"phone\": \"+1555123456\",\n  \"city\": \"Metropolis\"\n}"
+      }
+    },
+    {
+      "_id": "req-branch-update",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-branches",
+      "name": "Update Branch",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/branches/{{branchId}}",
+      "method": "PUT",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Downtown Branch Flagship\",\n  \"address\": \"100 Broad St Suite A\",\n  \"phone\": \"+1555123456\"\n}"
+      }
+    },
+    {
+      "_id": "req-branch-delete",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-branches",
+      "name": "Delete Branch",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/branches/{{branchId}}",
+      "method": "DELETE",
+      "sortNum": 50000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-category-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-categories",
+      "name": "Get All Categories",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-category-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-categories",
+      "name": "Create Category",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Starters & Appetizers\",\n  \"displayOrder\": 1,\n  \"status\": \"ACTIVE\"\n}"
+      }
+    },
+    {
+      "_id": "req-category-update",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-categories",
+      "name": "Update Category",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories/{{categoryId}}",
+      "method": "PUT",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Gourmet Starters\",\n  \"displayOrder\": 1,\n  \"status\": \"ACTIVE\"\n}"
+      }
+    },
+    {
+      "_id": "req-category-delete",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-categories",
+      "name": "Delete Category",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/categories/{{categoryId}}",
+      "method": "DELETE",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-menuitem-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-menu-items",
+      "name": "Get All Menu Items",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu-items",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-menuitem-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-menu-items",
+      "name": "Create Menu Item",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu-items",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"categoryId\": {{categoryId}},\n  \"name\": \"Crispy Spring Rolls\",\n  \"description\": \"Served with sweet chili sauce\",\n  \"price\": 7.99,\n  \"isAvailable\": true,\n  \"vegNonveg\": \"VEG\"\n}"
+      }
+    },
+    {
+      "_id": "req-menuitem-update",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-menu-items",
+      "name": "Update Menu Item",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu-items/{{menuItemId}}",
+      "method": "PUT",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"categoryId\": {{categoryId}},\n  \"name\": \"Crispy Vegetable Spring Rolls\",\n  \"description\": \"Served with sweet chili dip\",\n  \"price\": 8.49,\n  \"isAvailable\": true,\n  \"vegNonveg\": \"VEG\"\n}"
+      }
+    },
+    {
+      "_id": "req-menuitem-delete",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-menu-items",
+      "name": "Delete Menu Item",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/menu-items/{{menuItemId}}",
+      "method": "DELETE",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-offer-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-offers",
+      "name": "Get All Offers",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/offers",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-offer-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-offers",
+      "name": "Create Offer",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/offers",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"title\": \"Weekend Special\",\n  \"description\": \"15% off on all starters\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountPercentage\": 15.00,\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-12-31\"\n}"
+      }
+    },
+    {
+      "_id": "req-qr-list",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-qr-codes",
+      "name": "Get All QR Codes",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/qr-codes",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-qr-create",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-qr-codes",
+      "name": "Create QR Code",
+      "url": "{{baseUrl}}/restaurants/{{restaurantId}}/qr-codes",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"branchId\": {{branchId}},\n  \"tableNumber\": \"Table 12\"\n}"
+      }
+    },
+    {
+      "_id": "req-public-scan",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-public-menu",
+      "name": "Scan QR Token (Public)",
+      "url": "{{baseUrl}}/public/menu/{{qrToken}}",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "req-public-slug",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-public-menu",
+      "name": "Get Public Menu By Slug",
+      "url": "{{baseUrl}}/public/menu/restaurant/{{restaurantSlug}}",
+      "method": "GET",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z"
+    },
+    {
+      "_id": "req-admin-stats",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-super-admin",
+      "name": "Get Platform Stats (Super Admin)",
+      "url": "{{baseUrl}}/super-admin/stats",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-admin-status",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-super-admin",
+      "name": "Update Restaurant Status (Super Admin)",
+      "url": "{{baseUrl}}/super-admin/restaurants/{{restaurantId}}/status",
+      "method": "PATCH",
+      "sortNum": 20000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+      }
+    },
+    {
+      "_id": "req-sub-activate",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-super-admin",
+      "name": "Activate Subscription (Super Admin)",
+      "url": "{{baseUrl}}/subscriptions/restaurants/{{restaurantId}}/activate",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"plan\": \"PROFESSIONAL\",\n  \"months\": 12,\n  \"paymentId\": \"pay_razorpay_12345\",\n  \"paymentGateway\": \"RAZORPAY\"\n}"
+      }
+    },
+    {
+      "_id": "req-sub-cancel",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-super-admin",
+      "name": "Cancel Subscription",
+      "url": "{{baseUrl}}/subscriptions/restaurants/{{restaurantId}}/cancel",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    },
+    {
+      "_id": "req-analytics-dashboard",
+      "colId": "restaurant-qr-menu-tc-collection",
+      "containerId": "folder-analytics",
+      "name": "Get Analytics Dashboard",
+      "url": "{{baseUrl}}/analytics/restaurants/{{restaurantId}}/dashboard",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-07-21T00:55:00.000Z",
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      }
+    }
+  ]
+}

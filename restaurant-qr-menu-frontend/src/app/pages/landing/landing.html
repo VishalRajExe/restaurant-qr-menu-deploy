@@ -1,0 +1,318 @@
+<div class="min-h-screen transition-colors duration-500 overflow-x-hidden"
+     [ngClass]="isDarkMode ? 'bg-[#0b0c0e] text-gray-100' : 'bg-[#fafafa] text-gray-800'">
+     
+  <!-- Dynamic Floating Header Navigation -->
+  <app-navbar></app-navbar>
+
+  <!-- Interactive Hero Presentation -->
+  <app-hero [isDarkMode]="isDarkMode"></app-hero>
+
+  <!-- TRUST LOGOS SECTION -->
+  <!-- <section class="py-12 border-y transition-colors duration-500"
+           [ngClass]="isDarkMode ? 'bg-[#0e0f12] border-white/5' : 'bg-white border-black/5'">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-xs font-semibold uppercase tracking-widest text-gray-500 mb-8">Trusted by Elite Dining Groups & Michelin Star Kitchens</p>
+      <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-60">
+        <span *ngFor="let logo of logos" 
+              class="font-display font-bold text-lg tracking-wider"
+              [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'">
+          {{logo}}
+        </span>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- TRUST LOGOS MARQUEE -->
+<section
+  class="py-12 border-y overflow-hidden transition-colors duration-500"
+  [ngClass]="isDarkMode ? 'bg-[#0e0f12] border-white/5' : 'bg-white border-black/5'"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <p
+      class="text-center text-xs font-semibold uppercase tracking-widest text-gray-500 mb-8"
+    >
+      Trusted by Elite Dining Groups & Michelin Star Kitchens
+    </p>
+
+    <div class="relative overflow-hidden">
+
+      <!-- Left fade -->
+      <div
+        class="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+        [ngClass]="isDarkMode
+          ? 'bg-gradient-to-r from-[#0e0f12] to-transparent'
+          : 'bg-gradient-to-r from-white to-transparent'"
+      ></div>
+
+      <!-- Right fade -->
+      <div
+        class="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+        [ngClass]="isDarkMode
+          ? 'bg-gradient-to-l from-[#0e0f12] to-transparent'
+          : 'bg-gradient-to-l from-white to-transparent'"
+      ></div>
+
+      <!-- Moving Track -->
+      <div class="logo-marquee">
+
+        <!-- First set -->
+        <div class="logo-track">
+
+          <span
+            *ngFor="let logo of logos"
+            class="client-logo"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'"
+          >
+            {{ logo }}
+          </span>
+
+        </div>
+
+        <!-- Duplicate set for seamless loop -->
+        <div class="logo-track" aria-hidden="true">
+
+          <span
+            *ngFor="let logo of logos"
+            class="client-logo"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'"
+          >
+            {{ logo }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+  <!-- SECTION 3: HOW IT WORKS (Cinematic Timeline) -->
+  <section id="how-it-works" class="py-24 relative overflow-hidden transition-colors duration-500"
+           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="text-center max-w-3xl mx-auto space-y-4 mb-20">
+        <p class="text-sm font-bold uppercase tracking-widest text-orange-500 font-display">Simplicity Meets Precision</p>
+        <h2 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          Four Steps To Modern Table Service
+        </h2>
+        <p class="text-sm sm:text-base" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Digitalize your offline menu assets without complex installation headaches or tech training requirements.
+        </p>
+      </div>
+
+      <!-- Connecting dashes container -->
+      <div class="relative grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <div *ngFor="let step of howItWorks; let i = index" class="relative group">
+          
+          <div class="p-8 rounded-3xl transition-all duration-300 pointer-events-auto"
+               [ngClass]="isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-100 border border-black/5'">
+            
+            <div class="flex items-center justify-between mb-6">
+              <span class="font-display font-black text-3xl text-orange-500/20 group-hover:text-orange-500 transition-colors duration-300">
+                {{step.step}}
+              </span>
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow">
+                ✓
+              </div>
+            </div>
+
+            <h3 class="font-display font-bold text-base sm:text-lg mb-3"
+                [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+              {{step.title}}
+            </h3>
+            <p class="text-xs sm:text-sm leading-relaxed"
+               [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+              {{step.desc}}
+            </p>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 4: FEATURES -->
+  <app-features [isDarkMode]="isDarkMode"></app-features>
+
+  <!-- SECTION 7: TESTIMONIALS (Owners reviews list) -->
+  <section id="testimonials" class="py-24 transition-colors duration-500"
+           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-3 mb-16">
+        <p class="text-sm font-bold uppercase tracking-widest text-[#f97316] font-display">Testimonials</p>
+        <h2 class="font-display font-extrabold text-2xl sm:text-4xl"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          Success Stories from the Kitchen Floor
+        </h2>
+        <p class="text-xs sm:text-sm" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Read how restaurateurs solved typography, reprint labor overheads, and menu layouts globally.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div *ngFor="let t of testimonials"
+             class="p-8 rounded-3xl flex flex-col justify-between"
+             [ngClass]="isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-100 border border-black/5'">
+          
+          <div class="space-y-6">
+            <!-- Stars row -->
+            <div class="flex items-center space-x-1">
+              <svg *ngFor="let star of [1,2,3,4,5]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-amber-400">
+                <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.007-.557 1.494l3.693 2.924-1.129 4.67a1 1 0 0 0 1.452 1.054L10 15.228l4.242 2.58a1 1 0 0 0 1.452-1.054l-1.128-4.67 3.692-2.924c.614-.487.276-1.427-.556-1.494l-4.754-.381-1.83-4.401Z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <!-- Commentary text -->
+            <p class="italic text-sm sm:text-base leading-relaxed"
+               [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-700'">
+              "{{t.comment}}"
+            </p>
+          </div>
+
+          <!-- Writer credit -->
+          <div class="flex items-center space-x-4 pt-8 mt-8 border-t border-dashed"
+               [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
+            <div class="w-11 h-11 rounded-full overflow-hidden shrink-0 shadow bg-slate-800">
+              <img class="w-full h-full object-cover" [src]="t.avatar" alt="Chef Avatar" referrerPolicy="no-referrer" />
+            </div>
+            <div>
+              <h4 class="font-display font-medium text-sm"
+                  [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+                {{t.name}}
+              </h4>
+              <p class="text-xs text-gray-500">{{t.role}} • <span class="text-orange-500">{{t.restaurantName}}</span></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 8: PRICING (Subscription models) -->
+  <section id="pricing" class="py-24 transition-colors duration-500"
+           [ngClass]="isDarkMode ? 'bg-[#0f1117] border-t border-white/5' : 'bg-white border-t border-black/5'">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-4 mb-20">
+        <p class="text-sm font-bold uppercase tracking-widest text-[#f97316] font-display">Premium Strategy</p>
+        <h2 class="font-display font-extrabold text-3xl sm:text-4xl"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          Scale Your Operations Comfortably
+        </h2>
+        <p class="text-sm" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Start completely free and unlock customised canvas themes, unlimited dishes, and white label options as you expand.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        <div *ngFor="let p of pricingPlans"
+             class="p-8 rounded-[32px] flex flex-col justify-between transition-all duration-300 relative pointer-events-auto"
+             [ngClass]="p.isPopular ? 
+               (isDarkMode ? 'bg-[#181a20] border-2 border-orange-500 shadow-2xl shadow-orange-500/5' : 'bg-orange-50/50 border-2 border-orange-500 shadow-xl') : 
+               (isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-50 border border-black/5')">
+          
+          <!-- Popular overlay card top badge -->
+          <span *ngIf="p.isPopular" 
+                class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-orange-500 text-white shadow-md shadow-orange-500/10">
+            Highly Selected Plan
+          </span>
+
+          <div class="space-y-6">
+            <div>
+              <h3 class="font-display font-bold text-lg sm:text-xl"
+                  [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+                {{p.name}}
+              </h3>
+              <p class="text-xs text-gray-500 mt-1">{{p.description}}</p>
+            </div>
+
+            <!-- Price line -->
+            <div class="flex items-baseline space-x-2">
+              <span class="font-display font-extrabold text-4xl sm:text-5xl"
+                    [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+                {{p.price}}
+              </span>
+              <span class="text-xs text-gray-500 font-mono">{{p.billing}}</span>
+            </div>
+
+            <!-- Bullet benefits -->
+            <ul class="space-y-3.5 pt-4 border-t" [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
+              <li *ngFor="let feat of p.features" class="flex items-start space-x-3 text-xs sm:text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 text-orange-500 shrink-0 mt-0.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                <span [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-700'">{{feat}}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Button link -->
+          <div class="pt-8">
+            <a routerLink="/signup"
+               class="block w-full py-3.5 text-center rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer"
+               [ngClass]="p.isPopular ? 
+                 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-lg hover:shadow-orange-500/10 hover:scale-[1.01]' : 
+                 (isDarkMode ? 'bg-white/5 hover:bg-white/10 text-gray-200 border border-white/10' : 'bg-gray-200 hover:bg-gray-300 text-gray-800 border border-black/5')">
+              {{p.buttonText}}
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 9: FINAL CTA BANNER -->
+  <section class="py-24 relative overflow-hidden transition-colors duration-500"
+           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
+    
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="p-8 sm:p-16 rounded-[40px] text-center space-y-8 relative overflow-hidden pointer-events-auto"
+           [ngClass]="isDarkMode ? 'bg-gradient-to-br from-[#1c120c] to-[#0f1117] border border-orange-500/20' : 'bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-200'">
+        
+        <!-- Ambient gold glow in CTA -->
+        <div *ngIf="isDarkMode" class="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-orange-500/5 blur-3xl pointer-events-none"></div>
+
+        <h2 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          Elevate Your Dining Experience <br />
+          <span class="text-gold animate-glow bg-gradient-to-r from-orange-400 to-amber-400">
+            Within the Hour.
+          </span>
+        </h2>
+        <p class="max-w-xl mx-auto text-sm sm:text-base leading-relaxed"
+           [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+          Scale your custom high-contrast standalone cards easily. Join hundreds of fine-dining, luxury lounges, sushi hubs, and bistro owners who have transformed table conversions.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a routerLink="/signup"
+             class="w-full sm:w-auto px-10 py-4 rounded-xl font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-[1.02] shadow-xl shadow-orange-500/10 transition-all cursor-pointer">
+            Claim Free Account
+          </a>
+          <a routerLink="/menu/r1"
+             class="w-full sm:w-auto px-10 py-4 rounded-xl font-medium border transition-all cursor-pointer"
+             [ngClass]="isDarkMode ? 'border-white/10 text-white hover:bg-white/5' : 'border-black/10 text-gray-800 hover:bg-black/5'">
+            View Diner Showcase
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Global Footer -->
+  <app-footer [isDarkMode]="isDarkMode"></app-footer>
+
+</div>

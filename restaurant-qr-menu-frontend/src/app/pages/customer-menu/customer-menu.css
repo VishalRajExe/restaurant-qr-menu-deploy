@@ -1,0 +1,20 @@
+/* Lock the shell to full viewport height so all 3 panels scroll independently */
+.guest-menu-shell {
+  height: 100dvh;
+  height: 100vh;
+}
+
+/* Hide scrollbar but keep scroll functional */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Apply to all overflow-y-auto panels inside the shell */
+.guest-menu-shell aside,
+.guest-menu-shell main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.guest-menu-shell aside::-webkit-scrollbar,
+.guest-menu-shell main::-webkit-scrollbar {
+  display: none;
+}

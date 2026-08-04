@@ -1,0 +1,49 @@
+{
+  "clientName": "Thunder Client",
+  "environmentName": "Restaurant QR Menu Local Environment",
+  "environmentId": "restaurant-qr-menu-tc-env",
+  "dateExported": "2026-07-21T00:55:00.000Z",
+  "version": "1.0",
+  "variables": [
+    {
+      "name": "baseUrl",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "name": "accessToken",
+      "value": ""
+    },
+    {
+      "name": "refreshToken",
+      "value": ""
+    },
+    {
+      "name": "restaurantId",
+      "value": "1"
+    },
+    {
+      "name": "restaurantSlug",
+      "value": "winged-diner"
+    },
+    {
+      "name": "branchId",
+      "value": "1"
+    },
+    {
+      "name": "categoryId",
+      "value": "1"
+    },
+    {
+      "name": "menuItemId",
+      "value": "1"
+    },
+    {
+      "name": "offerId",
+      "value": "1"
+    },
+    {
+      "name": "qrToken",
+      "value": "sample-qr-token-uuid"
+    }
+  ]
+}
