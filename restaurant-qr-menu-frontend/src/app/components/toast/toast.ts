@@ -6,7 +6,7 @@ import { ToastService, ToastMessage } from '../../services/toast.service';
   selector: 'app-toast-container',
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col space-y-3 pointer-events-none max-w-sm w-full px-4 sm:px-0">
+    <div class="fixed top-6 right-6 z-[100] flex flex-col space-y-3 pointer-events-none max-w-sm w-full px-4 sm:px-0">
       @for (toast of toastService.toasts(); track toast.id) {
         <div class="pointer-events-auto flex items-start space-x-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-300 transform translate-y-0 animate-bounce-short"
              [ngClass]="{
@@ -36,7 +36,7 @@ import { ToastService, ToastMessage } from '../../services/toast.service';
           </div>
 
           <button (click)="toastService.remove(toast.id)" type="button"
-                  class="shrink-0 text-gray-400 hover:text-white text-xs p-1">
+                  class="shrink-0 text-gray-400 hover:text-white text-xs p-1 cursor-pointer">
             ✕
           </button>
         </div>
