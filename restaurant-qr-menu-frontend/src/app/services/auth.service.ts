@@ -59,13 +59,13 @@ export class AuthService {
   }
 
   private mapBackendRoleToFrontend(role: string, expectedRole?: 'owner' | 'chef' | 'super-admin'): 'owner' | 'chef' | 'super-admin' {
-    if (!role) return expectedRole || 'owner';
+    if (expectedRole) return expectedRole;
+    if (!role) return 'owner';
     const upper = role.toUpperCase();
     if (upper.includes('SUPER_ADMIN') || upper === 'ADMIN') return 'super-admin';
     if (upper.includes('RESTAURANT_OWNER') || upper.includes('OWNER')) return 'owner';
-    if (upper.includes('CHEF') || upper.includes('STAFF')) return 'chef';
-    if (upper.includes('MANAGER')) return expectedRole === 'owner' ? 'owner' : 'chef';
-    return expectedRole || 'owner';
+    if (upper.includes('CHEF')) return 'chef';
+    return 'owner';
   }
 
   login(email: string, passwordOrRole: string, expectedRole?: 'owner' | 'chef' | 'super-admin'): Observable<boolean> {

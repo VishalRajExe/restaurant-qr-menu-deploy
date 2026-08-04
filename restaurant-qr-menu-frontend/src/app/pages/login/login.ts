@@ -32,15 +32,18 @@ export class Login implements OnInit {
   };
 
   ngOnInit() {
-    if (this.authService.isLoggedIn()) {
-      const role = this.authService.currentUser()?.role || 'owner';
-      this.router.navigate([this.roleRoutes[role] || '/dashboard/owner']);
+    // Clear stale session on navigating to login page if user explicitly came to login
+    const session = this.authService.currentUser();
+    if (session && session.role !== 'owner') {
+      // Allow session reset when on login page
     }
   }
 
   setRoleTab(role: 'owner' | 'chef' | 'super-admin') {
     this.activeTab.set(role);
     this.errorMessage.set('');
+    this.authService.logout();
+
     if (role === 'owner') {
       this.email.set('owner@example.com');
       this.password.set('Password123!');
@@ -58,12 +61,17 @@ export class Login implements OnInit {
     this.errorMessage.set('');
 
     const expectedRole = this.activeTab();
+
+    // Clear any previous session before performing new login
+    this.authService.logout();
+
     this.authService.login(this.email(), this.password(), expectedRole).subscribe({
       next: (success: boolean) => {
         this.isLoading.set(false);
         if (success) {
           const role = this.authService.currentUser()?.role ?? expectedRole;
-          this.router.navigate([this.roleRoutes[role] || '/dashboard/owner']);
+          const targetPath = this.roleRoutes[role] || '/dashboard/owner';
+          this.router.navigateByUrl(targetPath);
         } else {
           this.errorMessage.set('Invalid credentials. Please verify email and password.');
         }

@@ -22,8 +22,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody UserRegistrationDto request) {
-        // Public self-registration → STAFF role (no restaurant association)
-        return ResponseEntity.ok(ApiResponse.success("Account created", authService.register(request, User.Role.STAFF)));
+        // Public self-registration → RESTAURANT_OWNER role
+        return ResponseEntity.ok(ApiResponse.success("Account created", authService.register(request, User.Role.RESTAURANT_OWNER)));
     }
 
     @PostMapping("/refresh")
