@@ -98,8 +98,9 @@ public class MenuItemService {
 
         var restaurant = restaurantService.findById(restaurantId);
         var category = categoryRepository.findById(request.categoryId)
-                .filter(c -> c.getRestaurant().getId().equals(restaurantId))
-                .orElseThrow(() -> new ResourceNotFoundException("Category", request.categoryId));
+                .orElseGet(() -> categoryRepository.findByRestaurantIdOrdered(restaurantId).stream()
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException("Category", request.categoryId)));
 
         var item = MenuItem.builder()
                 .restaurant(restaurant)

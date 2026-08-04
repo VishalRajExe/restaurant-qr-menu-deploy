@@ -13,13 +13,34 @@ export class MenuService {
   private menuItemsList = signal<MenuItem[]>([]);
   private localAddedItems: MenuItem[] = [];
 
-  getMenuItemsForCategories(categoryIds: string[]): MenuItem[] {
-    if (!categoryIds || categoryIds.length === 0) return this.menuItemsList();
-    const cleanCatIds = categoryIds.map(id => String(id).toLowerCase().replace(/^c/, ''));
-    return this.menuItemsList().filter(item => {
-      const itemCatId = String(item.categoryId).toLowerCase().replace(/^c/, '');
-      return cleanCatIds.includes(itemCatId) || categoryIds.includes(item.categoryId);
-    });
+  constructor() {
+    this.loadLocalItems();
+  }
+
+  private loadLocalItems() {
+    try {
+      const stored = localStorage.getItem('aura_added_dishes');
+      if (stored) {
+        this.localAddedItems = JSON.parse(stored);
+        if (Array.isArray(this.localAddedItems) && this.localAddedItems.length > 0) {
+          this.menuItemsList.set(this.localAddedItems);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read local added items from storage', e);
+    }
+  }
+
+  private saveLocalItems() {
+    try {
+      localStorage.setItem('aura_added_dishes', JSON.stringify(this.localAddedItems));
+    } catch (e) {
+      console.warn('Could not save local added items to storage', e);
+    }
+  }
+
+  getMenuItemsForCategories(categoryIds?: string[]): MenuItem[] {
+    return this.menuItemsList();
   }
 
   getMenuItemsForCategory(categoryId: string): MenuItem[] {
@@ -53,7 +74,7 @@ export class MenuService {
             calories: item.calories || undefined
           }));
 
-          // Merge API items with locally added items to prevent auto-deletion during polling
+          // Merge API items with locally persisted items to ensure NO dish is lost on refresh
           const combined = [...apiMapped];
           for (const localItem of this.localAddedItems) {
             if (!combined.some(i => String(i.id) === String(localItem.id) || i.name.toLowerCase() === localItem.name.toLowerCase())) {
@@ -80,8 +101,9 @@ export class MenuService {
       id: newItemId
     };
 
-    // Store in local added items array and update signal
+    // Store in local array, localStorage, and signal
     this.localAddedItems.push(newItem);
+    this.saveLocalItems();
     this.menuItemsList.update(list => [...list, newItem]);
 
     const restId = 1;
@@ -106,6 +128,7 @@ export class MenuService {
           this.menuItemsList.update(list =>
             list.map(i => i.id === newItemId ? { ...i, id: serverId } : i)
           );
+          this.saveLocalItems();
         }
       });
 
@@ -120,6 +143,7 @@ export class MenuService {
     this.localAddedItems = this.localAddedItems.map(item =>
       item.id === id ? { ...item, ...updated } : item
     );
+    this.saveLocalItems();
 
     const numericId = parseInt(id.replace(/^m_?/, ''), 10);
     if (!isNaN(numericId)) {
@@ -144,6 +168,7 @@ export class MenuService {
   deleteMenuItem(id: string) {
     this.menuItemsList.update(list => list.filter(item => item.id !== id));
     this.localAddedItems = this.localAddedItems.filter(item => item.id !== id);
+    this.saveLocalItems();
 
     const numericId = parseInt(id.replace(/^m_?/, ''), 10);
     if (!isNaN(numericId)) {
