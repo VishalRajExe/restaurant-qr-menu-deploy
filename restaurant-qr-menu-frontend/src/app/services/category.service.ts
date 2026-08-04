@@ -14,7 +14,7 @@ export class CategoryService {
 
   getCategoriesForRestaurant(restaurantId: string): Category[] {
     return this.categoriesList()
-      .filter(c => c.restaurantId === restaurantId || !c.restaurantId)
+      .filter(c => String(c.restaurantId) === String(restaurantId) || !c.restaurantId)
       .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
@@ -48,9 +48,10 @@ export class CategoryService {
   }
 
   addCategory(category: Omit<Category, 'id'>): Category {
+    const tempId = 'c_' + Date.now();
     const newCategory: Category = {
       ...category,
-      id: 'c' + (this.categoriesList().length + 1),
+      id: tempId,
       sortOrder: this.categoriesList().length + 1
     };
     this.categoriesList.update(list => [...list, newCategory]);
@@ -63,7 +64,14 @@ export class CategoryService {
 
     this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${numericRestId}/categories`, body)
       .pipe(catchError(() => of(null)))
-      .subscribe();
+      .subscribe(res => {
+        if (res && res.success && res.data && res.data.id) {
+          const serverId = String(res.data.id);
+          this.categoriesList.update(list =>
+            list.map(c => c.id === tempId ? { ...c, id: serverId } : c)
+          );
+        }
+      });
 
     return newCategory;
   }
@@ -73,7 +81,7 @@ export class CategoryService {
       list.map(c => c.id === id ? { ...c, name, icon } : c)
     );
 
-    const numericId = parseInt(id, 10);
+    const numericId = parseInt(id.replace(/^c_?/, ''), 10);
     if (!isNaN(numericId)) {
       const restId = 1;
       this.http.put<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/categories/${numericId}`, { name, displayOrder: 1 })
@@ -85,7 +93,7 @@ export class CategoryService {
   deleteCategory(id: string) {
     this.categoriesList.update(list => list.filter(c => c.id !== id));
 
-    const numericId = parseInt(id, 10);
+    const numericId = parseInt(id.replace(/^c_?/, ''), 10);
     if (!isNaN(numericId)) {
       const restId = 1;
       this.http.delete<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/categories/${numericId}`)
@@ -103,7 +111,7 @@ export class CategoryService {
 
     const restId = parseInt(reordered[0]?.restaurantId || '1', 10) || 1;
     const itemsPayload = reordered.map((c, idx) => ({
-      id: parseInt(c.id, 10) || (idx + 1),
+      id: parseInt(c.id.replace(/^c_?/, ''), 10) || (idx + 1),
       displayOrder: idx + 1
     }));
 
