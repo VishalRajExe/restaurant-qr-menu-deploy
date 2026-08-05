@@ -14,6 +14,7 @@ import { Offer } from '../../models/offer.model';
 
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
+import { OrderService } from '../../services/order.service';
 import { BackButton } from '../../components/back-button/back-button';
 
 export interface CartItem {
@@ -36,6 +37,7 @@ export class CustomerMenu implements OnInit {
   publicMenuService = inject(PublicMenuService);
   toastService      = inject(ToastService);
   modalService      = inject(ModalService);
+  orderService      = inject(OrderService);
 
   // ── Restaurant data ──────────────────────────────────────────────────────────
   restaurant = signal<Restaurant | undefined>(undefined);
@@ -256,6 +258,20 @@ export class CustomerMenu implements OnInit {
 
     setTimeout(() => {
       const id = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const tableNum = this.tableNumber() > 0 ? (this.tableNumber() < 10 ? '0' + this.tableNumber() : String(this.tableNumber())) : '01';
+      this.orderService.createOrder({
+        id: id,
+        table: 'Table ' + tableNum,
+        tableNumber: tableNum,
+        placedAt: new Date().toISOString(),
+        items: this.cartItems().map((i: CartItem) => ({
+          name: i.menuItem.name,
+          qty: i.quantity,
+          note: i.menuItem.isVeg ? 'Vegetarian' : 'Medium Spice'
+        })),
+        specialRequest: 'No cutlery required, extra napkins please.',
+        waiterName: 'Self-Order QR'
+      });
       this.orderId.set(id);
       this.orderPlaced.set(true);
       this.isPlacingOrder.set(false);

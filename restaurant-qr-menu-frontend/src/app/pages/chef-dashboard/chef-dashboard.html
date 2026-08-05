@@ -169,24 +169,19 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between text-[10px]">
                 <span class="text-gray-500">Est. {{ estimatedMins(order) }} min target</span>
-                @if (remainingMins(order) > 0) {
-                  <span class="text-blue-400 font-semibold">{{ remainingMins(order) }}m left</span>
-                } @else {
-                  <span class="text-red-400 font-bold animate-pulse">
-                    {{ remainingMins(order) * -1 }}m overdue
-                  </span>
-                }
+                <span [ngClass]="formatCountdown(order).isOverdue ? 'text-red-400 font-bold animate-pulse' : 'text-blue-400 font-semibold font-mono'">
+                  {{ formatCountdown(order).text }}
+                </span>
               </div>
               <!-- Progress bar -->
-               
               <div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-1000"
-                    [style.width.%]="Math.min(100, (elapsedMins(order.placedAt) / estimatedMins(order)) * 100)"
-                    [ngClass]="remainingMins(order) > 5 
-                      ? 'bg-blue-500' 
-                      : remainingMins(order) > 0 
-                        ? 'bg-amber-500' 
-                        : 'bg-red-500'">
+                <div class="h-full rounded-full transition-all duration-300"
+                     [style.width.%]="progressPercent(order)"
+                     [ngClass]="formatCountdown(order).isOverdue
+                       ? 'bg-red-500' 
+                       : progressPercent(order) > 70 
+                         ? 'bg-amber-500' 
+                         : 'bg-blue-500'">
                 </div>
               </div>
             </div>
