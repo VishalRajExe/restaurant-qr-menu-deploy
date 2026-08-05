@@ -107,7 +107,8 @@ export class MenuService {
     this.menuItemsList.update(list => [...list, newItem]);
 
     const restId = 1;
-    const numericCatId = parseInt(String(item.categoryId).replace(/^c/, ''), 10) || 1;
+    let parsedCatId = parseInt(String(item.categoryId).replace(/^c_?/, ''), 10);
+    const numericCatId = (!isNaN(parsedCatId) && parsedCatId <= 2147483647) ? parsedCatId : 1;
     const body = {
       categoryId: numericCatId,
       name: item.name,

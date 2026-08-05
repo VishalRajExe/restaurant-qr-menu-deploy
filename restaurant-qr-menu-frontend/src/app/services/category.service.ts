@@ -11,12 +11,38 @@ import { ApiResponse } from '../models/api-response.model';
 export class CategoryService {
   private http = inject(HttpClient);
   private categoriesList = signal<Category[]>([]);
+  private localAddedCategories: Category[] = [];
+
+  constructor() {
+    this.loadLocalCategories();
+  }
+
+  private loadLocalCategories() {
+    try {
+      const stored = localStorage.getItem('aura_added_categories');
+      if (stored) {
+        this.localAddedCategories = JSON.parse(stored);
+        if (Array.isArray(this.localAddedCategories) && this.localAddedCategories.length > 0) {
+          this.categoriesList.set(this.localAddedCategories);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read local added categories from storage', e);
+    }
+  }
+
+  private saveLocalCategories() {
+    try {
+      localStorage.setItem('aura_added_categories', JSON.stringify(this.localAddedCategories));
+    } catch (e) {
+      console.warn('Could not save local added categories to storage', e);
+    }
+  }
 
   getCategoriesForRestaurant(restaurantId?: string): Category[] {
     return this.categoriesList().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
-  /** Called by PublicMenuService to set categories from unified endpoint */
   setCategories(categories: Category[]): void {
     this.categoriesList.set(categories);
   }
@@ -25,17 +51,29 @@ export class CategoryService {
     const numericId = parseInt(restaurantId, 10) || 1;
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/restaurants/${numericId}/categories`).pipe(
       map(res => {
-        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-          const mapped: Category[] = res.data.map(item => ({
+        let apiMapped: Category[] = [];
+        if (res && res.success && Array.isArray(res.data)) {
+          apiMapped = res.data.map(item => ({
             id: String(item.id),
             restaurantId: String(restaurantId),
             name: item.name,
             icon: item.icon || 'Utensils',
             sortOrder: item.displayOrder || item.sortOrder || 1
           }));
-          this.categoriesList.set(mapped);
-          return mapped;
         }
+
+        const combined = [...apiMapped];
+        for (const localCat of this.localAddedCategories) {
+          if (!combined.some(c => String(c.id) === String(localCat.id) || c.name.toLowerCase() === localCat.name.toLowerCase())) {
+            combined.push(localCat);
+          }
+        }
+
+        if (combined.length > 0) {
+          this.categoriesList.set(combined);
+          return combined;
+        }
+
         return this.getCategoriesForRestaurant(restaurantId);
       }),
       catchError(err => {
@@ -52,6 +90,9 @@ export class CategoryService {
       id: tempId,
       sortOrder: this.categoriesList().length + 1
     };
+
+    this.localAddedCategories.push(newCategory);
+    this.saveLocalCategories();
     this.categoriesList.update(list => [...list, newCategory]);
 
     const numericRestId = parseInt(category.restaurantId, 10) || 1;
@@ -65,9 +106,11 @@ export class CategoryService {
       .subscribe(res => {
         if (res && res.success && res.data && res.data.id) {
           const serverId = String(res.data.id);
+          newCategory.id = serverId;
           this.categoriesList.update(list =>
             list.map(c => c.id === tempId ? { ...c, id: serverId } : c)
           );
+          this.saveLocalCategories();
         }
       });
 
@@ -76,8 +119,13 @@ export class CategoryService {
 
   updateCategory(id: string, name: string, icon?: string) {
     this.categoriesList.update(list =>
-      list.map(c => c.id === id ? { ...c, name, icon } : c)
+      list.map(c => c.id === id ? { ...c, name, icon: icon || c.icon } : c)
     );
+
+    this.localAddedCategories = this.localAddedCategories.map(c =>
+      c.id === id ? { ...c, name, icon: icon || c.icon } : c
+    );
+    this.saveLocalCategories();
 
     const numericId = parseInt(id.replace(/^c_?/, ''), 10);
     if (!isNaN(numericId)) {
@@ -90,6 +138,8 @@ export class CategoryService {
 
   deleteCategory(id: string) {
     this.categoriesList.update(list => list.filter(c => c.id !== id));
+    this.localAddedCategories = this.localAddedCategories.filter(c => c.id !== id);
+    this.saveLocalCategories();
 
     const numericId = parseInt(id.replace(/^c_?/, ''), 10);
     if (!isNaN(numericId)) {
