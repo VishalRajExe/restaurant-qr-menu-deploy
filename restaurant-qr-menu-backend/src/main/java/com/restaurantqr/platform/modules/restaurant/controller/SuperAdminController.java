@@ -82,6 +82,27 @@ public class SuperAdminController {
         return ResponseEntity.ok(ApiResponse.success("Restaurant status updated", null));
     }
 
+    /** Update restaurant verification status */
+    @PatchMapping("/restaurants/{id}/verification")
+    public ResponseEntity<ApiResponse<Restaurant>> setVerificationStatus(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body,
+            @RequestParam(required = false) String status) {
+
+        var restaurant = restaurantRepository.findById(id)
+                .filter(r -> !r.getIsDeleted())
+                .orElseThrow(() -> new com.restaurantqr.platform.common.ResourceNotFoundException("Restaurant", id));
+
+        String verificationStatusStr = (body != null && body.containsKey("status")) ? body.get("status") : status;
+        if (verificationStatusStr == null) {
+            verificationStatusStr = "VERIFIED";
+        }
+
+        restaurant.setVerificationStatus(verificationStatusStr.toUpperCase());
+        Restaurant saved = restaurantRepository.save(restaurant);
+        return ResponseEntity.ok(ApiResponse.success("Restaurant verification status updated", saved));
+    }
+
     /** List all platform users */
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Page<User>>> listUsers(

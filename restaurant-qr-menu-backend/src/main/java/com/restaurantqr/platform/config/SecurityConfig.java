@@ -115,6 +115,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         // Customer-facing restaurant lookups & public read queries (used by frontend dashboard & menu pages) — read-only, no auth required.
                         .requestMatchers(HttpMethod.GET, "/restaurants/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/analytics/**").permitAll()
                         // Public pricing/plan comparison
                         .requestMatchers(HttpMethod.GET, "/subscriptions/plans").permitAll()
                         // Super admin only

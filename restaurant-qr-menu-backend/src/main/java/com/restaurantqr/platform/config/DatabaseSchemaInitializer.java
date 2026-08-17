@@ -32,5 +32,12 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
             log.warn("Automatic support_tickets.message alter skipped: {}", e.getMessage());
         }
 
+        try {
+            jdbcTemplate.execute("ALTER TABLE restaurants ADD COLUMN verification_status VARCHAR(50) DEFAULT 'PENDING_VERIFICATION'");
+            log.info("Successfully added verification_status column on restaurants table.");
+        } catch (Exception e) {
+            log.warn("verification_status column already exists: {}", e.getMessage());
+        }
+
     }
 }
