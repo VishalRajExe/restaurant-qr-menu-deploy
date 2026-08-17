@@ -68,13 +68,15 @@ export class CustomerMenu implements OnInit, OnDestroy {
   orderId              = signal<string>('');
   isPlacingOrder       = signal<boolean>(false);
 
-  // ── Order Status Tracking ────────────────────────────────────────────────────
-  activeOrder          = signal<Order | null>(null);
-  showOrderTracker     = signal<boolean>(false);
-  showTrackLookupModal = signal<boolean>(false);
-  lookupQuery          = signal<string>('');
-  trackedOrdersList    = signal<Order[]>([]);
-  isTracking           = signal<boolean>(false);
+  // ── Order Status Tracking & Customer History ──────────────────────────────────
+  activeOrder           = signal<Order | null>(null);
+  showOrderTracker      = signal<boolean>(false);
+  showTrackLookupModal  = signal<boolean>(false);
+  customerOrderHistory  = signal<Order[]>([]);
+  showOrderHistoryModal = signal<boolean>(false);
+  lookupQuery           = signal<string>('');
+  trackedOrdersList     = signal<Order[]>([]);
+  isTracking            = signal<boolean>(false);
 
   private pollTimer: any;
 
@@ -194,6 +196,8 @@ export class CustomerMenu implements OnInit, OnDestroy {
         }
       });
     });
+
+    this.loadCustomerOrderHistory();
 
     // Start background status polling timer for active order
     this.pollTimer = setInterval(() => {
@@ -317,12 +321,86 @@ export class CustomerMenu implements OnInit, OnDestroy {
 
     this.orderService.createOrder(orderPayload).subscribe((placedOrder: Order) => {
       this.activeOrder.set(placedOrder);
+      this.saveOrderToHistory(placedOrder);
       this.orderId.set(placedOrder.orderNumber || placedOrder.id);
       this.orderPlaced.set(true);
       this.isPlacingOrder.set(false);
       this.showMobileCart.set(false);
       this.toastService.show('Order placed successfully!', 'success');
     });
+  }
+
+  loadCustomerOrderHistory() {
+    try {
+      const stored = localStorage.getItem('aura_customer_orders');
+      if (stored) {
+        const list = JSON.parse(stored);
+        if (Array.isArray(list)) {
+          this.customerOrderHistory.set(list);
+          if (list.length > 0 && !this.activeOrder()) {
+            this.activeOrder.set(list[0]);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load customer order history', e);
+    }
+  }
+
+  saveOrderToHistory(order: Order) {
+    const list = this.customerOrderHistory();
+    const filtered = list.filter((o: Order) => o.id !== order.id && o.orderNumber !== order.orderNumber);
+    const updated = [order, ...filtered];
+    this.customerOrderHistory.set(updated);
+    try {
+      localStorage.setItem('aura_customer_orders', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Failed to save order to history', e);
+    }
+  }
+
+  openOrderHistory() {
+    this.loadCustomerOrderHistory();
+    this.showOrderHistoryModal.set(true);
+  }
+
+  closeOrderHistory() {
+    this.showOrderHistoryModal.set(false);
+  }
+
+  trackSpecificOrder(order: Order) {
+    this.activeOrder.set(order);
+    this.showOrderHistoryModal.set(false);
+    this.showOrderTracker.set(true);
+    this.refreshActiveOrderStatus();
+  }
+
+  reorderItems(order: Order) {
+    if (!order.items || order.items.length === 0) return;
+    const allDishes = this.menuItems();
+    
+    order.items.forEach(orderItem => {
+      let targetDish = allDishes.find((d: MenuItem) => d.name.toLowerCase() === orderItem.name.toLowerCase());
+      if (!targetDish) {
+        targetDish = {
+          id: 're_' + Math.random(),
+          categoryId: 'c1',
+          name: orderItem.name,
+          price: orderItem.price || 150,
+          description: 'Re-ordered item',
+          image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+          isAvailable: true,
+          isVeg: true
+        };
+      }
+      for (let i = 0; i < (orderItem.qty || 1); i++) {
+        this.addToCart(targetDish);
+      }
+    });
+
+    this.showOrderHistoryModal.set(false);
+    this.showMobileCart.set(true);
+    this.toastService.show(`Added items from ${order.orderNumber || 'previous order'} to your cart!`, 'success');
   }
 
   closeOrderSuccess() {
@@ -346,7 +424,9 @@ export class CustomerMenu implements OnInit, OnDestroy {
     const searchId = current.orderNumber || current.id;
     this.orderService.trackOrders(searchId).subscribe(orders => {
       if (orders && orders.length > 0) {
-        this.activeOrder.set(orders[0]);
+        const updatedOrder = orders[0];
+        this.activeOrder.set(updatedOrder);
+        this.saveOrderToHistory(updatedOrder);
       }
     });
   }

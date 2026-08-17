@@ -25,6 +25,7 @@ export interface Order {
   status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED' | 'pending' | 'preparing' | 'done';
   items: OrderItem[];
   totalAmount?: number;
+  totalPrice?: number;
   specialRequest?: string;
   waiterName?: string;
 }
