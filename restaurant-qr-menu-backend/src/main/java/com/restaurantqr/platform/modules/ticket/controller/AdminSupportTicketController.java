@@ -35,7 +35,7 @@ public class AdminSupportTicketController {
         return ResponseEntity.ok(ApiResponse.success(supportTicketRepository.findAllTickets(pageable)));
     }
 
-    @PatchMapping("/{ticketId}/assign")
+    @RequestMapping(value = "/{ticketId}/assign", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> assignTicket(
             @PathVariable Long ticketId,
             @RequestParam(required = false) Long assignToUserId,
@@ -43,14 +43,14 @@ public class AdminSupportTicketController {
         return ResponseEntity.ok(ApiResponse.success("Ticket assigned", supportTicketService.assignTicket(ticketId, assignToUserId, team)));
     }
 
-    @PatchMapping("/{ticketId}/escalate")
+    @RequestMapping(value = "/{ticketId}/escalate", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> escalateTicket(
             @PathVariable Long ticketId,
             @RequestParam SupportTicket.EscalationLevel level) {
         return ResponseEntity.ok(ApiResponse.success("Ticket escalated", supportTicketService.escalateTicket(ticketId, level)));
     }
 
-    @PatchMapping("/{ticketId}/resolve")
+    @RequestMapping(value = "/{ticketId}/resolve", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> resolveTicket(@PathVariable Long ticketId) {
         return ResponseEntity.ok(ApiResponse.success("Ticket resolved", supportTicketService.resolveTicket(ticketId)));
     }

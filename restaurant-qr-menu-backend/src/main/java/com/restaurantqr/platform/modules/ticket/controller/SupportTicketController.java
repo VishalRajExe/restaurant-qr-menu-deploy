@@ -80,12 +80,12 @@ public class SupportTicketController {
     }
 
 
-    @PatchMapping("/{ticketId}/reopen")
+    @RequestMapping(value = "/{ticketId}/reopen", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> reopenTicket(@PathVariable Long ticketId) {
         return ResponseEntity.ok(ApiResponse.success("Ticket reopened", supportTicketService.reopenTicket(ticketId)));
     }
 
-    @PostMapping("/{ticketId}/rate")
+    @RequestMapping(value = "/{ticketId}/rate", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> rateTicket(
             @PathVariable Long ticketId,
             @RequestParam int rating,
