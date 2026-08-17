@@ -19,6 +19,7 @@ export interface Restaurant {
   currency?: string;
   tableCount?: number;
   isPublished?: boolean;
+  verificationStatus?: 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
   socialLinks?: {
     instagram?: string;
     facebook?: string;

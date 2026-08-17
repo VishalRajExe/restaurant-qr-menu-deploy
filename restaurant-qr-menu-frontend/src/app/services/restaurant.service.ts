@@ -120,7 +120,8 @@ export class RestaurantService {
       reviewCount: d.reviewCount || 0,
       currency: d.currency || '₹',
       tableCount: d.tableCount || 20,
-      isPublished: d.status === 'ACTIVE' || d.isPublished === true
+      isPublished: d.status === 'ACTIVE' || d.isPublished === true,
+      verificationStatus: d.verificationStatus || 'PENDING_VERIFICATION'
     };
   }
 

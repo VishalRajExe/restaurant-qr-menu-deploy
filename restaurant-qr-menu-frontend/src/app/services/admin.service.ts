@@ -21,6 +21,7 @@ export interface AdminRestaurantData {
   joinedDate?: string;
   plan: 'Basic' | 'Pro' | 'Enterprise';
   status: 'active' | 'inactive';
+  verificationStatus?: 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
 }
 
 @Injectable({
@@ -53,7 +54,8 @@ export class AdminService {
             totalItems: r.totalMenuItems || r.totalItems || 0,
             joinedDate: r.createdAt ? new Date(r.createdAt).toISOString().split('T')[0] : '',
             plan: r.subscriptionPlan || r.plan || 'Basic',
-            status: (r.status === 'ACTIVE') ? 'active' : 'inactive'
+            status: (r.status === 'ACTIVE') ? 'active' : 'inactive',
+            verificationStatus: r.verificationStatus || 'PENDING_VERIFICATION'
           }));
           this.restaurantsList.set(mapped);
           return mapped;
@@ -80,6 +82,23 @@ export class AdminService {
     if (!isNaN(numericId)) {
       return this.http.patch<ApiResponse<any>>(
         `${environment.apiUrl}/super-admin/restaurants/${numericId}/status?status=${nextStatus}`, {}
+      ).pipe(
+        map(() => true),
+        catchError(() => of(true))
+      );
+    }
+    return of(true);
+  }
+
+  updateVerificationStatus(id: string, verificationStatus: 'VERIFIED' | 'REJECTED'): Observable<boolean> {
+    this.restaurantsList.update((list: AdminRestaurantData[]) =>
+      list.map((r: AdminRestaurantData) => r.id === id ? { ...r, verificationStatus } : r)
+    );
+
+    const numericId = parseInt(id, 10);
+    if (!isNaN(numericId)) {
+      return this.http.patch<ApiResponse<any>>(
+        `${environment.apiUrl}/restaurants/${numericId}/verification?status=${verificationStatus}`, {}
       ).pipe(
         map(() => true),
         catchError(() => of(true))

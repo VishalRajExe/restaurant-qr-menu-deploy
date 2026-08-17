@@ -166,11 +166,11 @@
         <div class="flex items-center gap-2">
           <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
                 [ngClass]="{
-                  'bg-amber-500/10 text-amber-400 border-amber-500/30': (authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION',
-                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': authService.currentUser()?.verificationStatus === 'VERIFIED',
-                  'bg-rose-500/10 text-rose-400 border-rose-500/30': authService.currentUser()?.verificationStatus === 'REJECTED'
+                  'bg-amber-500/10 text-amber-400 border-amber-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION',
+                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus) === 'VERIFIED',
+                  'bg-rose-500/10 text-rose-400 border-rose-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus) === 'REJECTED'
                 }">
-            ⏳ Admin Verification: {{ authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION' }}
+            ⏳ Admin Verification: {{ activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION' }}
           </span>
         </div>
       </div>

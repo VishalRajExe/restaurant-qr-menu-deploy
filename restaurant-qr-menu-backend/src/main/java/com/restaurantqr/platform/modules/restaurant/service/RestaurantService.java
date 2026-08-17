@@ -105,6 +105,13 @@ public class RestaurantService {
         log.info("Restaurant soft-deleted: id={}", id);
     }
 
+    @Transactional
+    public Restaurant updateVerificationStatus(Long id, String verificationStatus) {
+        var restaurant = findById(id);
+        restaurant.setVerificationStatus(verificationStatus);
+        return repository.save(restaurant);
+    }
+
     // ─── Subscription Limit Guards ────────────────────────────────────────────
 
     public void assertBranchLimit(Long restaurantId) {

@@ -63,6 +63,10 @@ public class Restaurant extends BaseEntity {
     @Builder.Default
     private Status status = Status.ACTIVE;
 
+    @Column(name = "verification_status", length = 50)
+    @Builder.Default
+    private String verificationStatus = "PENDING_VERIFICATION";
+
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription_plan", nullable = false, length = 50)
     @Builder.Default

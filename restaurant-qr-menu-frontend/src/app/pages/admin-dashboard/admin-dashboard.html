@@ -133,6 +133,7 @@
                 <th class="text-left px-5 py-3.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
                 <th class="text-left px-5 py-3.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Scans</th>
                 <th class="text-left px-5 py-3.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-5 py-3.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Verification</th>
                 <th class="text-left px-5 py-3.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -174,6 +175,16 @@
                   <td class="px-5 py-4">
                     <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border capitalize"
                           [ngClass]="statusBadge(r.status)">{{ r.status }}</span>
+                  </td>
+                  <td class="px-5 py-4">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
+                          [ngClass]="{
+                            'bg-amber-500/10 text-amber-400 border-amber-500/30': (r.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION',
+                            'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': r.verificationStatus === 'VERIFIED',
+                            'bg-rose-500/10 text-rose-400 border-rose-500/30': r.verificationStatus === 'REJECTED'
+                          }">
+                      {{ (r.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION' ? 'PENDING' : r.verificationStatus }}
+                    </span>
                   </td>
                   <td class="px-5 py-4" (click)="$event.stopPropagation()">
                     <div class="flex items-center gap-1.5">

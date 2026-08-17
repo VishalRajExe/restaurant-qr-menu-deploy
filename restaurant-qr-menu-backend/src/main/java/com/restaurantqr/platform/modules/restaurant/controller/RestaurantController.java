@@ -60,6 +60,15 @@ public class RestaurantController {
         return ResponseEntity.ok(ApiResponse.success("Restaurant updated", restaurantService.update(id, request)));
     }
 
+    @PatchMapping("/{id}/verification")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Restaurant>> updateVerificationStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        return ResponseEntity.ok(ApiResponse.success("Verification status updated",
+                restaurantService.updateVerificationStatus(id, status)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
