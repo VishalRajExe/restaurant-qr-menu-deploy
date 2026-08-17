@@ -132,6 +132,26 @@ export class AdminDashboard implements OnInit, OnDestroy {
     });
   }
 
+  approveVerification(id: string) {
+    const session = this.authService.currentUser();
+    if (session) {
+      session.verificationStatus = 'VERIFIED';
+      localStorage.setItem('user_session', JSON.stringify(session));
+      this.authService.currentUser.set({ ...session });
+    }
+    this.toastService.success('Venue Approved', 'Restaurant venue credentials approved successfully!');
+  }
+
+  rejectVerification(id: string) {
+    const session = this.authService.currentUser();
+    if (session) {
+      session.verificationStatus = 'REJECTED';
+      localStorage.setItem('user_session', JSON.stringify(session));
+      this.authService.currentUser.set({ ...session });
+    }
+    this.toastService.warning('Venue Rejected', 'Restaurant venue registration marked as rejected.');
+  }
+
   resolveTicket(id: string) {
     this.ticketService.resolveTicket(id).subscribe(() => {
       this.toastService.success('Ticket Resolved', 'Support ticket marked as resolved.');

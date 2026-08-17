@@ -152,6 +152,29 @@
     <!-- CONTENT BODY CONTAINER -->
     <div class="flex-1 p-6 sm:p-8">
       
+      <!-- FREE TRIAL & ADMIN VERIFICATION STATUS BANNER -->
+      <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-zinc-900 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2.5 py-1 rounded-full bg-orange-500 text-white font-extrabold text-[10px] uppercase tracking-wider shrink-0 animate-pulse">
+            🚀 Free Trial Active
+          </span>
+          <span class="text-white font-semibold">
+            14-Day Premium Free Trial Active (14 Days Remaining)
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
+                [ngClass]="{
+                  'bg-amber-500/10 text-amber-400 border-amber-500/30': (authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION',
+                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': authService.currentUser()?.verificationStatus === 'VERIFIED',
+                  'bg-rose-500/10 text-rose-400 border-rose-500/30': authService.currentUser()?.verificationStatus === 'REJECTED'
+                }">
+            ⏳ Admin Verification: {{ authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION' }}
+          </span>
+        </div>
+      </div>
+
       <!-- SUBSECTION TAB 1: WORKSPACE OVERVIEW & ANALYTICS CHARTS -->
       <div class="space-y-8" *ngIf="activeTab() === 'overview'">
         

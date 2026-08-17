@@ -176,13 +176,21 @@
                           [ngClass]="statusBadge(r.status)">{{ r.status }}</span>
                   </td>
                   <td class="px-5 py-4" (click)="$event.stopPropagation()">
-                    <button (click)="toggleStatus(r.id)"
-                            class="px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer"
-                            [ngClass]="r.status === 'active'
-                              ? 'border-red-500/20 text-red-400 hover:bg-red-500/10'
-                              : 'border-green-500/20 text-green-400 hover:bg-green-500/10'">
-                      {{ r.status === 'active' ? 'Suspend' : 'Activate' }}
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                      <button (click)="approveVerification(r.id)"
+                              class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 cursor-pointer">
+                        ✓ Approve
+                      </button>
+                      <button (click)="rejectVerification(r.id)"
+                              class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30 cursor-pointer">
+                        ✕ Reject
+                      </button>
+                      <button (click)="toggleStatus(r.id)"
+                              class="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer"
+                              [ngClass]="r.status === 'active' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20' : 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20'">
+                        {{ r.status === 'active' ? 'Suspend' : 'Activate' }}
+                      </button>
+                    </div>
                   </td>
                 </tr>
 

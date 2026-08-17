@@ -12,6 +12,9 @@ export interface UserSession {
   restaurantId?: string;
   restaurantName?: string;
   restaurantPhoto?: string;
+  verificationStatus?: 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
+  isTrialActive?: boolean;
+  trialDaysRemaining?: number;
 }
 
 export interface AuthResponseData {
@@ -150,7 +153,10 @@ export class AuthService {
           name: info.name,
           restaurantId: '1',
           restaurantName: info.restaurantName,
-          restaurantPhoto: info.photo || ''
+          restaurantPhoto: info.photo || '',
+          verificationStatus: 'PENDING_VERIFICATION',
+          isTrialActive: true,
+          trialDaysRemaining: 14
         };
         if (res?.data?.accessToken) {
           localStorage.setItem('jwt_access_token', res.data.accessToken);
@@ -169,7 +175,10 @@ export class AuthService {
           name: info.name,
           restaurantId: '1',
           restaurantName: info.restaurantName,
-          restaurantPhoto: info.photo || ''
+          restaurantPhoto: info.photo || '',
+          verificationStatus: 'PENDING_VERIFICATION',
+          isTrialActive: true,
+          trialDaysRemaining: 14
         };
         localStorage.setItem('user_session', JSON.stringify(session));
         this.currentUser.set(session);
@@ -186,6 +195,9 @@ export class AuthService {
       role: 'chef',
       name: info.name,
       restaurantId: '1',
+      verificationStatus: 'PENDING_VERIFICATION',
+      isTrialActive: true,
+      trialDaysRemaining: 14
     };
     localStorage.setItem('user_session', JSON.stringify(session));
     this.currentUser.set(session);
