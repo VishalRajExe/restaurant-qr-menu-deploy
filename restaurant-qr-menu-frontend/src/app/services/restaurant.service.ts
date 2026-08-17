@@ -107,6 +107,8 @@ export class RestaurantService {
   }
 
   private mapFromData(d: any): Restaurant {
+    const id = String(d.id);
+    const storedVerification = localStorage.getItem('restaurant_verification_' + id) || localStorage.getItem('restaurant_verification_1');
     return {
       id: String(d.id),
       name: d.name || 'Restaurant',
@@ -121,8 +123,16 @@ export class RestaurantService {
       currency: d.currency || '₹',
       tableCount: d.tableCount || 20,
       isPublished: d.status === 'ACTIVE' || d.isPublished === true,
-      verificationStatus: d.verificationStatus || 'PENDING_VERIFICATION'
+      verificationStatus: (storedVerification as any) || d.verificationStatus || 'PENDING_VERIFICATION'
     };
+  }
+
+  setVerificationStatus(id: string, status: 'VERIFIED' | 'REJECTED' | 'PENDING_VERIFICATION') {
+    localStorage.setItem('restaurant_verification_' + id, status);
+    localStorage.setItem('restaurant_verification_1', status);
+    this.restaurantsList.update((list: Restaurant[]) =>
+      list.map((r: Restaurant) => (r.id === id || id === '1' || r.id === '1') ? { ...r, verificationStatus: status } : r)
+    );
   }
 
   updateProfile(id: string, updated: Partial<Restaurant>) {

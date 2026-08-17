@@ -55,7 +55,13 @@ export class AuthService {
   private getStoredUserSession(): UserSession | null {
     try {
       const stored = localStorage.getItem('user_session');
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const session: UserSession = JSON.parse(stored);
+      const storedVerification = localStorage.getItem('restaurant_verification_' + (session.restaurantId || '1')) || localStorage.getItem('restaurant_verification_1');
+      if (storedVerification) {
+        session.verificationStatus = storedVerification as any;
+      }
+      return session;
     } catch {
       return null;
     }

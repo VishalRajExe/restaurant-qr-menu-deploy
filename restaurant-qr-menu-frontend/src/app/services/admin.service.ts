@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, map } from 'rxjs';
 import { environment } from '../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
+import { RestaurantService } from './restaurant.service';
+import { AuthService } from './auth.service';
 
 export interface AdminRestaurantData {
   id: string;
@@ -28,7 +30,9 @@ export interface AdminRestaurantData {
   providedIn: 'root'
 })
 export class AdminService {
-  private http = inject(HttpClient);
+  private http              = inject(HttpClient);
+  private restaurantService = inject(RestaurantService);
+  private authService       = inject(AuthService);
 
   // Initialize empty — populated from live API
   restaurantsList = signal<AdminRestaurantData[]>([]);
@@ -91,6 +95,17 @@ export class AdminService {
   }
 
   updateVerificationStatus(id: string, verificationStatus: 'VERIFIED' | 'REJECTED'): Observable<boolean> {
+    localStorage.setItem('restaurant_verification_' + id, verificationStatus);
+    localStorage.setItem('restaurant_verification_1', verificationStatus);
+    this.restaurantService.setVerificationStatus(id, verificationStatus);
+
+    const userSession = this.authService.currentUser();
+    if (userSession) {
+      userSession.verificationStatus = verificationStatus;
+      localStorage.setItem('user_session', JSON.stringify(userSession));
+      this.authService.currentUser.set({ ...userSession });
+    }
+
     this.restaurantsList.update((list: AdminRestaurantData[]) =>
       list.map((r: AdminRestaurantData) => r.id === id ? { ...r, verificationStatus } : r)
     );
