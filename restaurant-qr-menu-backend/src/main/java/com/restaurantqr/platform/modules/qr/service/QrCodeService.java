@@ -86,6 +86,28 @@ public class QrCodeService {
         }
     }
 
+    @Transactional
+    public QrCode regenerate(Long id, Long restaurantId) {
+        var qrCode = findById(id, restaurantId);
+        String newToken = UUID.randomUUID().toString().replace("-", "");
+        String tableNum = qrCode.getTableNumber() != null ? qrCode.getTableNumber() : "";
+        String menuUrl = String.format("%s/%s?table=%s", qrBaseUrl, newToken, tableNum);
+
+        try {
+            byte[] qrImageBytes = generateQrImage(menuUrl);
+            String cloudinaryUrl = cloudinaryUploadService.uploadBytes(qrImageBytes,
+                    "qrcodes/" + restaurantId + "/" + newToken);
+
+            qrCode.setToken(newToken);
+            qrCode.setQrImageUrl(cloudinaryUrl);
+            var updated = qrCodeRepository.save(qrCode);
+            log.info("QR Code regenerated for restaurant={} id={}", restaurantId, id);
+            return updated;
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to regenerate QR code: " + e.getMessage());
+        }
+    }
+
     // ─── Scan (public, increments counter) ───────────────────────────────────
 
     @Transactional

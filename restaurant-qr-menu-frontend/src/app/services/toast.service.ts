@@ -14,7 +14,23 @@ export interface ToastMessage {
 export class ToastService {
   toasts = signal<ToastMessage[]>([]);
 
-  show(type: ToastMessage['type'], title: string, message: string, duration: number = 4000) {
+  show(arg1: string, arg2?: string, arg3?: string, duration: number = 4000) {
+    let type: ToastMessage['type'] = 'info';
+    let title = '';
+    let message = '';
+
+    if (arg1 === 'success' || arg1 === 'error' || arg1 === 'warning' || arg1 === 'info') {
+      type = arg1;
+      title = arg2 || '';
+      message = arg3 || '';
+    } else {
+      title = 'Notice';
+      message = arg1;
+      if (arg2 === 'success' || arg2 === 'error' || arg2 === 'warning' || arg2 === 'info') {
+        type = arg2;
+      }
+    }
+
     const id = 'toast_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     const newToast: ToastMessage = { id, type, title, message, duration };
 

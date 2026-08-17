@@ -31,17 +31,24 @@ export class ChefDashboard implements OnInit, OnDestroy {
     const f = this.activeFilter();
     const list = this.orders();
     if (f === 'all') return list;
-    return list.filter(o => o.status === f);
+    return list.filter(o => {
+      const s = String(o.status).toLowerCase();
+      if (f === 'pending') return s === 'pending';
+      if (f === 'preparing') return s === 'preparing' || s === 'accepted';
+      if (f === 'done') return s === 'done' || s === 'ready' || s === 'completed';
+      return false;
+    });
   });
 
-  pendingCount   = computed(() => this.orders().filter(o => o.status === 'pending').length);
-  preparingCount = computed(() => this.orders().filter(o => o.status === 'preparing').length);
-  doneCount      = computed(() => this.orders().filter(o => o.status === 'done').length);
+  pendingCount   = computed(() => this.orders().filter(o => String(o.status).toLowerCase() === 'pending').length);
+  preparingCount = computed(() => this.orders().filter(o => ['preparing', 'accepted'].includes(String(o.status).toLowerCase())).length);
+  doneCount      = computed(() => this.orders().filter(o => ['done', 'ready', 'completed'].includes(String(o.status).toLowerCase())).length);
 
   private clockTicker: any;
   Math = Math;
 
   ngOnInit() {
+    this.orderService.fetchOrders(1).subscribe();
     this.clockTicker = setInterval(() => {
       this.currentTime.set(Date.now());
     }, 1000);
@@ -54,11 +61,12 @@ export class ChefDashboard implements OnInit, OnDestroy {
   }
 
   advanceOrder(orderId: string) {
-    const target = this.orders().find(o => o.id === orderId);
+    const target = this.orders().find(o => o.id === orderId || o.orderNumber === orderId);
     if (!target) return;
-    const nextStatus = target.status === 'pending' ? 'preparing' : 'done';
-    this.orderService.updateOrderStatus(orderId, nextStatus);
-    this.toastService.success('Order Status Updated', `Order ${orderId} moved to ${nextStatus.toUpperCase()}`);
+    const currentStatus = String(target.status).toLowerCase();
+    const nextStatus = currentStatus === 'pending' ? 'PREPARING' : 'COMPLETED';
+    this.orderService.updateOrderStatus(orderId, nextStatus).subscribe();
+    this.toastService.success('Order Status Updated', `Order ${orderId} status set to ${nextStatus}`);
   }
 
   parseDate(date: string | Date): Date {
@@ -112,12 +120,12 @@ export class ChefDashboard implements OnInit, OnDestroy {
     return Math.min(100, Math.max(0, Math.floor((elapsedSec / totalSec) * 100)));
   }
 
-  statusColor(status: Order['status']): string {
-    return {
-      pending:   'bg-amber-500/15 text-amber-400 border-amber-500/20',
-      preparing: 'bg-blue-500/15  text-blue-400  border-blue-500/20',
-      done:      'bg-green-500/15 text-green-400 border-green-500/20',
-    }[status];
+  statusColor(status: any): string {
+    const s = String(status).toUpperCase();
+    if (s === 'PENDING') return 'bg-amber-500/15 text-amber-400 border-amber-500/20';
+    if (s === 'PREPARING' || s === 'ACCEPTED') return 'bg-blue-500/15 text-blue-400 border-blue-500/20';
+    if (s === 'READY' || s === 'COMPLETED' || s === 'DONE') return 'bg-green-500/15 text-green-400 border-green-500/20';
+    return 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
   }
 
   advanceLabel(status: Order['status']): string {

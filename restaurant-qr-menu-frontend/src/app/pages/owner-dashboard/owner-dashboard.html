@@ -28,6 +28,15 @@
           <span>WORKSPACE OVERVIEW</span>
         </button>
 
+        <button (click)="selectTab('orders')" type="button" 
+                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
+                [ngClass]="activeTab() === 'orders' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.25 6a2.25 2.25 0 1 1 4.5 0v4.5h-4.5V6Z" />
+          </svg>
+          <span>LIVE ORDERS ({{ ordersList().length }})</span>
+        </button>
+
         <button (click)="selectTab('categories')" type="button" 
                 class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
                 [ngClass]="activeTab() === 'categories' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
@@ -263,6 +272,103 @@
 
         </div>
 
+      </div>
+
+      <!-- SUBSECTION TAB 1.5: LIVE ORDERS MANAGEMENT -->
+      <div class="space-y-8" *ngIf="activeTab() === 'orders'">
+        <div class="p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <span>📦 Incoming Live Orders</span>
+                <span class="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-xs font-black">{{ ordersList().length }}</span>
+              </h3>
+              <p class="text-xs text-gray-400 mt-0.5">Real-time table orders placed by customers via QR menu</p>
+            </div>
+
+            <!-- Filter tabs -->
+            <div class="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-900 border border-white/5 text-xs font-bold">
+              <button (click)="activeOrderFilter.set('ALL')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'ALL' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'">All</button>
+              <button (click)="activeOrderFilter.set('PENDING')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'PENDING' ? 'bg-amber-500 text-white' : 'text-gray-400 hover:text-white'">Pending</button>
+              <button (click)="activeOrderFilter.set('PREPARING')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'PREPARING' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'">Preparing</button>
+              <button (click)="activeOrderFilter.set('READY')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'READY' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'">Ready</button>
+            </div>
+          </div>
+
+          <!-- Orders Grid/Table -->
+          @if (filteredOrders().length === 0) {
+            <div class="text-center py-16 space-y-2">
+              <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl mx-auto">📋</div>
+              <p class="text-xs font-bold text-gray-400">No orders found in this filter state</p>
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              @for (order of filteredOrders(); track order.id) {
+                <div class="p-5 rounded-2xl bg-zinc-900/70 border border-white/10 space-y-4 hover:border-orange-500/30 transition-all">
+                  <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div>
+                      <span class="text-xs font-mono font-bold text-orange-400">#{{ order.orderNumber || order.id }}</span>
+                      <p class="text-xs font-bold text-white mt-0.5">{{ order.table }}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border"
+                          [ngClass]="{
+                            'bg-amber-500/10 text-amber-400 border-amber-500/30': order.status === 'PENDING',
+                            'bg-blue-500/10 text-blue-400 border-blue-500/30': order.status === 'ACCEPTED',
+                            'bg-orange-500/10 text-orange-400 border-orange-500/30': order.status === 'PREPARING',
+                            'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': order.status === 'READY',
+                            'bg-green-500/10 text-green-400 border-green-500/30': order.status === 'COMPLETED',
+                            'bg-rose-500/10 text-rose-400 border-rose-500/30': order.status === 'CANCELLED'
+                          }">
+                      {{ order.status }}
+                    </span>
+                  </div>
+
+                  <div class="space-y-1 text-xs">
+                    <div class="flex justify-between text-gray-400">
+                      <span>Customer Mobile:</span>
+                      <span class="text-white font-mono font-bold">{{ order.customerMobile }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                      <span>Placed Time:</span>
+                      <span class="text-gray-300 font-mono">{{ order.placedAt | date:'shortTime' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Item list -->
+                  <div class="space-y-1.5 p-3 rounded-xl bg-black/40 border border-white/5 max-h-36 overflow-y-auto">
+                    @for (item of order.items; track item.name) {
+                      <div class="flex justify-between text-xs text-gray-300">
+                        <span>{{ item.qty }}× {{ item.name }}</span>
+                        <span class="font-bold text-white">₹{{ item.subtotal || (item.price! * item.qty) }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="flex items-center justify-between border-t border-white/5 pt-3">
+                    <span class="text-xs font-bold text-gray-400">Total Amount</span>
+                    <span class="text-sm font-black text-emerald-400">₹{{ order.totalAmount || 0 }}</span>
+                  </div>
+
+                  <!-- Status Action Buttons -->
+                  <div class="grid grid-cols-2 gap-2 pt-1">
+                    @if (order.status === 'PENDING') {
+                      <button (click)="updateOrderStatus(order.id, 'ACCEPTED')" class="px-3 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold cursor-pointer">Accept Order</button>
+                      <button (click)="updateOrderStatus(order.id, 'CANCELLED')" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 text-xs font-bold cursor-pointer">Reject</button>
+                    } @else if (order.status === 'ACCEPTED') {
+                      <button (click)="updateOrderStatus(order.id, 'PREPARING')" class="col-span-2 px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold cursor-pointer">Start Preparing</button>
+                    } @else if (order.status === 'PREPARING') {
+                      <button (click)="updateOrderStatus(order.id, 'READY')" class="col-span-2 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold cursor-pointer">Mark Ready to Serve</button>
+                    } @else if (order.status === 'READY') {
+                      <button (click)="updateOrderStatus(order.id, 'COMPLETED')" class="col-span-2 px-3 py-2 rounded-xl bg-green-500 hover:bg-green-400 text-white text-xs font-bold cursor-pointer">Complete Order</button>
+                    } @else {
+                      <button disabled class="col-span-2 px-3 py-2 rounded-xl bg-white/5 text-gray-500 text-xs font-bold opacity-60 cursor-not-allowed">Order Finalized</button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <!-- SUBSECTION TAB 2: DIVISION / CATEGORY MANAGEMENT -->

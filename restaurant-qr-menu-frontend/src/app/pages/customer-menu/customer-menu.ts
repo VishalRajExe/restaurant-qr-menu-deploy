@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -14,7 +14,7 @@ import { Offer } from '../../models/offer.model';
 
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
-import { OrderService } from '../../services/order.service';
+import { OrderService, Order } from '../../services/order.service';
 import { BackButton } from '../../components/back-button/back-button';
 
 export interface CartItem {
@@ -28,7 +28,7 @@ export interface CartItem {
   templateUrl: './customer-menu.html',
   styleUrls: ['./customer-menu.css']
 })
-export class CustomerMenu implements OnInit {
+export class CustomerMenu implements OnInit, OnDestroy {
   route             = inject(ActivatedRoute);
   restaurantService = inject(RestaurantService);
   categoryService   = inject(CategoryService);
@@ -60,10 +60,23 @@ export class CustomerMenu implements OnInit {
   isEditingTable   = signal<boolean>(false);
   tableInputValue  = signal<string>('');
 
-  // ── Order flow ───────────────────────────────────────────────────────────────
-  orderPlaced    = signal<boolean>(false);
-  orderId        = signal<string>('');
-  isPlacingOrder = signal<boolean>(false);
+  // ── Order flow & Customer Mobile ─────────────────────────────────────────────
+  customerMobile       = signal<string>('');
+  customerName         = signal<string>('');
+  specialInstructions  = signal<string>('');
+  orderPlaced          = signal<boolean>(false);
+  orderId              = signal<string>('');
+  isPlacingOrder       = signal<boolean>(false);
+
+  // ── Order Status Tracking ────────────────────────────────────────────────────
+  activeOrder          = signal<Order | null>(null);
+  showOrderTracker     = signal<boolean>(false);
+  showTrackLookupModal = signal<boolean>(false);
+  lookupQuery          = signal<string>('');
+  trackedOrdersList    = signal<Order[]>([]);
+  isTracking           = signal<boolean>(false);
+
+  private pollTimer: any;
 
   // ── Cart ─────────────────────────────────────────────────────────────────────
   cartItems = signal<CartItem[]>([]);
@@ -151,10 +164,17 @@ export class CustomerMenu implements OnInit {
       this.loadError.set('');
       this.activeCategoryTagId.set('all');
 
-      // Use unified /public/menu/{tokenOrSlug} endpoint (handles QR token + slug)
+      // Use unified /public/menu/{tokenOrSlug} endpoint
       this.publicMenuService.fetchPublicMenu(tokenOrSlug).subscribe((payload: PublicMenuPayload | null) => {
         if (payload) {
           this.restaurant.set(payload.restaurant);
+          // Auto-detect table number if embedded in QR payload
+          if (payload.qrCode && payload.qrCode.tableNumber) {
+            const qrTableNum = parseInt(String(payload.qrCode.tableNumber).replace(/\D/g, ''), 10);
+            if (!isNaN(qrTableNum) && qrTableNum > 0 && this.tableNumber() === 0) {
+              this.tableNumber.set(qrTableNum);
+            }
+          }
           this.isLoading.set(false);
         } else {
           // Fallback: try individual service calls
@@ -174,6 +194,19 @@ export class CustomerMenu implements OnInit {
         }
       });
     });
+
+    // Start background status polling timer for active order
+    this.pollTimer = setInterval(() => {
+      if (this.activeOrder() && this.showOrderTracker()) {
+        this.refreshActiveOrderStatus();
+      }
+    }, 5000);
+  }
+
+  ngOnDestroy() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+    }
   }
 
   toggleTheme() {
@@ -254,34 +287,88 @@ export class CustomerMenu implements OnInit {
   placeOrder() {
     if (this.cartIsEmpty() || this.isPlacingOrder()) return;
 
+    const mobile = this.customerMobile().trim();
+    if (!mobile || mobile.length < 7) {
+      this.toastService.show('Please enter a valid mobile number to place order', 'error');
+      return;
+    }
+
     this.isPlacingOrder.set(true);
 
-    setTimeout(() => {
-      const id = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      const tableNum = this.tableNumber() > 0 ? (this.tableNumber() < 10 ? '0' + this.tableNumber() : String(this.tableNumber())) : '01';
-      this.orderService.createOrder({
-        id: id,
-        table: 'Table ' + tableNum,
-        tableNumber: tableNum,
-        placedAt: new Date().toISOString(),
-        items: this.cartItems().map((i: CartItem) => ({
-          name: i.menuItem.name,
-          qty: i.quantity,
-          note: i.menuItem.isVeg ? 'Vegetarian' : 'Medium Spice'
-        })),
-        specialRequest: 'No cutlery required, extra napkins please.',
-        waiterName: 'Self-Order QR'
-      });
-      this.orderId.set(id);
+    const tableNum = this.tableNumber() > 0 ? (this.tableNumber() < 10 ? '0' + this.tableNumber() : String(this.tableNumber())) : '01';
+    const restId = parseInt(this.restaurant()?.id || '1', 10) || 1;
+    const restSlug = this.restaurant()?.slug || 'gourmet-bistro';
+
+    const orderPayload = {
+      restaurantId: restId,
+      restaurantSlug: restSlug,
+      tableNumber: tableNum,
+      customerMobile: mobile,
+      customerName: this.customerName().trim() || 'Customer',
+      specialInstructions: this.specialInstructions().trim(),
+      items: this.cartItems().map((i: CartItem) => ({
+        menuItemId: parseInt(i.menuItem.id.replace(/\D/g, ''), 10) || 1,
+        name: i.menuItem.name,
+        price: i.menuItem.price,
+        qty: i.quantity,
+        note: i.menuItem.isVeg ? 'Veg' : 'Standard Spice'
+      }))
+    };
+
+    this.orderService.createOrder(orderPayload).subscribe((placedOrder: Order) => {
+      this.activeOrder.set(placedOrder);
+      this.orderId.set(placedOrder.orderNumber || placedOrder.id);
       this.orderPlaced.set(true);
       this.isPlacingOrder.set(false);
       this.showMobileCart.set(false);
-    }, 1200);
+      this.toastService.show('Order placed successfully!', 'success');
+    });
   }
 
   closeOrderSuccess() {
     this.orderPlaced.set(false);
+    this.showOrderTracker.set(true);
     this.clearCart();
+  }
+
+  openOrderTracker() {
+    if (!this.activeOrder()) {
+      this.lookupQuery.set(this.customerMobile() || '');
+      this.showTrackLookupModal.set(true);
+    } else {
+      this.showOrderTracker.set(true);
+    }
+  }
+
+  refreshActiveOrderStatus() {
+    const current = this.activeOrder();
+    if (!current) return;
+    const searchId = current.orderNumber || current.id;
+    this.orderService.trackOrders(searchId).subscribe(orders => {
+      if (orders && orders.length > 0) {
+        this.activeOrder.set(orders[0]);
+      }
+    });
+  }
+
+  lookupOrders() {
+    const q = this.lookupQuery().trim();
+    if (!q) {
+      this.toastService.show('Please enter Mobile Number or Order ID', 'error');
+      return;
+    }
+    this.isTracking.set(true);
+    this.orderService.trackOrders(q).subscribe(orders => {
+      this.trackedOrdersList.set(orders);
+      this.isTracking.set(false);
+      if (orders.length === 0) {
+        this.toastService.show('No orders found for this Mobile Number or Order ID', 'error');
+      } else {
+        this.activeOrder.set(orders[0]);
+        this.showTrackLookupModal.set(false);
+        this.showOrderTracker.set(true);
+      }
+    });
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -4,6 +4,8 @@ export interface Restaurant {
   slug?: string;
   tagline?: string;
   logo: string;
+  logoUrl?: string;
+  description?: string;
   photo?: string;
   coverImage?: string;
   banner?: string;

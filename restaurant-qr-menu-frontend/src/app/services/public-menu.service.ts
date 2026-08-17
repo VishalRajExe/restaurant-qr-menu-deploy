@@ -14,6 +14,7 @@ import { OfferService } from './offer.service';
 
 export interface PublicMenuPayload {
   restaurant: Restaurant;
+  qrCode?: any;
   categories: Category[];
   menuItems: MenuItem[];
   activeOffers: Offer[];
@@ -98,7 +99,7 @@ export class PublicMenuService {
           isActive:            o.isActive !== false
         }));
 
-        const payload: PublicMenuPayload = { restaurant, categories, menuItems, activeOffers };
+        const payload: PublicMenuPayload = { restaurant, qrCode: d.qrCode, categories, menuItems, activeOffers };
 
         // ── Cache into individual services via public methods ─────────────────
         this.restaurantService.setRestaurant(restaurant);

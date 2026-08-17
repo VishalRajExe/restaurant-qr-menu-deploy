@@ -49,6 +49,14 @@ public class QrCodeController {
         return ResponseEntity.ok(ApiResponse.success("QR code deactivated", null));
     }
 
+    @PostMapping("/restaurants/{restaurantId}/qr-codes/{id}/regenerate")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<QrCode>> regenerate(
+            @PathVariable Long restaurantId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("QR Code regenerated", qrCodeService.regenerate(id, restaurantId)));
+    }
+
     @DeleteMapping("/restaurants/{restaurantId}/qr-codes/{id}")
     @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long restaurantId,

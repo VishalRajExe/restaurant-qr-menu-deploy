@@ -124,6 +124,10 @@ export class RestaurantService {
     };
   }
 
+  updateProfile(id: string, updated: Partial<Restaurant>) {
+    this.updateRestaurant(id, updated);
+  }
+
   updateRestaurant(id: string, updated: Partial<Restaurant>) {
     this.restaurantsList.update((list: Restaurant[]) =>
       list.map((r: Restaurant) => r.id === id ? { ...r, ...updated } : r)

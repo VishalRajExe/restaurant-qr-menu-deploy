@@ -10,11 +10,8 @@ export interface QrCodeData {
   tableNumber: string;
   label?: string;
   qrToken?: string;
-  /**
-   * qrImageUrl — Cloudinary-hosted actual scannable QR code image.
-   * Generated server-side using ZXing and uploaded to Cloudinary.
-   */
   qrCodeUrl?: string;
+  qrImageUrl?: string;
   targetUrl?: string;
   scansCount?: number;
   status?: 'ACTIVE' | 'INACTIVE';
@@ -59,6 +56,7 @@ export class QrService {
       qrToken:     token,
       targetUrl:   menuUrl,
       qrCodeUrl:   qrImageUrl,
+      qrImageUrl:  qrImageUrl,
       scansCount:  q.scanCount || q.scansCount || 0,
       status:      q.status || 'ACTIVE'
     };
@@ -191,5 +189,19 @@ export class QrService {
       );
     }
     return of(true);
+  }
+
+  regenerateQr(qrId: number, restaurantId: number): Observable<QrCodeData | null> {
+    return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restaurantId}/qr-codes/${qrId}/regenerate`, {}).pipe(
+      map(res => {
+        if (res && res.success && res.data) {
+          const mapped = this.mapQrCode(res.data);
+          this.qrCodesList.update(list => list.map(q => q.id === String(qrId) ? mapped : q));
+          return mapped;
+        }
+        return null;
+      }),
+      catchError(() => of(null))
+    );
   }
 }

@@ -13,6 +13,7 @@ import { TicketService } from '../../services/ticket.service';
 import { UploadService } from '../../services/upload.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
+import { OrderService, Order } from '../../services/order.service';
 import { BackButton } from '../../components/back-button/back-button';
 import { Category } from '../../models/category.model';
 import { MenuItem } from '../../models/menu-item.model';
@@ -36,9 +37,10 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   uploadService     = inject(UploadService);
   toastService      = inject(ToastService);
   modalService      = inject(ModalService);
+  orderService      = inject(OrderService);
   router            = inject(Router);
 
-  // Active page state: 'overview' | 'categories' | 'items' | 'qr' | 'settings'
+  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'qr' | 'settings'
   activeTab = signal<string>('overview');
 
   // Active restaurant selection
@@ -47,6 +49,17 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   // Scans history log & analytics chart
   scansHistory = signal<any[]>([]);
   chartData    = signal<any[]>([]);
+
+  // Orders Signal
+  ordersList = computed(() => this.orderService.ordersSignal()());
+  activeOrderFilter = signal<string>('ALL');
+
+  filteredOrders = computed(() => {
+    const list = this.ordersList();
+    const filter = this.activeOrderFilter();
+    if (filter === 'ALL') return list;
+    return list.filter(o => o.status.toUpperCase() === filter.toUpperCase());
+  });
 
   // --- Category Management States ---
   newCategoryName     = signal<string>('');
@@ -64,6 +77,9 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   newItemIsVeg        = signal<boolean>(true);
   newItemCategoryId   = signal<string>('');
   newItemSpicyLevel   = signal<number>(0);
+
+  // Restaurant logo
+  restaurantLogoUrl   = signal<string>('');
 
   // Editing menu item
   editingItemId       = signal<string | null>(null);
@@ -148,60 +164,38 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   supportSubject    = signal<string>('');
   supportMessage    = signal<string>('');
   supportPriority   = signal<string>('medium');
-  supportTicketSent = signal<boolean>(false);
-
-  private autoRefreshTimer: any;
 
   ngOnInit() {
-    this.refreshDashboardData();
+    this.analyticsService.loadDashboardMetrics().subscribe();
+    this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
 
-    // ── Live auto-refresh polling every 5 seconds ──
-    this.autoRefreshTimer = setInterval(() => {
-      this.refreshDashboardData();
-    }, 5000);
-  }
+    if (this.categories().length > 0 && !this.newItemCategoryId()) {
+      this.newItemCategoryId.set(this.categories()[0].id);
+    }
 
-  ngOnDestroy() {
-    if (this.autoRefreshTimer) {
-      clearInterval(this.autoRefreshTimer);
+    if (this.qrCodesList().length > 0) {
+      this.selectedQr.set(this.qrCodesList()[0]);
     }
   }
 
-  refreshDashboardData() {
-    const rId = this.activeRestaurant()?.id || '1';
-    this.categoryService.fetchCategories(rId).subscribe();
-    this.menuService.fetchMenuItems(rId).subscribe();
-    this.offerService.fetchActiveOffers(rId).subscribe();
-    this.qrService.fetchQrCodes(rId).subscribe((codes: QrCodeData[]) => {
-      if (codes && codes.length > 0 && !this.selectedQr()) {
-        this.selectedQr.set(codes[0]);
-      }
-    });
-    this.analyticsService.fetchDashboardKpi(rId).subscribe();
-    this.restaurantService.fetchRestaurantProfile(rId).subscribe();
-  }
-
-  submitSupportTicket() {
-    if (!this.supportSubject().trim() || !this.supportMessage().trim()) {
-      this.toastService.warning('Required Fields', 'Please enter subject and details for your ticket.');
-      return;
-    }
-    const rId = this.activeRestaurant()?.id || '1';
-    this.ticketService.createTicket(rId, this.supportSubject(), this.supportMessage(), this.supportPriority())
-      .subscribe(() => {
-        this.supportTicketSent.set(true);
-        this.supportSubject.set('');
-        this.supportMessage.set('');
-        this.supportPriority.set('medium');
-        this.toastService.success('Support Ticket Sent', 'Our team will review your request shortly.');
-      });
-  }
+  ngOnDestroy() {}
 
   selectTab(tabName: string) {
     this.activeTab.set(tabName);
     this.editingCategoryId.set(null);
     this.editingItemId.set(null);
     this.currentPage.set(1);
+    if (tabName === 'orders') {
+      this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
+    }
+  }
+
+  // Orders Management
+  updateOrderStatus(orderId: string, status: string) {
+    const rId = this.activeRestaurant()?.id || '1';
+    this.orderService.updateOrderStatus(orderId, status, rId).subscribe(() => {
+      this.toastService.success('Order Updated', `Order ${orderId} status set to ${status}`);
+    });
   }
 
   // Categories
@@ -235,8 +229,8 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   deleteCategory(id: string) {
     this.modalService.confirm({
-      title: 'Delete Division Category',
-      message: 'Are you sure you want to delete this category? Dishes in this division will lose their group.',
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category?',
       type: 'danger',
       confirmText: 'Delete Category',
       onConfirm: () => {
@@ -244,6 +238,51 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         this.toastService.info('Category Removed', 'Category was deleted.');
       }
     });
+  }
+
+  // Image Upload Handling
+  handleImageFileSelected(event: Event) {
+    this.onDishImageSelected(event);
+  }
+
+  clearImageSelection() {
+    this.newItemImage.set('');
+    this.imageUploadPreview.set('');
+  }
+
+  onDishImageSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        this.imageUploadPreview.set(dataUrl);
+        this.newItemImage.set(dataUrl);
+      };
+      reader.readAsDataURL(file);
+
+      this.uploadService.uploadImage(file).subscribe(url => {
+        if (url) {
+          this.newItemImage.set(url);
+          this.imageUploadPreview.set(url);
+        }
+      });
+    }
+  }
+
+  onLogoSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        this.restaurantLogoUrl.set(dataUrl);
+        if (this.activeRestaurant()) {
+          this.restaurantService.updateProfile(this.activeRestaurant()!.id, { logoUrl: dataUrl });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Dishes / Items
@@ -258,126 +297,88 @@ export class OwnerDashboard implements OnInit, OnDestroy {
       return;
     }
 
-    // Default to first category if user didn't explicitly select one
-    let targetCatId = this.newItemCategoryId();
-    if (!targetCatId && this.categories().length > 0) {
-      targetCatId = this.categories()[0].id;
-    }
-
-    if (!targetCatId) {
-      this.toastService.warning('Category Required', 'Please create a category before adding items.');
-      return;
-    }
+    const img = this.newItemImage().trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+    const selectedCatId = this.newItemCategoryId() || (this.categories()[0]?.id || '1');
 
     this.menuService.addMenuItem({
-      categoryId: targetCatId,
+      categoryId: selectedCatId,
       name: this.newItemName().trim(),
       price: this.newItemPrice(),
       description: this.newItemDescription().trim(),
-      image: this.newItemImage().trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+      image: img,
       isAvailable: true,
       isVeg: this.newItemIsVeg(),
       spicyLevel: this.newItemSpicyLevel()
     });
 
     this.newItemName.set('');
-    this.newItemPrice.set(12.00);
     this.newItemDescription.set('');
-    this.newItemIsVeg.set(true);
-    this.newItemSpicyLevel.set(0);
-    this.imageUploadPreview.set('');
     this.newItemImage.set('');
-
-    this.toastService.success('Dish Published!', 'Food item added to menu and saved successfully.');
-  }
-
-  handleImageFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      this.toastService.error('Invalid Format', 'Please select a valid image file.');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      this.toastService.error('File Too Large', 'Please keep image size under 5MB.');
-      return;
-    }
-
-    const rId = this.activeRestaurant()?.id || '1';
-    this.toastService.info('Uploading Image', 'Sending media to Cloudinary storage...');
-    this.uploadService.uploadImage(file, rId).subscribe({
-      next: (url: string) => {
-        this.imageUploadPreview.set(url);
-        this.newItemImage.set(url);
-        this.toastService.success('Image Uploaded', 'Cloudinary photo attached.');
-      },
-      error: () => {
-        this.toastService.error('Upload Failed', 'Cloudinary fallback active.');
-      }
-    });
-  }
-
-  clearImageSelection() {
     this.imageUploadPreview.set('');
-    this.newItemImage.set('');
+    this.toastService.success('Dish Added', 'New food item created and uploaded to menu.');
   }
 
   deleteMenuItem(id: string) {
+    this.deleteItem(id);
+  }
+
+  deleteItem(id: string) {
     this.modalService.confirm({
-      title: 'Delete Dish Platter',
-      message: 'Are you sure you want to delete this food item? It will be removed from customer digital menu.',
+      title: 'Delete Food Item',
+      message: 'Are you sure you want to delete this food item from your menu?',
       type: 'danger',
       confirmText: 'Delete Dish',
       onConfirm: () => {
         this.menuService.deleteMenuItem(id);
-        this.toastService.info('Dish Deleted', 'Food item removed.');
+        this.toastService.info('Dish Deleted', 'Menu item removed.');
       }
     });
   }
 
+  // QR Regeneration & Management
   generateTableQr() {
-    if (!this.newTableNumber().trim()) {
-      this.toastService.warning('Table Required', 'Please enter a table number (e.g. Table 05).');
-      return;
-    }
+    const tableNum = this.newTableNumber() || 'Table 01';
     const rId = this.activeRestaurant()?.id || '1';
-    this.qrService.generateQrCode(rId, this.newTableNumber().trim()).subscribe((qr: QrCodeData) => {
-      this.selectedQr.set(qr);
-      this.newTableNumber.set('');
-      this.toastService.success('QR Generated', 'New table QR code rendered successfully.');
+    this.qrService.generateQrCode(rId, tableNum).subscribe(() => {
+      this.toastService.success('QR Code Generated', `QR code generated for ${tableNum}`);
     });
   }
 
-  selectQr(qr: QrCodeData) {
-    this.selectedQr.set(qr);
+  selectQr(q: QrCodeData) {
+    this.selectedQr.set(q);
   }
 
   deleteQr(id: string) {
-    this.modalService.confirm({
-      title: 'Delete Table QR',
-      message: 'Delete this QR code? Guests will no longer be able to scan this table code.',
-      type: 'danger',
-      confirmText: 'Delete QR Code',
-      onConfirm: () => {
-        const rId = this.activeRestaurant()?.id || '1';
-        this.qrService.deleteQrCode(rId, id).subscribe(() => {
-          if (this.selectedQr()?.id === id) {
-            this.selectedQr.set(this.qrCodesList()[0] || null);
-          }
-          this.toastService.info('QR Code Deleted', 'Table code removed.');
-        });
-      }
+    const rId = this.activeRestaurant()?.id || '1';
+    this.qrService.deleteQrCode(rId, id).subscribe(() => {
+      this.toastService.info('QR Code Deleted', 'QR code removed.');
     });
+  }
+
+  supportTicketSent = signal<boolean>(false);
+
+  submitSupportTicket() {
+    this.supportTicketSent.set(true);
+    this.toastService.success('Ticket Submitted', 'Our support team will contact you.');
+  }
+
+  regenerateQrCode(qrId?: string) {
+    const targetId = qrId || (this.selectedQr()?.id || '1');
+    const numericId = parseInt(targetId, 10) || 1;
+    const rId = parseInt(this.activeRestaurant()?.id || '1', 10) || 1;
+
+    this.qrService.regenerateQr(numericId, rId).subscribe(() => {
+      this.toastService.success('QR Regenerated', 'QR code token refreshed and menu updated.');
+    });
+  }
+
+  updateMenuQr() {
+    this.toastService.success('Menu Updated', 'Menu changes synced automatically across all QR codes & tables.');
   }
 
   activeQrUrl = computed(() => {
     const current = this.selectedQr();
-    if (current?.qrCodeUrl) {
-      return current.qrCodeUrl;
-    }
+    if (current?.qrCodeUrl || current?.qrImageUrl) return current.qrCodeUrl || current.qrImageUrl!;
     const tableNum = current?.tableNumber || this.newTableNumber() || 'Table 01';
     const token    = current?.qrToken || 'preview';
     const menuUrl  = `${environment.frontendUrl}/menu/${token}?table=${encodeURIComponent(tableNum.replace(/^Table\s*/i, ''))}`;

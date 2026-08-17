@@ -33,6 +33,10 @@ export class AnalyticsService {
     avgRating: 0
   });
 
+  loadDashboardMetrics(restaurantId: string = '1'): Observable<DashboardKpiData> {
+    return this.fetchDashboardKpi(restaurantId);
+  }
+
   fetchDashboardKpi(restaurantId: string): Observable<DashboardKpiData> {
     const numericId = parseInt(restaurantId.replace('r', ''), 10) || 1;
     return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/analytics/restaurants/${numericId}/dashboard`).pipe(
