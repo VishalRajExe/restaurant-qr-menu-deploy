@@ -166,6 +166,14 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   supportPriority   = signal<string>('medium');
 
   ngOnInit() {
+    const userSession = this.authService.currentUser();
+    const rId = userSession?.restaurantId || '1';
+    this.restaurantService.fetchRestaurantProfile(rId).subscribe(rest => {
+      if (rest) {
+        this.restaurantService.setRestaurant(rest);
+      }
+    });
+
     this.analyticsService.loadDashboardMetrics().subscribe();
     this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
 

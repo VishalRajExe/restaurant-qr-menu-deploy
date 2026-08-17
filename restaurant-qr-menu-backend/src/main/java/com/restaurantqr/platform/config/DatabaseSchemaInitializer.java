@@ -39,5 +39,12 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
             log.warn("verification_status column already exists: {}", e.getMessage());
         }
 
+        try {
+            jdbcTemplate.execute("UPDATE restaurants SET verification_status = 'PENDING_VERIFICATION' WHERE verification_status IS NULL");
+            log.info("Set default PENDING_VERIFICATION for existing NULL verification_status rows.");
+        } catch (Exception e) {
+            log.warn("Update NULL verification_status skipped: {}", e.getMessage());
+        }
+
     }
 }
