@@ -299,6 +299,29 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.toastService.info('Availability Updated', 'Dish availability updated.');
   }
 
+  startEditMenuItem(dish: MenuItem) {
+    this.editingItemId.set(dish.id);
+    this.newItemName.set(dish.name);
+    this.newItemPrice.set(dish.price);
+    this.newItemDescription.set(dish.description || '');
+    this.newItemImage.set(dish.image || '');
+    this.imageUploadPreview.set(dish.image || '');
+    this.newItemIsVeg.set(dish.isVeg);
+    this.newItemCategoryId.set(dish.categoryId);
+    this.newItemSpicyLevel.set(dish.spicyLevel || 0);
+  }
+
+  cancelEditMenuItem() {
+    this.editingItemId.set(null);
+    this.newItemName.set('');
+    this.newItemPrice.set(12.00);
+    this.newItemDescription.set('');
+    this.newItemImage.set('');
+    this.imageUploadPreview.set('');
+    this.newItemIsVeg.set(true);
+    this.newItemSpicyLevel.set(0);
+  }
+
   handleAddItem() {
     if (!this.newItemName().trim()) {
       this.toastService.warning('Missing Information', 'Please fill out dish title.');
@@ -308,22 +331,33 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     const img = this.newItemImage().trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
     const selectedCatId = this.newItemCategoryId() || (this.categories()[0]?.id || '1');
 
-    this.menuService.addMenuItem({
-      categoryId: selectedCatId,
-      name: this.newItemName().trim(),
-      price: this.newItemPrice(),
-      description: this.newItemDescription().trim(),
-      image: img,
-      isAvailable: true,
-      isVeg: this.newItemIsVeg(),
-      spicyLevel: this.newItemSpicyLevel()
-    });
-
-    this.newItemName.set('');
-    this.newItemDescription.set('');
-    this.newItemImage.set('');
-    this.imageUploadPreview.set('');
-    this.toastService.success('Dish Added', 'New food item created and uploaded to menu.');
+    if (this.editingItemId()) {
+      const editId = this.editingItemId()!;
+      this.menuService.updateMenuItem(editId, {
+        categoryId: selectedCatId,
+        name: this.newItemName().trim(),
+        price: this.newItemPrice(),
+        description: this.newItemDescription().trim(),
+        image: img,
+        isVeg: this.newItemIsVeg(),
+        spicyLevel: this.newItemSpicyLevel()
+      });
+      this.cancelEditMenuItem();
+      this.toastService.success('Dish Updated', 'Menu item changes saved successfully.');
+    } else {
+      this.menuService.addMenuItem({
+        categoryId: selectedCatId,
+        name: this.newItemName().trim(),
+        price: this.newItemPrice(),
+        description: this.newItemDescription().trim(),
+        image: img,
+        isAvailable: true,
+        isVeg: this.newItemIsVeg(),
+        spicyLevel: this.newItemSpicyLevel()
+      });
+      this.cancelEditMenuItem();
+      this.toastService.success('Dish Added', 'New food item created and uploaded to menu.');
+    }
   }
 
   deleteMenuItem(id: string) {

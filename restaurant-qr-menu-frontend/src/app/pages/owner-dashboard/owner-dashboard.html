@@ -549,6 +549,11 @@
                       <span class="text-[10px] text-gray-500 font-semibold ml-2 select-none">{{dish.isAvailable ? 'Cook' : 'OOS'}}</span>
                     </label>
 
+                    <button (click)="startEditMenuItem(dish)"
+                            class="p-1 px-2.5 rounded bg-orange-500/10 text-orange-400 text-xs shrink-0 cursor-pointer hover:bg-orange-500/20">
+                      ✏️ Edit
+                    </button>
+
                     <button (click)="deleteMenuItem(dish.id)"
                             class="p-1 px-2.5 rounded bg-rose-500/10 text-rose-400 text-xs shrink-0 cursor-pointer hover:bg-rose-500/20">
                       Delete
@@ -577,9 +582,17 @@
 
           </div>
 
-          <!-- Add new dishes form right columns -->
+          <!-- Add / Edit dishes form right columns -->
           <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-            <h4 class="font-display font-medium text-white text-sm sm:text-base">Introduce New Dish</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="font-display font-medium text-white text-sm sm:text-base">
+                {{ editingItemId() ? '✏️ Edit Dish Details' : 'Introduce New Dish' }}
+              </h4>
+              <button *ngIf="editingItemId()" (click)="cancelEditMenuItem()" type="button"
+                      class="px-2.5 py-1 rounded bg-zinc-800 text-[10px] font-bold text-gray-400 hover:text-white cursor-pointer">
+                Cancel Edit
+              </button>
+            </div>
             
             <form (submit)="handleAddItem(); $event.preventDefault()" class="space-y-4">
               
@@ -711,7 +724,7 @@
 
               <button type="submit"
                       class="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-extrabold text-white shadow shadow-orange-500/10 cursor-pointer">
-                Publish Dish Platter
+                {{ editingItemId() ? 'Save Dish Changes' : 'Publish Dish Platter' }}
               </button>
 
             </form>
