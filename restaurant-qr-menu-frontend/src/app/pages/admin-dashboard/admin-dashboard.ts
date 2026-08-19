@@ -27,6 +27,49 @@ export class AdminDashboard implements OnInit, OnDestroy {
   // ── Tab navigation ────────────────────────────────────────────────────────
   activeTab = signal<'analytics' | 'restaurants' | 'tickets'>('analytics');
 
+  // ── Profile & Language Dropdowns ──────────────────────────────────────────
+  showProfileDropdown  = signal<boolean>(false);
+  showLanguageDropdown = signal<boolean>(false);
+  selectedLanguage     = signal<string>('English');
+
+  availableLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'fr', name: 'Français' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'hi', name: 'हिन्दी' }
+  ];
+
+  toggleProfileDropdown() {
+    this.showProfileDropdown.update(v => !v);
+    this.showLanguageDropdown.set(false);
+  }
+
+  toggleLanguageDropdown() {
+    this.showLanguageDropdown.update(v => !v);
+    this.showProfileDropdown.set(false);
+  }
+
+  selectLanguage(lang: string) {
+    this.selectedLanguage.set(lang);
+    this.showLanguageDropdown.set(false);
+    this.toastService.success('Language Changed', `Admin display language set to ${lang}`);
+  }
+
+  logout() {
+    this.modalService.confirm({
+      title: 'Sign Out Admin Command',
+      message: 'Are you sure you want to sign out of the Super Admin workspace?',
+      type: 'warning',
+      confirmText: 'Sign Out',
+      onConfirm: () => {
+        this.authService.logout();
+        this.toastService.info('Signed Out', 'Admin session terminated.');
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
   // ── Analytics Stats (Stitch Analytics Reference) ─────────────────────────
   menusToday     = signal<number>(346);
   customersToday = signal<number>(221);
@@ -188,19 +231,5 @@ export class AdminDashboard implements OnInit, OnDestroy {
     if (mins < 60) return `${mins}m ago`;
     if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
     return `${Math.floor(mins / 1440)}d ago`;
-  }
-
-  logout() {
-    this.modalService.confirm({
-      title: 'Sign Out Admin',
-      message: 'Are you sure you want to log out of Super Admin portal?',
-      type: 'warning',
-      confirmText: 'Sign Out',
-      onConfirm: () => {
-        this.authService.logout();
-        this.toastService.info('Signed Out', 'Super Admin logged out.');
-        this.router.navigate(['/login']);
-      }
-    });
   }
 }

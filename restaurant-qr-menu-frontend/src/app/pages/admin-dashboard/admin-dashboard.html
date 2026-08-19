@@ -105,21 +105,62 @@
           <span class="adm-chat-badge">3</span>
         </button>
 
-        <!-- User Profile Pill -->
-        <div class="adm-user-profile">
-          <img src="/img/testimonial-1.jpg" alt="Manager" class="adm-avatar-img" />
-          <div class="adm-user-info">
-            <div class="adm-user-name">Main Branch</div>
-            <div class="adm-user-role">Manager</div>
+        <!-- User Profile Pill & Dropdown -->
+        <div class="adm-pill-wrap">
+          <div class="adm-user-profile" (click)="toggleProfileDropdown()">
+            <img src="/img/testimonial-1.jpg" alt="Manager" class="adm-avatar-img" />
+            <div class="adm-user-info">
+              <div class="adm-user-name">{{ authService.currentUser()?.name || 'Main Branch' }}</div>
+              <div class="adm-user-role">Administrator</div>
+            </div>
+            <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
           </div>
-          <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+
+          @if (showProfileDropdown()) {
+            <div class="adm-dropdown-menu animate-fade-in" (click)="$event.stopPropagation()">
+              <div class="adm-dropdown-header">
+                <div class="adm-dropdown-title">{{ authService.currentUser()?.name || 'Admin User' }}</div>
+                <div class="adm-dropdown-sub">{{ authService.currentUser()?.email || 'admin@restaurantqr.com' }}</div>
+              </div>
+              <div class="adm-dropdown-divider"></div>
+              <button class="adm-dropdown-item" (click)="activeTab.set('restaurants'); showProfileDropdown.set(false)">
+                <span class="material-symbols-outlined text-[18px]">storefront</span>
+                <span>Partner Venues</span>
+              </button>
+              <button class="adm-dropdown-item" (click)="activeTab.set('tickets'); showProfileDropdown.set(false)">
+                <span class="material-symbols-outlined text-[18px]">support_agent</span>
+                <span>Support Inquiries</span>
+              </button>
+              <div class="adm-dropdown-divider"></div>
+              <button class="adm-dropdown-item text-danger" (click)="logout()">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          }
         </div>
 
-        <!-- Language Pill -->
-        <div class="adm-lang-pill">
-          <span class="material-symbols-outlined text-[16px] text-gray-500">language</span>
-          <span>English</span>
-          <span class="material-symbols-outlined text-[16px] text-gray-400">expand_more</span>
+        <!-- Language Pill & Dropdown -->
+        <div class="adm-pill-wrap">
+          <div class="adm-lang-pill" (click)="toggleLanguageDropdown()">
+            <span class="material-symbols-outlined text-[16px] text-gray-500">language</span>
+            <span>{{ selectedLanguage() }}</span>
+            <span class="material-symbols-outlined text-[16px] text-gray-400">expand_more</span>
+          </div>
+
+          @if (showLanguageDropdown()) {
+            <div class="adm-dropdown-menu adm-lang-dropdown animate-fade-in" (click)="$event.stopPropagation()">
+              @for (lang of availableLanguages; track lang.code) {
+                <button class="adm-dropdown-item" [class.active]="selectedLanguage() === lang.name" (click)="selectLanguage(lang.name)">
+                  <span class="material-symbols-outlined text-[16px] text-gray-400">translate</span>
+                  <span style="flex:1;text-align:left">{{ lang.name }}</span>
+                  @if (selectedLanguage() === lang.name) {
+                    <span class="material-symbols-outlined text-[16px] text-emerald-600">check</span>
+                  }
+                </button>
+              }
+            </div>
+          }
         </div>
       </div>
     </header>
