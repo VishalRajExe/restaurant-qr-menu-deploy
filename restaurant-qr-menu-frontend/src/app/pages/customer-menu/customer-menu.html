@@ -1,4 +1,4 @@
-<div class="pos-screen-wrapper" [class.dark-theme]="isDarkMode()">
+<div class="pos-screen-wrapper">
 
   <!-- ══════════════════════════════════════════════════════════════════════════
        MAIN POS MENU 3-COLUMN CONTAINER (Matches Reference Design)
@@ -10,10 +10,8 @@
       
       <!-- Top Brand / Choose Menu Header -->
       <div class="pos-sidebar-header">
-        <button class="pos-back-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Switch to Light' : 'Switch to Dark'">
-          <span class="material-symbols-outlined text-[20px]">
-            {{ isDarkMode() ? 'light_mode' : 'arrow_back' }}
-          </span>
+        <button class="pos-back-btn" (click)="goBack()" title="Back">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
         </button>
         <h2 class="pos-sidebar-title">Choose Menu</h2>
       </div>

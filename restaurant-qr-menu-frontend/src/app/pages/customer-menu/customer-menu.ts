@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { RestaurantService } from '../../services/restaurant.service';
 import { CategoryService } from '../../services/category.service';
 import { MenuService } from '../../services/menu.service';
@@ -30,6 +30,7 @@ export interface CartItem {
 })
 export class CustomerMenu implements OnInit, OnDestroy {
   route             = inject(ActivatedRoute);
+  router            = inject(Router);
   restaurantService = inject(RestaurantService);
   categoryService   = inject(CategoryService);
   menuService       = inject(MenuService);
@@ -50,7 +51,15 @@ export class CustomerMenu implements OnInit, OnDestroy {
   foodTypeFilter       = signal<'all' | 'veg' | 'non-veg'>('all');
   maxPriceFilter       = signal<number>(100);
   selectedLanguage     = signal<string>('en');
-  isDarkMode           = signal<boolean>(true);
+  isDarkMode           = signal<boolean>(false);
+
+  goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
 
   showMobileCart       = signal<boolean>(false);
   showMobileSidebar    = signal<boolean>(false);
