@@ -6,38 +6,55 @@ import { ToastService, ToastMessage } from '../../services/toast.service';
   selector: 'app-toast-container',
   imports: [CommonModule],
   template: `
-    <div class="fixed top-6 right-6 z-[100] flex flex-col space-y-3 pointer-events-none max-w-sm w-full px-4 sm:px-0">
+    <div class="lez-toast-container">
       @for (toast of toastService.toasts(); track toast.id) {
-        <div class="pointer-events-auto flex items-start space-x-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-300 transform translate-y-0 animate-bounce-short"
-             [ngClass]="{
-               'bg-emerald-950/90 border-emerald-500/30 text-emerald-100 shadow-emerald-950/40': toast.type === 'success',
-               'bg-rose-950/90 border-rose-500/30 text-rose-100 shadow-rose-950/40': toast.type === 'error',
-               'bg-amber-950/90 border-amber-500/30 text-amber-100 shadow-amber-950/40': toast.type === 'warning',
-               'bg-zinc-900/90 border-white/10 text-gray-100 shadow-zinc-950/50': toast.type === 'info'
-             }">
+        <div class="lez-toast"
+             [class.success]="toast.type === 'success'"
+             [class.error]="toast.type === 'error'"
+             [class.warning]="toast.type === 'warning'"
+             [class.info]="toast.type === 'info'">
           
-          <div class="shrink-0 mt-0.5">
+          <!-- Icon -->
+          <div style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:24px;height:24px">
             @if (toast.type === 'success') {
-              <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:#10B981">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             } @else if (toast.type === 'error') {
-              <div class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs">✕</div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:#EF4444">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             } @else if (toast.type === 'warning') {
-              <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">!</div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:#F59E0B">
+                <path d="M10 2L18 17H2L10 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M10 8v4M10 14v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             } @else {
-              <div class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">i</div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:#3B82F6">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10 9v5M10 6.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             }
           </div>
 
-          <div class="flex-1 min-w-0">
-            <h4 class="font-display font-bold text-xs tracking-wide uppercase">{{ toast.title }}</h4>
+          <!-- Message Body -->
+          <div style="flex:1;min-width:0">
+            @if (toast.title) {
+              <div style="font-size:13px;font-weight:700;color:#0b1c30;line-height:1.3">{{ toast.title }}</div>
+            }
             @if (toast.message) {
-              <p class="text-xs text-gray-300 mt-0.5 leading-relaxed font-sans">{{ toast.message }}</p>
+              <div style="font-size:12px;color:#594139;margin-top:2px">{{ toast.message }}</div>
             }
           </div>
 
+          <!-- Close button -->
           <button (click)="toastService.remove(toast.id)" type="button"
-                  class="shrink-0 text-gray-400 hover:text-white text-xs p-1 cursor-pointer">
-            ✕
+                  style="border:none;background:transparent;cursor:pointer;color:#8c9ba5;padding:4px">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
           </button>
         </div>
       }

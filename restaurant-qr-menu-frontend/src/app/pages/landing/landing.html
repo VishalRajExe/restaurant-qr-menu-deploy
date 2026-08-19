@@ -1,318 +1,413 @@
-<div class="min-h-screen transition-colors duration-500 overflow-x-hidden"
-     [ngClass]="isDarkMode ? 'bg-[#0b0c0e] text-gray-100' : 'bg-[#fafafa] text-gray-800'">
-     
-  <!-- Dynamic Floating Header Navigation -->
-  <app-navbar></app-navbar>
+<div class="restoran-root">
 
-  <!-- Interactive Hero Presentation -->
-  <app-hero [isDarkMode]="isDarkMode"></app-hero>
+  <!-- ═══════════════════════════════════════════════════════════
+       NAVBAR & HERO HEADER
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="restoran-hero-wrap">
+    <!-- Navbar -->
+    <nav class="restoran-navbar">
+      <div class="restoran-nav-container">
+        <a routerLink="/" class="restoran-logo">
+          <i class="fa fa-utensils"></i>
+          <span>RestQR</span>
+        </a>
 
-  <!-- TRUST LOGOS SECTION -->
-  <!-- <section class="py-12 border-y transition-colors duration-500"
-           [ngClass]="isDarkMode ? 'bg-[#0e0f12] border-white/5' : 'bg-white border-black/5'">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p class="text-center text-xs font-semibold uppercase tracking-widest text-gray-500 mb-8">Trusted by Elite Dining Groups & Michelin Star Kitchens</p>
-      <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-60">
-        <span *ngFor="let logo of logos" 
-              class="font-display font-bold text-lg tracking-wider"
-              [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'">
-          {{logo}}
-        </span>
-      </div>
-    </div>
-  </section> -->
-
-  <!-- TRUST LOGOS MARQUEE -->
-<section
-  class="py-12 border-y overflow-hidden transition-colors duration-500"
-  [ngClass]="isDarkMode ? 'bg-[#0e0f12] border-white/5' : 'bg-white border-black/5'"
->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-    <p
-      class="text-center text-xs font-semibold uppercase tracking-widest text-gray-500 mb-8"
-    >
-      Trusted by Elite Dining Groups & Michelin Star Kitchens
-    </p>
-
-    <div class="relative overflow-hidden">
-
-      <!-- Left fade -->
-      <div
-        class="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-        [ngClass]="isDarkMode
-          ? 'bg-gradient-to-r from-[#0e0f12] to-transparent'
-          : 'bg-gradient-to-r from-white to-transparent'"
-      ></div>
-
-      <!-- Right fade -->
-      <div
-        class="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-        [ngClass]="isDarkMode
-          ? 'bg-gradient-to-l from-[#0e0f12] to-transparent'
-          : 'bg-gradient-to-l from-white to-transparent'"
-      ></div>
-
-      <!-- Moving Track -->
-      <div class="logo-marquee">
-
-        <!-- First set -->
-        <div class="logo-track">
-
-          <span
-            *ngFor="let logo of logos"
-            class="client-logo"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'"
-          >
-            {{ logo }}
-          </span>
-
+        <div class="restoran-nav-links">
+          <a href="#home" class="restoran-nav-link active">Home</a>
+          <a href="#about" class="restoran-nav-link">About</a>
+          <a href="#service" class="restoran-nav-link">Service</a>
+          <a href="#menu" class="restoran-nav-link">Menu</a>
+          <a href="#team" class="restoran-nav-link">Our Team</a>
+          <a href="#testimonial" class="restoran-nav-link">Testimonial</a>
+          <a href="#contact" class="restoran-nav-link">Contact</a>
         </div>
 
-        <!-- Duplicate set for seamless loop -->
-        <div class="logo-track" aria-hidden="true">
-
-          <span
-            *ngFor="let logo of logos"
-            class="client-logo"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-800'"
-          >
-            {{ logo }}
-          </span>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-  <!-- SECTION 3: HOW IT WORKS (Cinematic Timeline) -->
-  <section id="how-it-works" class="py-24 relative overflow-hidden transition-colors duration-500"
-           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      
-      <div class="text-center max-w-3xl mx-auto space-y-4 mb-20">
-        <p class="text-sm font-bold uppercase tracking-widest text-orange-500 font-display">Simplicity Meets Precision</p>
-        <h2 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-          Four Steps To Modern Table Service
-        </h2>
-        <p class="text-sm sm:text-base" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
-          Digitalize your offline menu assets without complex installation headaches or tech training requirements.
-        </p>
-      </div>
-
-      <!-- Connecting dashes container -->
-      <div class="relative grid grid-cols-1 md:grid-cols-4 gap-8">
-        
-        <div *ngFor="let step of howItWorks; let i = index" class="relative group">
-          
-          <div class="p-8 rounded-3xl transition-all duration-300 pointer-events-auto"
-               [ngClass]="isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-100 border border-black/5'">
-            
-            <div class="flex items-center justify-between mb-6">
-              <span class="font-display font-black text-3xl text-orange-500/20 group-hover:text-orange-500 transition-colors duration-300">
-                {{step.step}}
-              </span>
-              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow">
-                ✓
-              </div>
-            </div>
-
-            <h3 class="font-display font-bold text-base sm:text-lg mb-3"
-                [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-              {{step.title}}
-            </h3>
-            <p class="text-xs sm:text-sm leading-relaxed"
-               [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
-              {{step.desc}}
-            </p>
-
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- SECTION 4: FEATURES -->
-  <app-features [isDarkMode]="isDarkMode"></app-features>
-
-  <!-- SECTION 7: TESTIMONIALS (Owners reviews list) -->
-  <section id="testimonials" class="py-24 transition-colors duration-500"
-           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto space-y-3 mb-16">
-        <p class="text-sm font-bold uppercase tracking-widest text-[#f97316] font-display">Testimonials</p>
-        <h2 class="font-display font-extrabold text-2xl sm:text-4xl"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-          Success Stories from the Kitchen Floor
-        </h2>
-        <p class="text-xs sm:text-sm" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
-          Read how restaurateurs solved typography, reprint labor overheads, and menu layouts globally.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div *ngFor="let t of testimonials"
-             class="p-8 rounded-3xl flex flex-col justify-between"
-             [ngClass]="isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-100 border border-black/5'">
-          
-          <div class="space-y-6">
-            <!-- Stars row -->
-            <div class="flex items-center space-x-1">
-              <svg *ngFor="let star of [1,2,3,4,5]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-amber-400">
-                <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.007-.557 1.494l3.693 2.924-1.129 4.67a1 1 0 0 0 1.452 1.054L10 15.228l4.242 2.58a1 1 0 0 0 1.452-1.054l-1.128-4.67 3.692-2.924c.614-.487.276-1.427-.556-1.494l-4.754-.381-1.83-4.401Z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <!-- Commentary text -->
-            <p class="italic text-sm sm:text-base leading-relaxed"
-               [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-700'">
-              "{{t.comment}}"
-            </p>
-          </div>
-
-          <!-- Writer credit -->
-          <div class="flex items-center space-x-4 pt-8 mt-8 border-t border-dashed"
-               [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
-            <div class="w-11 h-11 rounded-full overflow-hidden shrink-0 shadow bg-slate-800">
-              <img class="w-full h-full object-cover" [src]="t.avatar" alt="Chef Avatar" referrerPolicy="no-referrer" />
-            </div>
-            <div>
-              <h4 class="font-display font-medium text-sm"
-                  [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-                {{t.name}}
-              </h4>
-              <p class="text-xs text-gray-500">{{t.role}} • <span class="text-orange-500">{{t.restaurantName}}</span></p>
-            </div>
-          </div>
-
+        <div class="restoran-nav-actions">
+          <a routerLink="/login" class="restoran-btn-login">Sign In</a>
+          <a routerLink="/menu/1" class="restoran-btn-primary">
+            <i class="fa fa-qrcode" style="margin-right:6px"></i>View QR Menu
+          </a>
         </div>
       </div>
+    </nav>
 
-    </div>
-  </section>
-
-  <!-- SECTION 8: PRICING (Subscription models) -->
-  <section id="pricing" class="py-24 transition-colors duration-500"
-           [ngClass]="isDarkMode ? 'bg-[#0f1117] border-t border-white/5' : 'bg-white border-t border-black/5'">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center max-w-2xl mx-auto space-y-4 mb-20">
-        <p class="text-sm font-bold uppercase tracking-widest text-[#f97316] font-display">Premium Strategy</p>
-        <h2 class="font-display font-extrabold text-3xl sm:text-4xl"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-          Scale Your Operations Comfortably
-        </h2>
-        <p class="text-sm" [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
-          Start completely free and unlock customised canvas themes, unlimited dishes, and white label options as you expand.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-        <div *ngFor="let p of pricingPlans"
-             class="p-8 rounded-[32px] flex flex-col justify-between transition-all duration-300 relative pointer-events-auto"
-             [ngClass]="p.isPopular ? 
-               (isDarkMode ? 'bg-[#181a20] border-2 border-orange-500 shadow-2xl shadow-orange-500/5' : 'bg-orange-50/50 border-2 border-orange-500 shadow-xl') : 
-               (isDarkMode ? 'bg-[#181a20]/40 border border-white/5' : 'bg-gray-50 border border-black/5')">
-          
-          <!-- Popular overlay card top badge -->
-          <span *ngIf="p.isPopular" 
-                class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-orange-500 text-white shadow-md shadow-orange-500/10">
-            Highly Selected Plan
-          </span>
-
-          <div class="space-y-6">
-            <div>
-              <h3 class="font-display font-bold text-lg sm:text-xl"
-                  [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-                {{p.name}}
-              </h3>
-              <p class="text-xs text-gray-500 mt-1">{{p.description}}</p>
-            </div>
-
-            <!-- Price line -->
-            <div class="flex items-baseline space-x-2">
-              <span class="font-display font-extrabold text-4xl sm:text-5xl"
-                    [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-                {{p.price}}
-              </span>
-              <span class="text-xs text-gray-500 font-mono">{{p.billing}}</span>
-            </div>
-
-            <!-- Bullet benefits -->
-            <ul class="space-y-3.5 pt-4 border-t" [ngClass]="isDarkMode ? 'border-white/5' : 'border-black/5'">
-              <li *ngFor="let feat of p.features" class="flex items-start space-x-3 text-xs sm:text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 text-orange-500 shrink-0 mt-0.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                </svg>
-                <span [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-700'">{{feat}}</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Button link -->
-          <div class="pt-8">
-            <a routerLink="/signup"
-               class="block w-full py-3.5 text-center rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer"
-               [ngClass]="p.isPopular ? 
-                 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-lg hover:shadow-orange-500/10 hover:scale-[1.01]' : 
-                 (isDarkMode ? 'bg-white/5 hover:bg-white/10 text-gray-200 border border-white/10' : 'bg-gray-200 hover:bg-gray-300 text-gray-800 border border-black/5')">
-              {{p.buttonText}}
+    <!-- Hero Content -->
+    <div id="home" class="restoran-hero">
+      <div class="restoran-hero-container">
+        <div class="restoran-hero-left">
+          <h1 class="restoran-hero-title">
+            Enjoy Our<br>Delicious Meal
+          </h1>
+          <p class="restoran-hero-desc">
+            Experience culinary excellence crafted by world-class chefs. Fresh ingredients, exquisite flavors, and seamless digital QR ordering right at your table.
+          </p>
+          <div class="restoran-hero-buttons">
+            <a routerLink="/menu/1" class="restoran-btn-primary restoran-btn-lg">
+              <i class="fa fa-qrcode" style="margin-right:8px"></i>View Digital Menu
+            </a>
+            <a href="#menu" class="restoran-btn-outline-gold restoran-btn-lg">
+              Explore Dishes
             </a>
           </div>
-
+        </div>
+        <div class="restoran-hero-right">
+          <div class="hero-image-wrapper">
+            <img src="/img/hero.png" alt="Restoran Gourmet Grill" class="restoran-hero-img rotating-dish" />
+          </div>
         </div>
       </div>
-
     </div>
-  </section>
+  </div>
 
-  <!-- SECTION 9: FINAL CTA BANNER -->
-  <section class="py-24 relative overflow-hidden transition-colors duration-500"
-           [ngClass]="isDarkMode ? 'bg-[#0b0c0e]' : 'bg-[#fafafa]'">
-    
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="p-8 sm:p-16 rounded-[40px] text-center space-y-8 relative overflow-hidden pointer-events-auto"
-           [ngClass]="isDarkMode ? 'bg-gradient-to-br from-[#1c120c] to-[#0f1117] border border-orange-500/20' : 'bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-200'">
+  <!-- ═══════════════════════════════════════════════════════════
+       SERVICES SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="service" class="restoran-section">
+    <div class="restoran-container">
+      <div class="restoran-grid-4">
         
-        <!-- Ambient gold glow in CTA -->
-        <div *ngIf="isDarkMode" class="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-orange-500/5 blur-3xl pointer-events-none"></div>
+        <div class="restoran-service-card">
+          <div class="service-icon"><i class="fa fa-user-tie"></i></div>
+          <h5 class="service-title">Master Chefs</h5>
+          <p class="service-desc">World-renowned chefs creating unforgettable culinary masterpieces daily.</p>
+        </div>
 
-        <h2 class="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
-          Elevate Your Dining Experience <br />
-          <span class="text-gold animate-glow bg-gradient-to-r from-orange-400 to-amber-400">
-            Within the Hour.
-          </span>
-        </h2>
-        <p class="max-w-xl mx-auto text-sm sm:text-base leading-relaxed"
-           [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
-          Scale your custom high-contrast standalone cards easily. Join hundreds of fine-dining, luxury lounges, sushi hubs, and bistro owners who have transformed table conversions.
-        </p>
+        <div class="restoran-service-card">
+          <div class="service-icon"><i class="fa fa-utensils"></i></div>
+          <h5 class="service-title">Quality Food</h5>
+          <p class="service-desc">Farm-fresh organic ingredients sustainably sourced from premium local growers.</p>
+        </div>
 
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a routerLink="/signup"
-             class="w-full sm:w-auto px-10 py-4 rounded-xl font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-[1.02] shadow-xl shadow-orange-500/10 transition-all cursor-pointer">
-            Claim Free Account
-          </a>
-          <a routerLink="/menu/r1"
-             class="w-full sm:w-auto px-10 py-4 rounded-xl font-medium border transition-all cursor-pointer"
-             [ngClass]="isDarkMode ? 'border-white/10 text-white hover:bg-white/5' : 'border-black/10 text-gray-800 hover:bg-black/5'">
-            View Diner Showcase
-          </a>
+        <div class="restoran-service-card">
+          <div class="service-icon"><i class="fa fa-cart-plus"></i></div>
+          <h5 class="service-title">Online & QR Order</h5>
+          <p class="service-desc">Instant contactless table ordering and customized kitchen dispatch.</p>
+        </div>
+
+        <div class="restoran-service-card">
+          <div class="service-icon"><i class="fa fa-headset"></i></div>
+          <h5 class="service-title">24/7 Service</h5>
+          <p class="service-desc">Attentive hospitality and VIP concierge service for an extraordinary dining experience.</p>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- Global Footer -->
-  <app-footer [isDarkMode]="isDarkMode"></app-footer>
+  <!-- ═══════════════════════════════════════════════════════════
+       ABOUT US SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="about" class="restoran-section bg-light">
+    <div class="restoran-container">
+      <div class="restoran-about-grid">
+        
+        <!-- Image Quad -->
+        <div class="restoran-about-images">
+          <div class="about-img-col">
+            <img src="/img/about-1.jpg" alt="About Restoran" class="about-img" />
+            <img src="/img/about-2.jpg" alt="About Restoran" class="about-img about-img-offset" />
+          </div>
+          <div class="about-img-col">
+            <img src="/img/about-3.jpg" alt="About Restoran" class="about-img about-img-offset-reverse" />
+            <img src="/img/about-4.jpg" alt="About Restoran" class="about-img" />
+          </div>
+        </div>
+
+        <!-- About Content -->
+        <div class="restoran-about-text">
+          <h5 class="section-subtitle">About Us</h5>
+          <h2 class="section-title">
+            Welcome to <i class="fa fa-utensils text-gold"></i> RestQR
+          </h2>
+          <p class="about-paragraph">
+            Founded with a passion for exquisite gastronomy and warm hospitality, RestQR delivers a sensory dining journey. Every dish reflects our dedication to culinary artistry and seasonal refinement.
+          </p>
+          <p class="about-paragraph">
+            Pairing age-old culinary techniques with modern innovation, our kitchen crafts bold flavors and textures that delight discerning palates.
+          </p>
+
+          <div class="restoran-stats-row">
+            <div class="stat-box">
+              <h1 class="stat-number">15</h1>
+              <div class="stat-label">
+                <span>Years of</span>
+                <strong>EXPERIENCE</strong>
+              </div>
+            </div>
+            <div class="stat-box">
+              <h1 class="stat-number">50</h1>
+              <div class="stat-label">
+                <span>Popular</span>
+                <strong>MASTER CHEFS</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:14px;align-items:center;margin-top:16px">
+            <a href="#menu" class="restoran-btn-primary">Explore Our Menu</a>
+            <a routerLink="/login" class="restoran-btn-dark">Partner With Us</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FOOD MENU SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="menu" class="restoran-section">
+    <div class="restoran-container">
+      <div class="section-header text-center">
+        <h5 class="section-subtitle">Food Menu</h5>
+        <h2 class="section-title">Most Popular Items</h2>
+      </div>
+
+      <!-- Menu Category Tabs -->
+      <div class="restoran-menu-tabs">
+        <button class="menu-tab-btn" [class.active]="activeMenuTab() === 'breakfast'" (click)="setMenuTab('breakfast')">
+          <i class="fa fa-coffee"></i>
+          <div>
+            <small>Popular</small>
+            <h6>Breakfast</h6>
+          </div>
+        </button>
+
+        <button class="menu-tab-btn" [class.active]="activeMenuTab() === 'lunch'" (click)="setMenuTab('lunch')">
+          <i class="fa fa-hamburger"></i>
+          <div>
+            <small>Special</small>
+            <h6>Lunch</h6>
+          </div>
+        </button>
+
+        <button class="menu-tab-btn" [class.active]="activeMenuTab() === 'dinner'" (click)="setMenuTab('dinner')">
+          <i class="fa fa-utensils"></i>
+          <div>
+            <small>Lovely</small>
+            <h6>Dinner</h6>
+          </div>
+        </button>
+      </div>
+
+      <!-- Menu Items Grid -->
+      <div class="restoran-menu-grid">
+        @for (item of currentMenuItems; track item.name) {
+          <div class="restoran-dish-item">
+            <img [src]="item.image" [alt]="item.name" class="dish-thumb" />
+            <div class="dish-info">
+              <div class="dish-header">
+                <span class="dish-name">{{ item.name }}</span>
+                <span class="dish-price">{{ item.price }}</span>
+              </div>
+              <p class="dish-desc">{{ item.description }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="text-center" style="margin-top:40px">
+        <a routerLink="/menu/1" class="restoran-btn-primary restoran-btn-lg">
+          <i class="fa fa-qrcode" style="margin-right:8px"></i>Open Interactive QR Menu
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TEAM / MASTER CHEFS SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="team" class="restoran-section">
+    <div class="restoran-container">
+      <div class="section-header text-center">
+        <h5 class="section-subtitle">Team Members</h5>
+        <h2 class="section-title">Our Master Chefs</h2>
+      </div>
+
+      <div class="restoran-grid-4">
+        <div class="chef-card">
+          <div class="chef-avatar-wrap">
+            <img src="/img/team-1.jpg" alt="Executive Chef" class="chef-avatar" />
+          </div>
+          <h5 class="chef-name">Antoine Laurent</h5>
+          <small class="chef-role">Executive Chef</small>
+          <div class="chef-socials">
+            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="chef-card">
+          <div class="chef-avatar-wrap">
+            <img src="/img/team-2.jpg" alt="Pastry Chef" class="chef-avatar" />
+          </div>
+          <h5 class="chef-name">Marco Rossi</h5>
+          <small class="chef-role">Head Grill Master</small>
+          <div class="chef-socials">
+            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="chef-card">
+          <div class="chef-avatar-wrap">
+            <img src="/img/team-3.jpg" alt="Sous Chef" class="chef-avatar" />
+          </div>
+          <h5 class="chef-name">Elena Rostova</h5>
+          <small class="chef-role">Pastry & Dessert Specialist</small>
+          <div class="chef-socials">
+            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div class="chef-card">
+          <div class="chef-avatar-wrap">
+            <img src="/img/team-4.jpg" alt="Sommelier" class="chef-avatar" />
+          </div>
+          <h5 class="chef-name">David Chen</h5>
+          <small class="chef-role">Head Sommelier & Mixologist</small>
+          <div class="chef-socials">
+            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TESTIMONIAL SECTION
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="testimonial" class="restoran-section bg-light">
+    <div class="restoran-container">
+      <div class="section-header text-center">
+        <h5 class="section-subtitle">Testimonial</h5>
+        <h2 class="section-title">What Our Clients Say</h2>
+      </div>
+
+      <div class="restoran-grid-4">
+        <div class="testimonial-card">
+          <i class="fa fa-quote-left text-gold" style="font-size:24px;margin-bottom:12px;display:block"></i>
+          <p class="testimonial-text">
+            "The Wagyu Ribeye and Truffle Risotto were absolutely phenomenal. Best dining experience in town by far!"
+          </p>
+          <div class="testimonial-user">
+            <img src="/img/testimonial-1.jpg" alt="Client" class="testimonial-avatar" />
+            <div>
+              <h6 class="testimonial-name">Sarah Jenkins</h6>
+              <small class="testimonial-role">Food Critic</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <i class="fa fa-quote-left text-gold" style="font-size:24px;margin-bottom:12px;display:block"></i>
+          <p class="testimonial-text">
+            "The contactless QR ordering was seamless and blazing fast. The cocktails and duck confit were unforgettable."
+          </p>
+          <div class="testimonial-user">
+            <img src="/img/testimonial-2.jpg" alt="Client" class="testimonial-avatar" />
+            <div>
+              <h6 class="testimonial-name">Michael Chang</h6>
+              <small class="testimonial-role">Tech Entrepreneur</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <i class="fa fa-quote-left text-gold" style="font-size:24px;margin-bottom:12px;display:block"></i>
+          <p class="testimonial-text">
+            "Impeccable service and wine pairing. Restoran has set a new gold standard for culinary dining."
+          </p>
+          <div class="testimonial-user">
+            <img src="/img/testimonial-3.jpg" alt="Client" class="testimonial-avatar" />
+            <div>
+              <h6 class="testimonial-name">Emma Watson</h6>
+              <small class="testimonial-role">Lifestyle Blogger</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <i class="fa fa-quote-left text-gold" style="font-size:24px;margin-bottom:12px;display:block"></i>
+          <p class="testimonial-text">
+            "Celebrated our anniversary here. The private dining hospitality and dessert platter blew us away."
+          </p>
+          <div class="testimonial-user">
+            <img src="/img/testimonial-4.jpg" alt="Client" class="testimonial-avatar" />
+            <div>
+              <h6 class="testimonial-name">Robert Taylor</h6>
+              <small class="testimonial-role">Architect</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════ -->
+  <footer id="contact" class="restoran-footer">
+    <div class="restoran-container">
+      <div class="footer-grid">
+        
+        <div>
+          <h4 class="footer-title">Company</h4>
+          <a href="#about" class="footer-link">About Us</a>
+          <a href="#contact" class="footer-link">Contact Us</a>
+          <a routerLink="/menu/1" class="footer-link">QR Digital Menu</a>
+          <a routerLink="/login" class="footer-link">Owner Portal</a>
+          <a routerLink="/signup" class="footer-link">Restaurant Signup</a>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Contact</h4>
+          <p class="footer-text"><i class="fa fa-map-marker-alt text-gold me-2"></i>123 Gourmet Blvd, New York, USA</p>
+          <p class="footer-text"><i class="fa fa-phone-alt text-gold me-2"></i>+1 (555) 345-6789</p>
+          <p class="footer-text"><i class="fa fa-envelope text-gold me-2"></i>hello&#64;restqr.com</p>
+          <div class="footer-socials">
+            <a href="#" class="footer-social-btn"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="footer-social-btn"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="footer-social-btn"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="footer-social-btn"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Opening Hours</h4>
+          <h6 class="text-white" style="font-weight:600;margin:0 0 4px">Monday - Saturday</h6>
+          <p class="footer-text">09:00 AM - 10:00 PM</p>
+          <h6 class="text-white" style="font-weight:600;margin:12px 0 4px">Sunday</h6>
+          <p class="footer-text">10:00 AM - 08:00 PM</p>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Newsletter</h4>
+          <p class="footer-text">Subscribe to receive seasonal tasting menus and culinary updates.</p>
+          <div class="newsletter-wrap">
+            <input type="email" placeholder="Your email address" class="newsletter-input" />
+            <button type="button" class="newsletter-btn">Sign Up</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 <strong>RestQR</strong>. All Rights Reserved.</div>
+        <div style="display:flex;gap:18px">
+          <a href="#home" class="footer-link">Home</a>
+          <a href="#about" class="footer-link">About</a>
+          <a href="#menu" class="footer-link">Menu</a>
+          <a routerLink="/login" class="footer-link">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
 </div>

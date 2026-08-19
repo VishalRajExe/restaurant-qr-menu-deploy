@@ -1,520 +1,468 @@
-<div class="guest-menu-shell min-h-screen bg-[#0b0c0e] font-sans flex relative overflow-hidden">
+<!-- ═══════════════════════════════════════════════════════════════════════
+     EPICURE OS — CUSTOMER MENU
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="menu-root" [class.dark]="isDarkMode()" [class.light]="!isDarkMode()">
 
-  <!-- ════════════════════════════════════════════════════════════
-       LEFT SIDEBAR — desktop only
-  ═══════════════════════════════════════════════════════════════ -->
-  <aside class="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 border-r border-white/5
-                 bg-[#0d0e12] sticky top-0 h-screen overflow-y-auto">
-
-    <!-- Restaurant Brand & Back -->
-    <div class="p-5 border-b border-white/5 space-y-3">
-      <app-back-button label="Back"></app-back-button>
-      @if (restaurant()) {
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30
-                      flex items-center justify-center text-orange-400 font-black text-sm shrink-0">
-            @if (restaurant()!.logoUrl) {
-              <img [src]="restaurant()!.logoUrl" [alt]="restaurant()!.name" [title]="restaurant()!.name" class="w-full h-full object-cover rounded-xl"/>
-            } @else {
-              {{ restaurant()!.name.charAt(0) }}
-            }
-          </div>
-          <div class="min-w-0">
-            <p class="text-xs font-bold text-white leading-tight truncate">{{ restaurant()!.name }}</p>
-            <p class="text-[10px] text-gray-500 mt-0.5">Digital Menu</p>
-          </div>
-        </div>
-      }
+  <!-- ── Loading State ── -->
+  @if (isLoading()) {
+    <div class="menu-loading">
+      <div class="menu-loading-spinner"></div>
+      <div style="font-size:14px;color:#A1A1AA;margin-top:16px">Loading menu...</div>
     </div>
+  }
 
-    <!-- Search — desktop inside sidebar -->
-    <div class="px-4 py-3 border-b border-white/5 space-y-2">
-      <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500"
-             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-        </svg>
-        <input type="text"
-               [value]="searchQuery()"
-               (input)="searchQuery.set($any($event.target).value)"
-               placeholder="Search dishes..."
-               class="w-full pl-9 pr-3 py-2.5 bg-zinc-900/60 border border-white/5 rounded-xl
-                      text-xs text-gray-200 placeholder-gray-600 focus:outline-none
-                      focus:border-orange-500/40 transition-colors"/>
-      </div>
-
-      <!-- Track Order button -->
-      <button (click)="openOrderTracker()"
-              class="w-full py-2 px-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400
-                     hover:bg-orange-500/20 transition-all font-bold text-xs flex items-center justify-center gap-2 cursor-pointer">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-        </svg>
-        <span>Track Active Order</span>
-      </button>
-
-      <!-- Customer Order History Button -->
-      <button (click)="openOrderHistory()"
-              class="w-full py-2 px-3 rounded-xl bg-zinc-900 border border-white/5 text-gray-300 hover:text-white transition-all font-bold text-xs flex items-center justify-between cursor-pointer">
-        <div class="flex items-center gap-2">
-          <span>📋</span>
-          <span>My Order History</span>
-        </div>
-        <span class="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-black">
-          {{ customerOrderHistory().length }}
-        </span>
-      </button>
+  <!-- ── Error State ── -->
+  @if (!isLoading() && loadError()) {
+    <div class="menu-error-screen">
+      <div style="font-size:48px;margin-bottom:16px">😕</div>
+      <h2 style="font-size:20px;font-weight:700;color:#fff;margin:0 0 8px">Menu Not Found</h2>
+      <p style="font-size:14px;color:#71717A;text-align:center;max-width:300px">{{ loadError() }}</p>
     </div>
+  }
 
-    <!-- Category Nav -->
-    <nav class="flex-1 px-3 py-3 space-y-0.5">
-      <p class="text-[9px] font-bold text-gray-600 uppercase tracking-widest px-3 pb-2 pt-1">
-        Categories
-      </p>
-
-      <!-- All -->
-      <button (click)="selectCategory('all')"
-              class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold
-                     transition-all cursor-pointer"
-              [ngClass]="activeCategoryTagId() === 'all'
-                ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
-                : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-        <span>All Items</span>
-        <span class="text-[10px] opacity-60">{{ menuItems().length }}</span>
-      </button>
-
-      <!-- Each category -->
-      @for (cat of categories(); track cat.id) {
-        <button (click)="selectCategory(cat.id)"
-                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold
-                       transition-all cursor-pointer"
-                [ngClass]="activeCategoryTagId() === cat.id
-                  ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <span>{{ cat.name }}</span>
-          <span class="text-[10px] opacity-60">{{ categoryItemCount()[cat.id] || 0 }}</span>
-        </button>
-      }
-    </nav>
-
-    <!-- Footer note -->
-    <div class="p-4 border-t border-white/5">
-      <p class="text-[9px] text-gray-600 text-center leading-relaxed">
-        Powered by <span class="text-orange-500 font-semibold">AuraMenu</span>
-      </p>
-    </div>
-  </aside>
-
-  <!-- ════════════════════════════════════════════════════════════
-       MAIN CONTENT
-  ═══════════════════════════════════════════════════════════════ -->
-  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto pb-24 lg:pb-0">
-
-    <!-- Top Header -->
-    <header class="p-4 sm:p-5 border-b border-white/5 bg-[#0d0e12]/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <button (click)="showMobileSidebar.set(true)"
-                class="lg:hidden p-2 rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white cursor-pointer">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-          </svg>
-        </button>
-
-        @if (restaurant()) {
-          <div>
-            <h1 class="text-sm sm:text-base font-bold text-white truncate leading-tight">{{ restaurant()!.name }}</h1>
-            <p class="text-[10px] text-gray-400 truncate">{{ restaurant()!.description || 'Fine Dining & Craft Cuisine' }}</p>
-          </div>
-        }
-      </div>
-
-      <!-- Action controls -->
-      <div class="flex items-center gap-2">
-        <button (click)="openOrderHistory()"
-                class="px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-white/10 text-gray-300 text-xs font-bold hover:bg-zinc-800 transition-all flex items-center gap-1.5 cursor-pointer">
-          <span>📋</span>
-          <span class="hidden sm:inline">My Orders</span>
-          <span class="px-1.5 py-0.5 rounded-md bg-orange-500/20 text-orange-400 text-[10px] font-black">
-            {{ customerOrderHistory().length }}
-          </span>
-        </button>
-
-        <button (click)="openOrderTracker()"
-                class="px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold hover:bg-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-          <span class="hidden sm:inline">Track Order</span>
-        </button>
-
-        <!-- Cart count trigger for mobile -->
-        <button (click)="showMobileCart.set(true)"
-                class="lg:hidden relative px-3 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-orange-500/20">
-          <span>🛒</span>
-          <span>{{ cartCount() }}</span>
-        </button>
-      </div>
-    </header>
-
-    <!-- Dish Grid -->
-    <div class="p-4 sm:p-6 flex-1 space-y-6">
-      @if (isLoading()) {
-        <div class="flex flex-col items-center justify-center py-24 space-y-3">
-          <div class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-xs text-gray-500 font-semibold">Loading menu items...</p>
-        </div>
-      } @else if (loadError()) {
-        <div class="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-2">
-          <p class="text-sm font-bold text-red-400">{{ loadError() }}</p>
-          <p class="text-xs text-gray-500">Please scan a valid restaurant QR code.</p>
+  <!-- ── Main Menu UI ── -->
+  @if (!isLoading() && !loadError() && restaurant()) {
+    <!-- Restaurant Hero Header -->
+    <div class="menu-hero">
+      @if (restaurant()?.coverImage || restaurant()?.banner || restaurant()?.photo) {
+        <div class="menu-hero-bg">
+          <img [src]="restaurant()?.coverImage || restaurant()?.banner || restaurant()?.photo" [alt]="restaurant()?.name"
+               style="width:100%;height:100%;object-fit:cover;opacity:0.3"/>
         </div>
       } @else {
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-          @for (dish of filteredDishes(); track dish.id) {
-            <div class="rounded-2xl bg-[#0f1117] border border-white/5 overflow-hidden flex flex-col justify-between hover:border-orange-500/30 transition-all duration-300 group">
-              <div class="p-4 space-y-3">
-                <div class="relative w-full h-40 rounded-xl overflow-hidden bg-zinc-900 border border-white/5">
-                  @if (dish.image) {
-                    <img [src]="dish.image" [alt]="dish.name" [title]="dish.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
-                  } @else {
-                    <div class="w-full h-full flex items-center justify-center text-3xl text-zinc-700">🍲</div>
-                  }
-
-                  <div class="absolute top-2 left-2 flex items-center gap-1.5">
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-black tracking-wider uppercase border"
-                          [ngClass]="dish.isVeg ? 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30' : 'bg-red-950/80 text-red-400 border-red-500/30'">
-                      {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 class="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">{{ dish.name }}</h3>
-                  <p class="text-[11px] text-gray-400 mt-1 line-clamp-2 leading-relaxed">{{ dish.description }}</p>
-                </div>
-              </div>
-
-              <div class="p-4 pt-0 flex items-center justify-between gap-3 border-t border-white/5 mt-2">
-                <span class="text-sm font-black text-white">{{ formatPrice(dish.price) }}</span>
-
-                @if (getItemQty(dish.id) > 0) {
-                  <div class="flex items-center gap-2">
-                    <button (click)="decrementQty(dish.id)"
-                            class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:bg-orange-500 hover:text-white flex items-center justify-center font-bold text-xs cursor-pointer">
-                      −
-                    </button>
-                    <span class="text-xs font-bold text-white w-4 text-center">{{ getItemQty(dish.id) }}</span>
-                    <button (click)="addToCart(dish)"
-                            class="w-7 h-7 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-xs hover:bg-orange-400 cursor-pointer">
-                      +
-                    </button>
-                  </div>
-                } @else {
-                  <button (click)="addToCart(dish)"
-                          class="px-3.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500 hover:text-white text-xs font-bold transition-all cursor-pointer">
-                    + Add to Order
-                  </button>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  </main>
-
-  <!-- ════════════════════════════════════════════════════════════
-       RIGHT CART SIDEBAR — Desktop
-  ═══════════════════════════════════════════════════════════════ -->
-  <aside class="hidden lg:flex flex-col w-72 xl:w-80 shrink-0 border-l border-white/5 bg-[#0d0e12] sticky top-0 h-screen">
-    <div class="p-4 border-b border-white/5 flex items-center justify-between">
-      <span class="text-sm font-bold text-white flex items-center gap-2">
-        <span>🛒 Your Order</span>
-        @if (cartCount() > 0) {
-          <span class="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-black">{{ cartCount() }}</span>
-        }
-      </span>
-
-      <!-- Table Badge -->
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[10px]">
-        <span class="text-gray-500">Table:</span>
-        <span class="text-orange-400 font-bold">{{ tableNumber() > 0 ? (tableNumber() < 10 ? '0' + tableNumber() : tableNumber()) : '01' }}</span>
-      </div>
-    </div>
-
-    <!-- Items list -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-2.5">
-      @if (cartIsEmpty()) {
-        <div class="flex flex-col items-center justify-center h-full text-center py-12">
-          <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xl mb-2">🛒</div>
-          <p class="text-xs text-gray-500 font-semibold">Cart is empty</p>
-        </div>
+        <div class="menu-hero-bg-gradient"></div>
       }
 
-      @for (cartItem of cartItems(); track cartItem.menuItem.id) {
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 border border-white/5">
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-white truncate">{{ cartItem.menuItem.name }}</p>
-            <p class="text-[10px] text-orange-400 font-bold mt-0.5">{{ formatPrice(cartItem.menuItem.price * cartItem.quantity) }}</p>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button (click)="decrementQty(cartItem.menuItem.id)" class="w-6 h-6 rounded-md bg-white/5 text-gray-400 hover:bg-orange-500 hover:text-white flex items-center justify-center text-xs font-bold cursor-pointer">−</button>
-            <span class="text-xs font-bold text-white w-4 text-center">{{ cartItem.quantity }}</span>
-            <button (click)="addToCart(cartItem.menuItem)" class="w-6 h-6 rounded-md bg-orange-500 text-white flex items-center justify-center text-xs font-bold hover:bg-orange-400 cursor-pointer">+</button>
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- Customer Mobile Number & Place Order -->
-    @if (!cartIsEmpty()) {
-      <div class="p-4 border-t border-white/5 space-y-3 bg-[#0f1117]">
-        <div class="space-y-2">
-          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mobile Number *</label>
-          <input type="tel" [ngModel]="customerMobile()" (ngModelChange)="customerMobile.set($event)"
-                 placeholder="e.g. 9876543210"
-                 class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-orange-500/50"/>
-        </div>
-
-        <div class="space-y-1.5 text-xs">
-          <div class="flex justify-between text-gray-400"><span>Subtotal</span><span>{{ formatPrice(cartSubtotal()) }}</span></div>
-          <div class="flex justify-between text-gray-400"><span>Tax (5%)</span><span>{{ formatPrice(cartTax()) }}</span></div>
-          <div class="flex justify-between text-sm font-black text-white pt-1 border-t border-white/5">
-            <span>Total</span><span class="text-orange-400">{{ formatPrice(cartTotal()) }}</span>
-          </div>
-        </div>
-
-        <button (click)="placeOrder()" [disabled]="isPlacingOrder()"
-                class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs transition-all cursor-pointer shadow-lg shadow-orange-500/20 disabled:opacity-60 flex items-center justify-center gap-2">
-          @if (isPlacingOrder()) {
-            <span>Placing Order...</span>
+      <div class="menu-hero-content">
+        <!-- Logo -->
+        <div class="menu-hero-logo">
+          @if (restaurant()?.logo || restaurant()?.logoUrl) {
+            <img [src]="restaurant()?.logo || restaurant()?.logoUrl" [alt]="restaurant()?.name" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>
           } @else {
-            <span>Send Order to Kitchen</span>
-          }
-        </button>
-      </div>
-    }
-  </aside>
-
-  <!-- ════════════════════════════════════════════════════════════
-       LIVE ORDER TRACKER DRAWER
-  ═══════════════════════════════════════════════════════════════ -->
-  @if (showOrderTracker()) {
-    <div class="fixed inset-0 z-[70] flex justify-end">
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-md" (click)="showOrderTracker.set(false)"></div>
-
-      <div class="relative z-10 w-full max-w-md h-full bg-[#0d0e12] border-l border-white/10 p-6 flex flex-col justify-between overflow-y-auto space-y-6">
-        <div>
-          <div class="flex items-center justify-between pb-4 border-b border-white/5">
-            <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>📍 Live Order Tracker</span>
-              </h2>
-              <p class="text-[10px] text-gray-400 mt-0.5">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</p>
-            </div>
-            <button (click)="showOrderTracker.set(false)" class="w-8 h-8 rounded-xl bg-white/5 text-gray-400 hover:text-white flex items-center justify-center cursor-pointer">✕</button>
-          </div>
-
-          @if (activeOrder()) {
-            <div class="mt-6 space-y-6">
-              <!-- Table & Mobile -->
-              <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-zinc-900/60 border border-white/5 text-xs">
-                <div>
-                  <p class="text-[10px] text-gray-500 font-bold uppercase">Table</p>
-                  <p class="text-white font-bold mt-0.5">{{ activeOrder()?.table }}</p>
-                </div>
-                <div>
-                  <p class="text-[10px] text-gray-500 font-bold uppercase">Mobile</p>
-                  <p class="text-orange-400 font-mono font-bold mt-0.5">{{ activeOrder()?.customerMobile }}</p>
-                </div>
-              </div>
-
-              <!-- Status Progress Steps -->
-              <div class="space-y-4">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order Progress</p>
-
-                <div class="space-y-3">
-                  <div class="flex items-center gap-3 p-3 rounded-xl border"
-                       [ngClass]="activeOrder()?.status === 'PENDING' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-zinc-900/40 border-white/5 text-gray-400'">
-                    <span class="w-3 h-3 rounded-full" [ngClass]="activeOrder()?.status === 'PENDING' ? 'bg-amber-400 animate-ping' : 'bg-gray-600'"></span>
-                    <span class="text-xs font-bold">1. Order Placed (Pending Manager Acceptance)</span>
-                  </div>
-
-                  <div class="flex items-center gap-3 p-3 rounded-xl border"
-                       [ngClass]="activeOrder()?.status === 'ACCEPTED' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-zinc-900/40 border-white/5 text-gray-400'">
-                    <span class="w-3 h-3 rounded-full" [ngClass]="activeOrder()?.status === 'ACCEPTED' ? 'bg-blue-400 animate-ping' : 'bg-gray-600'"></span>
-                    <span class="text-xs font-bold">2. Accepted by Manager</span>
-                  </div>
-
-                  <div class="flex items-center gap-3 p-3 rounded-xl border"
-                       [ngClass]="activeOrder()?.status === 'PREPARING' ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' : 'bg-zinc-900/40 border-white/5 text-gray-400'">
-                    <span class="w-3 h-3 rounded-full" [ngClass]="activeOrder()?.status === 'PREPARING' ? 'bg-orange-400 animate-ping' : 'bg-gray-600'"></span>
-                    <span class="text-xs font-bold">3. Preparing in Kitchen</span>
-                  </div>
-
-                  <div class="flex items-center gap-3 p-3 rounded-xl border"
-                       [ngClass]="activeOrder()?.status === 'READY' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-900/40 border-white/5 text-gray-400'">
-                    <span class="w-3 h-3 rounded-full" [ngClass]="activeOrder()?.status === 'READY' ? 'bg-emerald-400 animate-ping' : 'bg-gray-600'"></span>
-                    <span class="text-xs font-bold">4. Ready to Serve</span>
-                  </div>
-
-                  <div class="flex items-center gap-3 p-3 rounded-xl border"
-                       [ngClass]="activeOrder()?.status === 'COMPLETED' ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-zinc-900/40 border-white/5 text-gray-400'">
-                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                    <span class="text-xs font-bold">5. Completed</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Ordered Items -->
-              <div class="space-y-2">
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ordered Dishes</p>
-                <div class="space-y-1.5 p-3 rounded-2xl bg-zinc-900/60 border border-white/5">
-                  @for (item of activeOrder()?.items; track item.name) {
-                    <div class="flex justify-between text-xs text-gray-300">
-                      <span>{{ item.qty }}× {{ item.name }}</span>
-                      <span class="font-bold text-white">₹{{ item.subtotal || (item.price! * item.qty) }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
+            <span style="font-size:28px">🍽</span>
           }
         </div>
 
-        <button (click)="showOrderTracker.set(false)" class="w-full py-3 rounded-xl bg-white/5 text-gray-300 hover:text-white font-bold text-xs border border-white/10 cursor-pointer">
-          Close Tracker
-        </button>
-      </div>
-    </div>
-  }
-
-  <!-- ════════════════════════════════════════════════════════════
-       ORDER SUCCESS MODAL
-  ═══════════════════════════════════════════════════════════════ -->
-  @if (orderPlaced()) {
-    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
-      <div class="relative z-10 w-full max-w-sm rounded-3xl bg-[#0f1117] border border-white/10 p-8 text-center space-y-6 shadow-2xl">
-        <div class="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center text-3xl text-green-400 mx-auto">✓</div>
-        <div class="space-y-2">
-          <h2 class="text-lg font-bold text-white">Order Sent to Kitchen!</h2>
-          <p class="text-xs text-gray-400">Order ID: <span class="text-orange-400 font-mono font-bold">{{ orderId() }}</span></p>
-        </div>
-        <button (click)="closeOrderSuccess()" class="w-full py-3.5 rounded-xl bg-orange-500 text-white font-bold text-xs hover:bg-orange-400 transition-all cursor-pointer">
-          Track Live Order Status
-        </button>
-      </div>
-    </div>
-  }
-
-  <!-- ════════════════════════════════════════════════════════════
-       CUSTOMER ORDER HISTORY MODAL
-  ═══════════════════════════════════════════════════════════════ -->
-  @if (showOrderHistoryModal()) {
-    <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div (click)="closeOrderHistory()" class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
-      
-      <div class="relative z-10 w-full max-w-lg rounded-3xl bg-[#0f1117] border border-white/10 p-6 sm:p-8 space-y-6 shadow-2xl max-h-[85vh] flex flex-col">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b border-white/5 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 text-lg">
-              📋
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-white">My Order History</h3>
-              <p class="text-xs text-gray-400">Your placed orders on this browser</p>
-            </div>
+        <!-- Info -->
+        <div class="menu-hero-info">
+          <h1 class="menu-hero-name">{{ restaurant()?.name }}</h1>
+          @if (restaurant()?.tagline) {
+            <p class="menu-hero-tagline">{{ restaurant()?.tagline }}</p>
+          }
+          <div class="menu-hero-meta">
+            @if (restaurant()?.cuisineType) {
+              <span class="menu-meta-pill">🍜 {{ restaurant()?.cuisineType }}</span>
+            }
+            @if (restaurant()?.rating) {
+              <span class="menu-meta-pill">⭐ {{ restaurant()?.rating }}</span>
+            }
+            @if (restaurant()?.openingHours) {
+              <span class="menu-meta-pill">🕐 {{ restaurant()?.openingHours }}</span>
+            }
+            <!-- Table badge -->
+            @if (tableNumber() > 0) {
+              <span class="menu-meta-pill menu-table-pill" (click)="startEditTable()">
+                🪑 Table {{ tableNumber() }}
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </span>
+            }
           </div>
+        </div>
 
-          <button (click)="closeOrderHistory()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer">
-            ✕
+        <!-- Header actions -->
+        <div class="menu-hero-actions">
+          <button class="menu-icon-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Light mode' : 'Dark mode'">
+            @if (isDarkMode()) {
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z"/></svg>
+            } @else {
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            }
+          </button>
+
+          <!-- Track order -->
+          <button class="menu-icon-btn" (click)="openOrderTracker()" title="Track order">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Orders List -->
-        <div class="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
-          @if (customerOrderHistory().length === 0) {
-            <div class="py-12 text-center space-y-3">
-              <div class="text-4xl text-gray-600">🍽️</div>
-              <p class="text-sm font-bold text-gray-300">No Past Orders Found</p>
-              <p class="text-xs text-gray-500">Orders placed on your mobile will appear here automatically.</p>
-            </div>
-          } @else {
-            @for (order of customerOrderHistory(); track order.id) {
-              <div class="p-4 rounded-2xl bg-zinc-900/60 border border-white/5 space-y-3 hover:border-white/10 transition-all">
-                
-                <!-- Order Top Info -->
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-mono font-bold text-orange-400">#{{ order.orderNumber || order.id }}</span>
-                      <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-300 font-bold border border-white/5">
-                        Table {{ order.table || '01' }}
-                      </span>
-                    </div>
-                    <p class="text-[10px] text-gray-500 mt-1 font-mono">
-                      {{ order.placedAt | date:'short' }}
-                    </p>
-                  </div>
+    <!-- Table number edit modal -->
+    @if (isEditingTable()) {
+      <div class="epi-overlay animate-fade-in" (click)="cancelTableEdit()">
+        <div class="epi-modal" (click)="$event.stopPropagation()">
+          <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 16px">Change Table Number</h3>
+          <input class="epi-input" type="number" min="1" placeholder="Enter table number"
+                 [value]="tableInputValue()" (input)="tableInputValue.set($any($event.target).value)"
+                 (keydown.enter)="confirmTableEdit()" autofocus />
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="epi-btn epi-btn-primary" style="flex:1" (click)="confirmTableEdit()">Confirm</button>
+            <button class="epi-btn epi-btn-secondary" (click)="cancelTableEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    }
 
-                  <!-- Real-time Status Badge -->
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
-                        [ngClass]="{
-                          'bg-amber-500/15 text-amber-400 border-amber-500/30': order.status === 'PENDING',
-                          'bg-blue-500/15 text-blue-400 border-blue-500/30': order.status === 'ACCEPTED',
-                          'bg-orange-500/15 text-orange-400 border-orange-500/30': order.status === 'PREPARING',
-                          'bg-emerald-500/15 text-emerald-400 border-emerald-500/30': order.status === 'READY',
-                          'bg-green-500/15 text-green-400 border-green-500/30': order.status === 'COMPLETED'
-                        }">
-                    {{ order.status }}
-                  </span>
-                </div>
+    <!-- ── Search + Filter bar ── -->
+    <div class="menu-search-bar">
+      <div class="epi-search" style="flex:1">
+        <svg class="epi-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input class="epi-input" type="search" placeholder="Search dishes..."
+               [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
 
-                <!-- Items Breakdown -->
-                <div class="space-y-1 py-2 border-t border-b border-white/5">
-                  @for (item of order.items; track item.name) {
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="text-gray-300">{{ item.qty }}× {{ item.name }}</span>
-                      <span class="text-gray-400 font-mono">₹{{ item.subtotal || ((item.price || 0) * item.qty) }}</span>
-                    </div>
+      <!-- Food type filter -->
+      <div style="display:flex;gap:6px">
+        <button class="menu-type-btn" [class.active]="foodTypeFilter() === 'all'" (click)="setFoodFilter('all')">All</button>
+        <button class="menu-type-btn veg-btn" [class.active]="foodTypeFilter() === 'veg'" (click)="setFoodFilter('veg')">🟢 Veg</button>
+        <button class="menu-type-btn nonveg-btn" [class.active]="foodTypeFilter() === 'non-veg'" (click)="setFoodFilter('non-veg')">🔴 Non-Veg</button>
+      </div>
+    </div>
+
+    <!-- ── Category Tabs ── -->
+    <div class="menu-cat-tabs-wrap">
+      <div class="menu-cat-tabs">
+        <button class="menu-cat-tab" [class.active]="activeCategoryTagId() === 'all'" (click)="selectCategory('all')">
+          🍽 All
+          <span class="cat-count">{{ menuItems().length }}</span>
+        </button>
+        @for (cat of categories(); track cat.id) {
+          <button class="menu-cat-tab" [class.active]="activeCategoryTagId() === cat.id" (click)="selectCategory(cat.id)">
+            {{ cat.name }}
+            @if (categoryItemCount()[cat.id]) {
+              <span class="cat-count">{{ categoryItemCount()[cat.id] }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── Offers banner ── -->
+    @if (activeOffers().length > 0) {
+      <div class="menu-offers-scroll">
+        @for (offer of activeOffers(); track offer.id) {
+          <div class="menu-offer-card">
+            <div style="font-size:20px;margin-bottom:6px">🎉</div>
+            <div style="font-size:13px;font-weight:700;color:#fff">{{ offer.title }}</div>
+            @if (offer.description) {
+              <div style="font-size:11px;color:#A1A1AA;margin-top:2px">{{ offer.description }}</div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Menu Items Grid ── -->
+    <div class="menu-content">
+      @if (filteredDishes().length === 0) {
+        <div class="epi-empty" style="padding:80px 20px">
+          <div class="epi-empty-icon">🍽</div>
+          <div class="epi-empty-title">No dishes found</div>
+          <div class="epi-empty-desc">Try adjusting your search or filter</div>
+        </div>
+      } @else {
+        <div class="menu-dishes-grid">
+          @for (dish of filteredDishes(); track dish.id) {
+            @if (dish.isAvailable) {
+              <div class="menu-dish-card">
+                <!-- Image -->
+                <div class="menu-dish-img-wrap" (click)="addToCart(dish)">
+                  @if (dish.image) {
+                    <img [src]="dish.image" [alt]="dish.name" class="menu-dish-img" />
+                  } @else {
+                    <div class="menu-dish-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--bg-input)">🍽</div>
+                  }
+                  @if (dish.isPopular) {
+                    <div class="menu-dish-popular-badge">🔥 Popular</div>
                   }
                 </div>
 
-                <!-- Footer & Actions -->
-                <div class="flex items-center justify-between pt-1">
-                  <div>
-                    <span class="text-[10px] text-gray-500 uppercase font-bold">Total</span>
-                    <p class="text-sm font-black text-white font-mono">₹{{ order.totalPrice || order.totalAmount || 0 }}</p>
+                <!-- Body -->
+                <div class="menu-dish-body">
+                  <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
+                    <span class="veg-dot" [class.veg]="dish.isVeg" [class.nonveg]="!dish.isVeg" style="margin-top:3px;flex-shrink:0"></span>
+                    <span class="menu-dish-name">{{ dish.name }}</span>
                   </div>
+                  @if (dish.description) {
+                    <p class="menu-dish-desc">{{ dish.description }}</p>
+                  }
 
-                  <div class="flex items-center gap-2">
-                    <button (click)="trackSpecificOrder(order)"
-                            class="px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 hover:bg-orange-500/20 text-xs font-bold transition-all cursor-pointer">
-                      Track Progress
-                    </button>
-                    <button (click)="reorderItems(order)"
-                            class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 text-xs font-bold transition-all cursor-pointer">
-                      Re-order 🛒
-                    </button>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+                    <span class="menu-dish-price">{{ formatPrice(dish.price) }}</span>
+
+                    <!-- Add to cart / qty control -->
+                    @if (getItemQty(dish.id) === 0) {
+                      <button class="menu-add-btn" (click)="addToCart(dish)">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                          <path stroke-linecap="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add
+                      </button>
+                    } @else {
+                      <div class="qty-control">
+                        <button class="qty-btn" (click)="decrementQty(dish.id)">−</button>
+                        <span class="qty-count">{{ getItemQty(dish.id) }}</span>
+                        <button class="qty-btn" style="background:var(--primary);border-color:var(--primary);color:#fff" (click)="addToCart(dish)">+</button>
+                      </div>
+                    }
                   </div>
                 </div>
-
               </div>
             }
           }
         </div>
-
-        <!-- Close button -->
-        <button (click)="closeOrderHistory()" class="w-full py-3 rounded-xl bg-white/5 text-gray-300 hover:text-white font-bold text-xs border border-white/10 cursor-pointer">
-          Close History
-        </button>
-
-      </div>
+      }
     </div>
+
+    <!-- ── Sticky Bottom Cart Bar ── -->
+    @if (!cartIsEmpty()) {
+      <div class="menu-cart-bar" (click)="showMobileCart.set(true)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="menu-cart-count-badge">{{ cartCount() }}</div>
+          <span style="font-size:14px;font-weight:600;color:#fff">View Cart</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:15px;font-weight:800;color:#fff">{{ formatPrice(cartTotal()) }}</span>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+            <path stroke-linecap="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    }
+
+    <!-- ── Cart Drawer ── -->
+    @if (showMobileCart()) {
+      <div class="menu-cart-overlay" (click)="showMobileCart.set(false)"></div>
+    }
+    <div class="cart-drawer" [class.open]="showMobileCart()">
+      <div class="cart-drawer-header">
+        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0">
+          Your Cart
+          @if (cartCount() > 0) { <span style="font-size:14px;color:#71717A;font-weight:400">({{ cartCount() }} items)</span> }
+        </h3>
+        <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showMobileCart.set(false)">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="cart-drawer-body">
+        @if (cartIsEmpty()) {
+          <div class="epi-empty" style="padding:40px 16px">
+            <div class="epi-empty-icon">🛒</div>
+            <div class="epi-empty-title">Your cart is empty</div>
+            <div class="epi-empty-desc">Add dishes from the menu to get started</div>
+          </div>
+        } @else {
+          <!-- Cart items -->
+          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+            @for (cartItem of cartItems(); track cartItem.menuItem.id) {
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-card);border-radius:12px">
+                @if (cartItem.menuItem.image) {
+                  <img [src]="cartItem.menuItem.image" [alt]="cartItem.menuItem.name"
+                       style="width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0"/>
+                }
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cartItem.menuItem.name }}</div>
+                  <div style="font-size:13px;font-weight:700;color:#FF6B35;margin-top:2px">{{ formatPrice(cartItem.menuItem.price * cartItem.quantity) }}</div>
+                </div>
+                <div class="qty-control">
+                  <button class="qty-btn" (click)="decrementQty(cartItem.menuItem.id)">−</button>
+                  <span class="qty-count">{{ cartItem.quantity }}</span>
+                  <button class="qty-btn" style="background:var(--primary);border-color:var(--primary);color:#fff" (click)="addToCart(cartItem.menuItem)">+</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Special instructions -->
+          <div class="epi-form-group" style="margin-bottom:16px">
+            <label class="epi-label">Special Instructions</label>
+            <textarea class="epi-input" rows="2" placeholder="Any special requests?"
+                      [value]="specialInstructions()" (input)="specialInstructions.set($any($event.target).value)"></textarea>
+          </div>
+        }
+      </div>
+
+      <!-- Cart Footer -->
+      @if (!cartIsEmpty()) {
+        <div class="cart-drawer-footer">
+          <!-- Price breakdown -->
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#A1A1AA">
+              <span>Subtotal</span><span>{{ formatPrice(cartSubtotal()) }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#A1A1AA">
+              <span>Tax (5%)</span><span>{{ formatPrice(cartTax()) }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#fff;padding-top:8px;border-top:1px solid var(--border)">
+              <span>Total</span><span style="color:#FF6B35">{{ formatPrice(cartTotal()) }}</span>
+            </div>
+          </div>
+
+          <!-- Customer details -->
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+            <input class="epi-input" type="tel" placeholder="Mobile Number *"
+                   [value]="customerMobile()" (input)="customerMobile.set($any($event.target).value)" />
+            <input class="epi-input" type="text" placeholder="Your Name (optional)"
+                   [value]="customerName()" (input)="customerName.set($any($event.target).value)" />
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="epi-btn epi-btn-ghost" (click)="clearCart()" style="flex-shrink:0">Clear</button>
+            <button class="epi-btn epi-btn-primary w-full" (click)="placeOrder()" [disabled]="isPlacingOrder()">
+              @if (isPlacingOrder()) {
+                <svg class="animate-spin-slow" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                  <path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                Placing order...
+              } @else {
+                Place Order · {{ formatPrice(cartTotal()) }}
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ── Order Success ── -->
+    @if (orderPlaced()) {
+      <div class="epi-overlay animate-fade-in">
+        <div class="epi-modal animate-slide-up" style="text-align:center">
+          <div style="font-size:56px;margin-bottom:16px">🎉</div>
+          <h3 style="font-size:20px;font-weight:800;color:#fff;margin:0 0 8px">Order Placed!</h3>
+          <p style="font-size:14px;color:#A1A1AA;margin:0 0 8px">Your order has been confirmed</p>
+          <div class="epi-badge epi-badge-success" style="margin:0 auto 20px">Order #{{ orderId() }}</div>
+          <p style="font-size:13px;color:#71717A;margin:0 0 20px">Estimated time: ~{{ estimatedMinutes() }} minutes</p>
+          <button class="epi-btn epi-btn-primary w-full" (click)="closeOrderSuccess()">Track My Order</button>
+        </div>
+      </div>
+    }
+
+    <!-- ── Order Tracker ── -->
+    @if (showOrderTracker() && activeOrder()) {
+      <div class="epi-overlay animate-fade-in">
+        <div class="epi-modal animate-slide-up">
+          <div class="epi-modal-header">
+            <h3 class="epi-modal-title">Order Status</h3>
+            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showOrderTracker.set(false)">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div style="text-align:center;margin-bottom:20px">
+            <div class="epi-badge epi-badge-primary" style="margin:0 auto 8px">{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
+            <div class="order-status-display"
+                 [class.status-pending]="activeOrder()?.status === 'PENDING'"
+                 [class.status-preparing]="activeOrder()?.status === 'PREPARING'"
+                 [class.status-ready]="activeOrder()?.status === 'READY'"
+                 [class.status-completed]="activeOrder()?.status === 'COMPLETED'">
+              @if (activeOrder()?.status === 'PENDING' || activeOrder()?.status === 'pending') { 🔔 Order Received }
+              @else if (activeOrder()?.status === 'PREPARING') { 👨‍🍳 Being Prepared }
+              @else if (activeOrder()?.status === 'READY') { ✅ Ready for Pickup! }
+              @else if (activeOrder()?.status === 'COMPLETED') { ✓ Completed }
+              @else { {{ activeOrder()?.status }} }
+            </div>
+          </div>
+
+          <!-- Status steps -->
+          <div class="order-tracker-steps">
+            <div class="tracker-step" [class.done]="true">
+              <div class="tracker-dot done">✓</div>
+              <div class="tracker-label">Order Placed</div>
+            </div>
+            <div class="tracker-line" [class.done]="activeOrder()?.status !== 'PENDING'"></div>
+            <div class="tracker-step" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
+              <div class="tracker-dot" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
+                @if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') { ✓ } @else { 2 }
+              </div>
+              <div class="tracker-label">Preparing</div>
+            </div>
+            <div class="tracker-line" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'"></div>
+            <div class="tracker-step" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
+              <div class="tracker-dot" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
+                @if (activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') { ✓ } @else { 3 }
+              </div>
+              <div class="tracker-label">Ready!</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:20px">
+            <button class="epi-btn epi-btn-secondary epi-btn-sm" (click)="refreshActiveOrderStatus()">Refresh Status</button>
+            <button class="epi-btn epi-btn-ghost epi-btn-sm" (click)="openOrderHistory()">Order History</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Order Lookup Modal ── -->
+    @if (showTrackLookupModal()) {
+      <div class="epi-overlay animate-fade-in">
+        <div class="epi-modal animate-slide-up">
+          <div class="epi-modal-header">
+            <h3 class="epi-modal-title">Track Your Order</h3>
+            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showTrackLookupModal.set(false)">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="epi-form-group" style="margin-bottom:16px">
+            <label class="epi-label">Mobile Number or Order ID</label>
+            <input class="epi-input" type="text" placeholder="Enter mobile number or order ID"
+                   [value]="lookupQuery()" (input)="lookupQuery.set($any($event.target).value)"
+                   (keydown.enter)="lookupOrders()" />
+          </div>
+          <button class="epi-btn epi-btn-primary w-full" (click)="lookupOrders()" [disabled]="isTracking()">
+            @if (isTracking()) { Searching... } @else { Find Order }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── Order History Modal ── -->
+    @if (showOrderHistoryModal()) {
+      <div class="epi-overlay animate-fade-in">
+        <div class="epi-modal animate-slide-up" style="max-width:500px">
+          <div class="epi-modal-header">
+            <h3 class="epi-modal-title">Order History</h3>
+            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="closeOrderHistory()">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          @if (customerOrderHistory().length === 0) {
+            <div class="epi-empty" style="padding:32px"><div class="epi-empty-icon">📋</div><div class="epi-empty-title">No orders yet</div></div>
+          } @else {
+            <div style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto">
+              @for (ord of customerOrderHistory(); track ord.id) {
+                <div style="padding:14px;background:var(--bg-input);border-radius:12px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span style="font-size:13px;font-weight:600;color:#fff">{{ ord.orderNumber || ord.id }}</span>
+                    <span class="epi-badge"
+                          [class.status-pending]="ord.status === 'PENDING'"
+                          [class.status-preparing]="ord.status === 'PREPARING'"
+                          [class.status-ready]="ord.status === 'READY'"
+                          [class.status-completed]="ord.status === 'COMPLETED'">
+                      {{ ord.status }}
+                    </span>
+                  </div>
+                  <div style="font-size:12px;color:#71717A;margin-bottom:10px">{{ ord.items.length }} items · Table {{ ord.tableNumber }}</div>
+                  <div style="display:flex;gap:8px">
+                    <button class="epi-btn epi-btn-sm epi-btn-secondary" (click)="trackSpecificOrder(ord)">Track</button>
+                    <button class="epi-btn epi-btn-sm" style="background:var(--primary);color:#fff" (click)="reorderItems(ord)">Reorder</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
   }
 </div>

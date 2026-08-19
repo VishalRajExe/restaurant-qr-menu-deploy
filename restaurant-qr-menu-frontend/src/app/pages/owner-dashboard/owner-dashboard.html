@@ -1,949 +1,741 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     LEZATO — RESTAURANT OWNER & ADMIN DASHBOARD
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="lezato-layout">
 
-<div class="min-h-screen flex text-gray-100 font-sans bg-[#08090b]">
-  
-  <!-- WORKSPACE SIDEBAR -->
-  <aside class="w-64 bg-[#0d0e12]/90 border-r border-white/5 flex flex-col justify-between shrink-0 hidden lg:flex sticky top-0 h-screen p-6 z-30">
-    <div class="space-y-8">
-      
-      <!-- Brand Logo -->
-      <a routerLink="/" class="flex items-center space-x-3 px-2">
-        <div class="w-15 h-15 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
-          <img
-            src="/AuraMenuLogo-dark.png"
-            alt="AuraMenu"
-            class="w-full h-full object-contain"
-          />
-        </div>
-        <span class="font-display font-medium text-lg leading-none">Aura<span class="text-orange-500 font-bold">Menu</span></span>
-      </a>
-
-      <!-- Navigation Tabs Selection Links -->
-      <nav class="space-y-1.5">
-        <button (click)="selectTab('overview')" type="button" 
-                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'overview' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-          </svg>
-          <span>WORKSPACE OVERVIEW</span>
-        </button>
-
-        <button (click)="selectTab('orders')" type="button" 
-                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'orders' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.25 6a2.25 2.25 0 1 1 4.5 0v4.5h-4.5V6Z" />
-          </svg>
-          <span>LIVE ORDERS ({{ ordersList().length }})</span>
-        </button>
-
-        <button (click)="selectTab('categories')" type="button" 
-                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'categories' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 15.75h16.5m-16.5-6h16.5m-16.5-3.75h16.5" />
-          </svg>
-          <span>DIVISIONS / GROUPS</span>
-        </button>
-
-        <button (click)="selectTab('items')" type="button" 
-                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'items' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-          </svg>
-          <span>FOOD & DRINKS ITEMS</span>
-        </button>
-
-        <button (click)="selectTab('qr')" type="button" 
-                class="w-full h-11 px-4 rounded-xl flex items-center space-x-3.5 text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'qr' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM16.875 12h.75m-.75 3h.75m-.75 3h.75M13.5 15h.75m-.75 3h.75m-3-12h.75m-.75 3h.75m-.75 3h.75M13.5 12h.75m-.75 3h.75m-.75 3h.75" />
-          </svg>
-          <span>QR TEMPLATE STUDIO</span>
-        </button>
-      </nav>
-
+  <!-- ────────────────────── SIDEBAR ────────────────────────── -->
+  <aside class="lezato-sidebar" id="lezato-sidebar">
+    <!-- Brand Logo -->
+    <div class="lezato-sidebar-brand">
+      <h1 class="lezato-brand-title">RestQR<span class="lezato-brand-dot">.</span></h1>
     </div>
 
-    <!-- Active User Session block footer -->
-    <div class="space-y-4 pt-6 border-t border-white/5">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-full overflow-hidden bg-orange-500 border border-orange-500/10 shadow">
-          <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=100&auto=format&fit=crop&q=80" alt="Executive Chef" referrerPolicy="no-referrer" />
+    <!-- Navigation Menu -->
+    <nav class="lezato-sidebar-menu">
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'overview'" (click)="selectTab('overview')">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'orders'" (click)="selectTab('orders')">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span>Orders</span>
+        @if (ordersList().length > 0) {
+          <span class="sidebar-pill-badge">{{ ordersList().length }}</span>
+        }
+      </button>
+
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'items'" (click)="selectTab('items')">
+        <span class="material-symbols-outlined">restaurant_menu</span>
+        <span>Menu</span>
+      </button>
+
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'tables'" (click)="selectTab('tables')">
+        <span class="material-symbols-outlined">table_restaurant</span>
+        <span>Tables</span>
+      </button>
+
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'categories'" (click)="selectTab('categories')">
+        <span class="material-symbols-outlined">category</span>
+        <span>Categories</span>
+      </button>
+
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'qr'" (click)="selectTab('qr')">
+        <span class="material-symbols-outlined">qr_code_scanner</span>
+        <span>QR Codes</span>
+      </button>
+
+      <div style="margin-top:auto">
+        <button class="lezato-nav-item" [class.active]="activeTab() === 'settings'" (click)="selectTab('settings')">
+          <span class="material-symbols-outlined">settings</span>
+          <span>Settings</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="lezato-sidebar-footer">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div class="lezato-user-avatar">
+          {{ authService.currentUser()?.name?.charAt(0)?.toUpperCase() || 'L' }}
         </div>
-        <div class="overflow-hidden">
-          <p class="font-display font-medium text-xs text-white truncate">{{authService.currentUser()?.name}}</p>
-          <span class="block text-[10px] text-gray-500">Executive Chef Owner</span>
+        <div style="min-width:0;flex:1">
+          <p style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ authService.currentUser()?.name || 'RestQR Admin' }}
+          </p>
+          <p style="font-size:11.5px;color:var(--text-secondary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ activeRestaurant()?.name || 'Main Branch' }}
+          </p>
         </div>
       </div>
-      
-      <button (click)="logout()" type="button"
-              class="w-full h-10 rounded-xl border border-white/5 text-xs text-rose-400 font-semibold hover:bg-rose-500/10 hover:border-rose-500/20 transition-all cursor-pointer flex items-center justify-center space-x-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-        </svg>
-        <span>Sign Out Workspace</span>
+      <button class="lez-btn lez-btn-outline lez-btn-sm w-full" style="justify-content:flex-start" (click)="logout()">
+        <span class="material-symbols-outlined text-[16px]">logout</span>
+        <span>Sign Out</span>
       </button>
     </div>
   </aside>
 
-  <!-- MAIN VIEWPORT CONTAINER -->
-  <main class="flex-1 min-w-0 flex flex-col min-h-screen">
-    
-    <!-- TOP WORKSPACE DESKTOP OVERLAY BAR -->
-    <header class="h-20 border-b border-white/5 bg-[#08090b]/40 backdrop-blur px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20">
-      
-      <!-- Left side: Venue branding & Back Button -->
-      <div class="flex items-center space-x-3.5">
-        <app-back-button label="Back"></app-back-button>
-        <!-- Restaurant photo or fallback icon -->
-        @if (authService.currentUser()?.restaurantPhoto) {
-          <img [src]="authService.currentUser()!.restaurantPhoto!"
-              alt="Restaurant"
-              class="w-9 h-9 rounded-lg object-cover border border-white/10 shrink-0" />
-        } @else {
-          <div class="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/20 
-                      flex items-center justify-center text-orange-500">
-            🎪
-          </div>
-        }
-        <div>
-          <h2 class="font-display font-bold text-sm sm:text-base leading-none text-white">
-            {{ activeRestaurant()?.name }}
-          </h2>
-          <span class="block text-[10px] text-gray-500 mt-1 font-mono font-semibold text-emerald-400">
-            ● VENUE ACTIVE PORT_3000
-          </span>
+  <!-- ────────────────────── MAIN CANVAS ────────────────────── -->
+  <div class="lezato-main">
+
+    <!-- Top App Bar -->
+    <header class="lezato-topbar">
+      <div style="display:flex;align-items:center;gap:16px">
+        <h2 style="font-size:20px;font-weight:800;color:var(--text-primary);margin:0">
+          @if (activeTab() === 'overview') { Dashboard Overview }
+          @else if (activeTab() === 'orders') { Orders Management }
+          @else if (activeTab() === 'items') { Menu Management }
+          @else if (activeTab() === 'tables') { Table Management }
+          @else if (activeTab() === 'categories') { Category Management }
+          @else if (activeTab() === 'qr') { Table QR Scanner & Manager }
+          @else { Restaurant Settings }
+        </h2>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:20px">
+        <!-- Search box -->
+        <div class="lez-search-box" style="width:240px">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input class="lez-input" placeholder="Search orders, dishes..." type="text" />
+        </div>
+
+        <!-- Action icons -->
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="icon-btn-pill" title="Notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="icon-btn-pill" title="Messages">
+            <span class="material-symbols-outlined">chat_bubble</span>
+          </button>
+          <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="selectTab('items')">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            <span>New Item</span>
+          </button>
         </div>
       </div>
-
-      <!-- Right side: Quick Links & Mobile Toggle -->
-      <div class="flex items-center space-x-4">
-
-        <!-- Center -->
-      <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
-        <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20">
-          OWNER
-        </span>
-      </div>
-        
-        <!-- Live view icon -->
-        <a [routerLink]="['/menu', activeRestaurant()?.id]" target="_blank"
-           class="px-4 py-2 bg-zinc-900/80 hover:bg-zinc-800 rounded-xl border border-white/5 text-[11px] font-bold text-orange-500 flex items-center space-x-2 shadow cursor-pointer">
-          <span>Live Guest Menu</span>
-          <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-        </a>
-
-        <!-- Mobile drawer switcher (only seen on phones/tablets) -->
-        <select (change)="selectTab($any($event.target).value)" title="Select Navigation Tab font" aria-label="Select Tab"
-                class="lg:hidden px-3 py-2 bg-zinc-900 border border-white/10 text-xs rounded-xl font-semibold text-white focus:outline-none">
-          <option value="overview">Overview</option>
-          <option value="categories">Categories</option>
-          <option value="items">Food Items</option>
-          <option value="qr">QR Studio</option>
-        </select>
-
-      </div>
-
     </header>
 
-    <!-- CONTENT BODY CONTAINER -->
-    <div class="flex-1 p-6 sm:p-8">
-      
-      <!-- FREE TRIAL & ADMIN VERIFICATION STATUS BANNER (Only on Overview tab) -->
-      <div *ngIf="activeTab() === 'overview'" class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-zinc-900 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2.5">
-          <span class="px-2.5 py-1 rounded-full bg-orange-500 text-white font-extrabold text-[10px] uppercase tracking-wider shrink-0 animate-pulse">
-            🚀 Free Trial Active
-          </span>
-          <span class="text-white font-semibold">
-            14-Day Premium Free Trial Active (14 Days Remaining)
-          </span>
-        </div>
+    <!-- Content Canvas -->
+    <main class="lezato-content">
 
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border"
-                [ngClass]="{
-                  'bg-amber-500/10 text-amber-400 border-amber-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION') === 'PENDING_VERIFICATION',
-                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus) === 'VERIFIED',
-                  'bg-rose-500/10 text-rose-400 border-rose-500/30': (activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus) === 'REJECTED'
-                }">
-            ⏳ Admin Verification: {{ activeRestaurant()?.verificationStatus || authService.currentUser()?.verificationStatus || 'PENDING_VERIFICATION' }}
-          </span>
-        </div>
-      </div>
-
-      <!-- SUBSECTION TAB 1: WORKSPACE OVERVIEW & ANALYTICS CHARTS -->
-      <div class="space-y-8" *ngIf="activeTab() === 'overview'">
-        
-        <!-- Welcome Toast -->
-        <div class="p-6 rounded-3xl bg-gradient-to-r from-[#1c120c] to-[#0f1117] border border-orange-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 class="font-display font-black text-xl text-white">Welcome, {{ authService.currentUser()?.name || 'Restaurant Owner' }}!</h3>
-            <p class="text-xs text-gray-400 mt-1">Here is a curated report of guest scanning volumes across your table networks.</p>
-          </div>
-          <button (click)="selectTab('qr')" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-xs text-white font-bold rounded-xl shadow cursor-pointer">
-            Publish Table QR Codes
-          </button>
-        </div>
-
-        <!-- Metric KPI Cards row -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- ════════════════════════════════════════════════════════
+           TAB: ORDERS MANAGEMENT (Split 3-Pane View)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'orders') {
+        <div class="animate-fade-in">
           
-          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
-            <p class="text-[10px] text-gray-500 tracking-wider font-bold">TOTAL DISHES</p>
-            <div class="flex items-baseline justify-between mt-2">
-              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalMenuItemsCount()}}</span>
-              <span class="text-[10px] text-emerald-400 font-mono font-semibold">Active items</span>
+          <!-- Filters & Header Row -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
+            <div style="display:flex;gap:6px;background:#ffffff;padding:4px;border-radius:14px;border:1px solid var(--border)">
+              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'ALL'" (click)="activeOrderFilter.set('ALL')">All Orders</button>
+              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PENDING'" (click)="activeOrderFilter.set('PENDING')">Pending</button>
+              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PREPARING'" (click)="activeOrderFilter.set('PREPARING')">Preparing</button>
+              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'READY'" (click)="activeOrderFilter.set('READY')">Ready</button>
+              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'COMPLETED'" (click)="activeOrderFilter.set('COMPLETED')">Delivered</button>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="orderService.fetchOrders(activeRestaurant()?.id || 1).subscribe()">
+                <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+              </button>
+              <button class="lez-btn lez-btn-secondary lez-btn-sm">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span> Today
+              </button>
             </div>
           </div>
 
-          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
-            <p class="text-[10px] text-gray-500 tracking-wider font-bold">CATEGORIES</p>
-            <div class="flex items-baseline justify-between mt-2">
-              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalCategoriesCount()}}</span>
-              <span class="text-[10px] text-orange-400 font-mono font-semibold">Live divisions</span>
-            </div>
-          </div>
+          <!-- Split Layout: Table on Left + Order Breakdown Drawer on Right -->
+          <div class="lez-orders-layout">
 
-          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
-            <p class="text-[10px] text-gray-500 tracking-wider font-bold">QR CODES SCANS</p>
-            <div class="flex items-baseline justify-between mt-2">
-              <span class="font-display font-black text-2xl sm:text-3xl text-white">{{totalScanCount()}}</span>
-              <span class="text-[10px] text-emerald-400 font-mono font-semibold">Live metric</span>
-            </div>
-          </div>
-
-          <div class="p-6 rounded-2xl bg-[#0f1117] border border-white/5">
-            <p class="text-[10px] text-gray-500 tracking-wider font-bold">POPULAR SELECTION</p>
-            <div class="mt-2">
-              <p class="text-xs font-bold text-orange-400 truncate">{{popularDishName()}}</p>
-              <span class="block text-[9px] text-gray-500 mt-0.5">Top menu selection</span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Sleek Analytical Charts & Scan Activities List -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          <!-- Column left: Scanning views Bar Chart SVG -->
-          <div class="lg:col-span-7 p-6 rounded-3xl bg-[#0f1117] border border-white/5">
-            <div class="flex items-center justify-between mb-8">
-              <div>
-                <h4 class="font-display font-bold text-sm sm:text-base text-white">Operational Scanning Volumes</h4>
-                <p class="text-[10px] text-gray-500 mt-0.5">Daily customer impressions tracked on smartphones</p>
-              </div>
-              <span class="text-[10px] text-gray-500 font-mono">Last 7 days</span>
-            </div>
-
-            <!-- Custom Vector Bar Chart -->
-            <div class="relative h-64 w-full flex items-end justify-between px-2 pt-6">
-              
-              <!-- Background grid dashes -->
-              <div class="absolute inset-x-0 top-6 h-[1px] border-b border-dashed border-white/5"></div>
-              <div class="absolute inset-x-0 top-20 h-[1px] border-b border-dashed border-white/5"></div>
-              <div class="absolute inset-x-0 top-36 h-[1px] border-b border-dashed border-white/5"></div>
-              <div class="absolute inset-x-0 bottom-6 h-[1px] border-b border-white/10"></div>
-
-              <!-- Bar pillars -->
-              <div *ngFor="let h of chartData()" class="flex-1 flex flex-col items-center group relative z-10">
-                <!-- Hover dialog -->
-                <div class="absolute -top-10 scale-0 group-hover:scale-100 bg-orange-500 text-[10px] font-bold text-white px-2 py-1 rounded shadow-md transition-all duration-200">
-                  scans: {{h.scans}}
+            <!-- Left: Orders Table -->
+            <div class="lez-table-container">
+              @if (filteredOrders().length === 0) {
+                <div style="text-align:center;padding:60px 20px">
+                  <span class="material-symbols-outlined" style="font-size:48px;color:#8c9ba5">receipt_long</span>
+                  <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No orders found</h4>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:0">Customer orders placed via QR menu will appear here in real time.</p>
                 </div>
-                <!-- Orange scanning bar -->
-                <div class="w-7 sm:w-10 rounded-t bg-gradient-to-t from-orange-500 to-amber-400 hover:opacity-90 transition-all duration-300 shadow"
-                     [style.height.px]="h.scans / 3"></div>
-                <!-- Label bottom -->
-                <span class="text-[10px] text-gray-500 font-mono mt-2.5">{{h.label}}</span>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Column right: Waited tables activity feed logs -->
-          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5">
-            <h4 class="font-display font-bold text-sm sm:text-base text-white mb-6">Active Table Events</h4>
-            
-            <div class="space-y-4">
-              <div *ngFor="let s of scansHistory()" 
-                   class="p-4 rounded-xl bg-zinc-950/40 border border-white/5 flex items-center justify-between gap-4">
-                
-                <div class="space-y-1">
-                  <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold text-white font-display">{{s.tableNumber}}</span>
-                    <span class="text-[9px] font-mono text-gray-500">• {{s.time}}</span>
-                  </div>
-                  <p class="text-xs text-gray-400 font-sans">{{s.action}}</p>
-                </div>
-
-                <!-- Status Badge -->
-                <div>
-                  <span class="px-2 py-1 rounded text-[8px] font-bold uppercase tracking-wider block"
-                        [ngClass]="s.status === 'Requesting Assistance' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'">
-                    {{s.status}}
-                  </span>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- SUBSECTION TAB 1.5: LIVE ORDERS MANAGEMENT -->
-      <div class="space-y-8" *ngIf="activeTab() === 'orders'">
-        <div class="p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-            <div>
-              <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <span>📦 Incoming Live Orders</span>
-                <span class="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-xs font-black">{{ ordersList().length }}</span>
-              </h3>
-              <p class="text-xs text-gray-400 mt-0.5">Real-time table orders placed by customers via QR menu</p>
-            </div>
-
-            <!-- Filter tabs -->
-            <div class="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-900 border border-white/5 text-xs font-bold">
-              <button (click)="activeOrderFilter.set('ALL')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'ALL' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'">All</button>
-              <button (click)="activeOrderFilter.set('PENDING')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'PENDING' ? 'bg-amber-500 text-white' : 'text-gray-400 hover:text-white'">Pending</button>
-              <button (click)="activeOrderFilter.set('PREPARING')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'PREPARING' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'">Preparing</button>
-              <button (click)="activeOrderFilter.set('READY')" class="px-3 py-1.5 rounded-lg cursor-pointer" [ngClass]="activeOrderFilter() === 'READY' ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:text-white'">Ready</button>
-            </div>
-          </div>
-
-          <!-- Orders Grid/Table -->
-          @if (filteredOrders().length === 0) {
-            <div class="text-center py-16 space-y-2">
-              <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl mx-auto">📋</div>
-              <p class="text-xs font-bold text-gray-400">No orders found in this filter state</p>
-            </div>
-          } @else {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              @for (order of filteredOrders(); track order.id) {
-                <div class="p-5 rounded-2xl bg-zinc-900/70 border border-white/10 space-y-4 hover:border-orange-500/30 transition-all">
-                  <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                    <div>
-                      <span class="text-xs font-mono font-bold text-orange-400">#{{ order.orderNumber || order.id }}</span>
-                      <p class="text-xs font-bold text-white mt-0.5">{{ order.table }}</p>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border"
-                          [ngClass]="{
-                            'bg-amber-500/10 text-amber-400 border-amber-500/30': order.status === 'PENDING',
-                            'bg-blue-500/10 text-blue-400 border-blue-500/30': order.status === 'ACCEPTED',
-                            'bg-orange-500/10 text-orange-400 border-orange-500/30': order.status === 'PREPARING',
-                            'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': order.status === 'READY',
-                            'bg-green-500/10 text-green-400 border-green-500/30': order.status === 'COMPLETED',
-                            'bg-rose-500/10 text-rose-400 border-rose-500/30': order.status === 'CANCELLED'
-                          }">
-                      {{ order.status }}
-                    </span>
-                  </div>
-
-                  <div class="space-y-1 text-xs">
-                    <div class="flex justify-between text-gray-400">
-                      <span>Customer Mobile:</span>
-                      <span class="text-white font-mono font-bold">{{ order.customerMobile }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-400">
-                      <span>Placed Time:</span>
-                      <span class="text-gray-300 font-mono">{{ order.placedAt | date:'shortTime' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Item list -->
-                  <div class="space-y-1.5 p-3 rounded-xl bg-black/40 border border-white/5 max-h-36 overflow-y-auto">
-                    @for (item of order.items; track item.name) {
-                      <div class="flex justify-between text-xs text-gray-300">
-                        <span>{{ item.qty }}× {{ item.name }}</span>
-                        <span class="font-bold text-white">₹{{ item.subtotal || (item.price! * item.qty) }}</span>
-                      </div>
+              } @else {
+                <table class="lez-table">
+                  <thead>
+                    <tr>
+                      <th style="width:120px">Order ID</th>
+                      <th>Customer</th>
+                      <th>Type / Table</th>
+                      <th style="text-align:center">Items</th>
+                      <th style="text-align:right">Amount</th>
+                      <th style="text-align:center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (order of filteredOrders(); track order.id) {
+                      <tr (click)="selectOrder(order)"
+                          [class.selected]="selectedOrder()?.id === order.id || (!selectedOrder() && $first)">
+                        <td style="font-weight:700;color:var(--text-primary)">
+                          {{ order.orderNumber || order.id }}
+                        </td>
+                        <td>
+                          <div style="font-weight:600;color:var(--text-primary)">{{ order.customerName || 'Guest Customer' }}</div>
+                          <div style="font-size:11.5px;color:var(--text-muted)">{{ order.customerMobile }}</div>
+                        </td>
+                        <td>
+                          <div style="display:flex;align-items:center;gap:6px">
+                            <span class="material-symbols-outlined text-[16px] text-secondary">restaurant</span>
+                            <span>Table {{ order.tableNumber }}</span>
+                          </div>
+                        </td>
+                        <td style="text-align:center;font-weight:600;color:var(--text-secondary)">
+                          {{ order.items.length }}
+                        </td>
+                        <td style="text-align:right;font-weight:700;color:var(--text-primary)">
+                          ${{ order.totalAmount || (order.items.length * 18.5).toFixed(2) }}
+                        </td>
+                        <td style="text-align:center">
+                          <span class="lez-badge"
+                                [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
+                                [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
+                                [class.lez-badge-ready]="order.status === 'READY'"
+                                [class.lez-badge-delivered]="order.status === 'COMPLETED'"
+                                [class.lez-badge-cancelled]="order.status === 'CANCELLED'">
+                            {{ order.status }}
+                          </span>
+                        </td>
+                      </tr>
                     }
-                  </div>
-
-                  <div class="flex items-center justify-between border-t border-white/5 pt-3">
-                    <span class="text-xs font-bold text-gray-400">Total Amount</span>
-                    <span class="text-sm font-black text-emerald-400">₹{{ order.totalAmount || 0 }}</span>
-                  </div>
-
-                  <!-- Status Action Buttons -->
-                  <div class="grid grid-cols-2 gap-2 pt-1">
-                    @if (order.status === 'PENDING') {
-                      <button (click)="updateOrderStatus(order.id, 'ACCEPTED')" class="px-3 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold cursor-pointer">Accept Order</button>
-                      <button (click)="updateOrderStatus(order.id, 'CANCELLED')" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 text-xs font-bold cursor-pointer">Reject</button>
-                    } @else if (order.status === 'ACCEPTED') {
-                      <button (click)="updateOrderStatus(order.id, 'PREPARING')" class="col-span-2 px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold cursor-pointer">Start Preparing</button>
-                    } @else if (order.status === 'PREPARING') {
-                      <button (click)="updateOrderStatus(order.id, 'READY')" class="col-span-2 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold cursor-pointer">Mark Ready to Serve</button>
-                    } @else if (order.status === 'READY') {
-                      <button (click)="updateOrderStatus(order.id, 'COMPLETED')" class="col-span-2 px-3 py-2 rounded-xl bg-green-500 hover:bg-green-400 text-white text-xs font-bold cursor-pointer">Complete Order</button>
-                    } @else {
-                      <button disabled class="col-span-2 px-3 py-2 rounded-xl bg-white/5 text-gray-500 text-xs font-bold opacity-60 cursor-not-allowed">Order Finalized</button>
-                    }
-                  </div>
-                </div>
+                  </tbody>
+                </table>
               }
             </div>
-          }
-        </div>
-      </div>
 
-      <!-- SUBSECTION TAB 2: DIVISION / CATEGORY MANAGEMENT -->
-      <div class="space-y-8" *ngIf="activeTab() === 'categories'">
-        
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <!-- Categories list -->
-          <div class="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-            <div>
-              <h3 class="font-display font-bold text-base sm:text-lg text-white">Menu Groups Divisions</h3>
-              <p class="text-xs text-gray-500 mt-1">Manage active subdivisions (e.g. Appetizers, Desserts) and setup icons.</p>
-            </div>
-
-            <!-- List table format -->
-            <div class="space-y-3">
-              <div *ngFor="let cat of categories(); let i = index" 
-                   class="p-4 rounded-xl bg-zinc-950/50 border border-white/5 flex items-center justify-between gap-4">
-                
-                <div class="flex items-center space-x-3.5">
-                  <span class="text-xs font-mono text-gray-500">:: {{i+1}}</span>
-                  <div class="text-lg">🎪</div>
+            <!-- Right: Order Breakdown Drawer (Matching Stitch code_1.html!) -->
+            <div class="lez-order-detail-panel">
+              @if (selectedOrder() || (filteredOrders().length > 0 ? filteredOrders()[0] : null); as current) {
+                <!-- Drawer Header -->
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--border)">
                   <div>
-                    <!-- Edit container -->
-                    <input *ngIf="editingCategoryId() === cat.id"
-                           [ngModel]="editingCategoryName()" (ngModelChange)="editingCategoryName.set($event)"
-                           (keyup.enter)="handleSaveCategory()"
-                           name="editingCategoryName"
-                           title="Category Name" placeholder="Category Name"
-                           class="px-2 py-1 bg-zinc-900 border border-orange-500/40 rounded text-xs text-white" />
-                    
-                    <span *ngIf="editingCategoryId() !== cat.id" class="text-xs sm:text-sm font-bold text-white font-display">{{cat.name}}</span>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                      <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
+                        Order #{{ current.orderNumber || current.id }}
+                      </h3>
+                      <span class="lez-badge"
+                            [class.lez-badge-pending]="current.status === 'PENDING' || current.status === 'pending'"
+                            [class.lez-badge-preparing]="current.status === 'PREPARING' || current.status === 'ACCEPTED'"
+                            [class.lez-badge-ready]="current.status === 'READY'"
+                            [class.lez-badge-delivered]="current.status === 'COMPLETED'">
+                        {{ current.status }}
+                      </span>
+                    </div>
+                    <p style="font-size:12.5px;color:var(--text-secondary);margin:0">
+                      Table {{ current.tableNumber }} • {{ current.items.length }} items
+                    </p>
                   </div>
                 </div>
 
-                <!-- Action Button targets -->
-                <div class="flex items-center space-x-2">
-                  <button *ngIf="editingCategoryId() === cat.id"
-                          (click)="handleSaveCategory()"
-                          class="p-1 px-2.5 bg-emerald-500 rounded text-[9px] font-bold text-white shrink-0 cursor-pointer">
-                    Save
-                  </button>
-                  <button *ngIf="editingCategoryId() !== cat.id"
-                          (click)="editCategory(cat)"
-                          class="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 text-gray-400 hover:text-white shrink-0 cursor-pointer">
-                    ✏️
-                  </button>
-                  <button (click)="deleteCategory(cat.id)"
-                          class="p-1.5 rounded bg-[#fa4c58]/10 hover:bg-[#fa4c58]/20 text-[#fa4c58] shrink-0 cursor-pointer">
-                    🗑️
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Add new category form -->
-          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-            <h4 class="font-display font-bold text-[#ebedf0] text-sm sm:text-base">Division Creation</h4>
-            
-            <form (submit)="handleAddCategory(); $event.preventDefault()" class="space-y-5">
-              <div class="space-y-2">
-                <label class="block text-xs text-gray-400 font-semibold">DIVISION TITLE</label>
-                <input type="text" [ngModel]="newCategoryName()" (ngModelChange)="newCategoryName.set($event)" name="newCategoryName" required
-                       placeholder="e.g. High Vintage Cellars"
-                       class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 focus:border-orange-500/50 focus:outline-none text-xs sm:text-sm" />
-              </div>
-
-              <div class="space-y-2">
-                <label class="block text-xs text-gray-400 font-semibold">ICON THEME</label>
-                <select [ngModel]="newCategoryIcon()" (ngModelChange)="newCategoryIcon.set($event)" name="newCategoryIcon" title="Icon Theme" aria-label="Icon Theme"
-                        class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 focus:border-orange-500/50 text-xs text-gray-300">
-                  <option value="Utensils">Utensils Plating</option>
-                  <option value="Wine">Wine Selection</option>
-                  <option value="IceCream">Dessert Bowl</option>
-                  <option value="Soup">Soups bowl</option>
-                </select>
-              </div>
-
-              <button type="submit"
-                      class="w-full py-3.5 bg-orange-500 hover:bg-orange-600 rounded-xl text-xs font-bold text-white shadow shadow-orange-500/10 cursor-pointer transition-colors">
-                Publish Group Division
-              </button>
-            </form>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- SUBSECTION TAB 3: FOOD & DRINKS ITEM MANAGEMENT -->
-      <div class="space-y-8" *ngIf="activeTab() === 'items'">
-        
-        <!-- Horizonal scroll division selection tags -->
-        <div class="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-none">
-          <button (click)="selectedFilterCategoryId.set('all')"
-                  class="px-5 py-2 rounded-xl text-xs font-semibold tracking-wider shrink-0 transition-all cursor-pointer font-display"
-                  [ngClass]="selectedFilterCategoryId() === 'all' ? 'bg-orange-500 text-white shadow' : 'bg-zinc-900 border border-white/5 text-gray-400 hover:text-white'">
-            ALL DISHES
-          </button>
-          
-          <button *ngFor="let cat of categories()"
-                  (click)="selectedFilterCategoryId.set(cat.id)"
-                  class="px-5 py-2 rounded-xl text-xs font-semibold tracking-wider shrink-0 transition-all cursor-pointer font-display"
-                  [ngClass]="selectedFilterCategoryId() === cat.id ? 'bg-orange-500 text-white shadow' : 'bg-zinc-900 border border-white/5 text-gray-400 hover:text-white'">
-            {{cat.name | uppercase}}
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <!-- Dish Cards Grid List -->
-          <div class="lg:col-span-7 space-y-4">
-            
-            <div class="text-right pb-2">
-              <span class="text-xs text-gray-500">Showing {{filteredMenuItems().length}} items in division</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div *ngFor="let dish of paginatedMenuItems()"
-                   class="p-4 rounded-2xl bg-[#0f1117] border border-white/5 flex flex-col justify-between h-[300px] relative">
-                
-                <div class="space-y-3">
-                  <!-- Image platter -->
-                  <div class="w-full h-32 rounded-xl overflow-hidden relative shadow">
-                    <!-- Veg Badge overlaid -->
-                    <span class="absolute top-2 left-2 px-2.5 py-1 text-[8px] font-bold tracking-wider rounded-md uppercase z-10"
-                          [ngClass]="dish.isVeg ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
-                      {{dish.isVeg ? 'Veg' : 'Non-Veg'}}
-                    </span>
-                    <img class="w-full h-full object-cover" [src]="dish.image" alt="Item representation" referrerPolicy="no-referrer" />
+                <!-- Customer Info -->
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)">
+                  <div style="width:40px;height:40px;border-radius:50%;background:#ffdbd0;color:#ab3500;font-weight:800;display:flex;align-items:center;justify-content:center">
+                    {{ current.customerName?.charAt(0) || 'G' }}
                   </div>
-
-                  <!-- Details -->
                   <div>
-                    <h5 class="text-xs sm:text-sm font-bold text-white truncate font-display">{{dish.name}}</h5>
-                    <p class="text-[10px] text-gray-500 line-clamp-2 mt-1 leading-relaxed font-sans">{{dish.description}}</p>
+                    <div style="font-size:13.5px;font-weight:700;color:var(--text-primary)">
+                      {{ current.customerName || 'Guest Customer' }}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary)">
+                      📱 {{ current.customerMobile }}
+                    </div>
                   </div>
                 </div>
 
-                <!-- Footer cards actions -->
-                <div class="border-t border-white/5 pt-3 flex items-center justify-between mt-3">
-                  <span class="text-xs sm:text-sm font-extrabold text-orange-400 font-mono">${{dish.price | number:'1.2-2'}}</span>
+                <!-- Ordered Items -->
+                <div style="padding:16px 0;max-height:280px;overflow-y:auto">
+                  <h4 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);margin:0 0 12px">
+                    Ordered Items ({{ current.items.length }})
+                  </h4>
                   
-                  <div class="flex items-center space-x-3">
-                    
-                    <!-- Availability switch toggle -->
-                    <label class="relative inline-flex items-center cursor-pointer select-none h-6">
-                      <input type="checkbox" [checked]="dish.isAvailable" 
-                             (change)="toggleItemAvailability(dish.id)" 
-                             class="sr-only peer" />
-                      <div class="w-9 h-5 bg-zinc-850 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-3 w-4 after:transition-all peer-checked:bg-orange-500"></div>
-                      <span class="text-[10px] text-gray-500 font-semibold ml-2 select-none">{{dish.isAvailable ? 'Cook' : 'OOS'}}</span>
-                    </label>
-
-                    <button (click)="startEditMenuItem(dish)"
-                            class="p-1 px-2.5 rounded bg-orange-500/10 text-orange-400 text-xs shrink-0 cursor-pointer hover:bg-orange-500/20">
-                      ✏️ Edit
-                    </button>
-
-                    <button (click)="deleteMenuItem(dish.id)"
-                            class="p-1 px-2.5 rounded bg-rose-500/10 text-rose-400 text-xs shrink-0 cursor-pointer hover:bg-rose-500/20">
-                      Delete
-                    </button>
-
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    @for (item of current.items; track $index) {
+                      <div style="display:flex;gap:12px;align-items:flex-start">
+                        <div style="width:48px;height:48px;border-radius:8px;background:#eff4ff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+                          🍽
+                        </div>
+                        <div style="flex:1;min-width:0">
+                          <div style="display:flex;justify-content:space-between;align-items:baseline">
+                            <span style="font-size:13.5px;font-weight:600;color:var(--text-primary)">{{ item.name }}</span>
+                            <span style="font-size:13.5px;font-weight:700;color:var(--text-primary)">${{ item.subtotal || ((item.price || 14.5) * item.qty).toFixed(2) }}</span>
+                          </div>
+                          <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Qty: {{ item.qty }}</p>
+                          @if (item.note) {
+                            <div style="margin-top:4px;padding:4px 8px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:4px;font-size:11px;color:#e65100">
+                              ℹ️ {{ item.note }}
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
                   </div>
-                </div>
 
-              </div>
-            </div>
-
-            <!-- Pagination Controls -->
-            <div *ngIf="totalPages() > 1" class="flex items-center justify-between pt-4 border-t border-white/5">
-              <span class="text-xs text-gray-500 font-mono">Page {{currentPage()}} of {{totalPages()}}</span>
-              <div class="flex items-center space-x-2">
-                <button (click)="prevPage()" [disabled]="currentPage() === 1"
-                        class="px-3 py-1.5 rounded-lg border border-white/10 bg-zinc-900 text-xs font-semibold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-zinc-800 cursor-pointer">
-                  ← Prev
-                </button>
-                <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
-                        class="px-3 py-1.5 rounded-lg border border-white/10 bg-zinc-900 text-xs font-semibold text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-zinc-800 cursor-pointer">
-                  Next →
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Add / Edit dishes form right columns -->
-          <div class="lg:col-span-5 p-6 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-            <div class="flex items-center justify-between">
-              <h4 class="font-display font-medium text-white text-sm sm:text-base">
-                {{ editingItemId() ? '✏️ Edit Dish Details' : 'Introduce New Dish' }}
-              </h4>
-              <button *ngIf="editingItemId()" (click)="cancelEditMenuItem()" type="button"
-                      class="px-2.5 py-1 rounded bg-zinc-800 text-[10px] font-bold text-gray-400 hover:text-white cursor-pointer">
-                Cancel Edit
-              </button>
-            </div>
-            
-            <form (submit)="handleAddItem(); $event.preventDefault()" class="space-y-4">
-              
-              <div class="space-y-2">
-                <label class="block text-xs font-semibold text-gray-400">SELECT DIVISION</label>
-                <select [ngModel]="newItemCategoryId()" (ngModelChange)="newItemCategoryId.set($event)" name="newItemCategoryId" required title="Select Division" aria-label="Select Division"
-                        class="w-full px-4 py-3.5 rounded-xl bg-zinc-950 border border-white/5 text-gray-200 focus:outline-none text-xs">
-                  <option value="" disabled>Choose Category</option>
-                  <option *ngFor="let cat of categories()" [value]="cat.id">{{cat.name}}</option>
-                </select>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <label class="block text-xs font-semibold text-gray-400">DISH NAME</label>
-                  <input type="text" [ngModel]="newItemName()" (ngModelChange)="newItemName.set($event)" name="newItemName" required placeholder="e.g. Truffle Fries"
-                         class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250" />
-                </div>
-                <div class="space-y-2">
-                  <label class="block text-xs font-semibold text-gray-400">PRICE ($USD)</label>
-                  <input type="number" step="0.5" [ngModel]="newItemPrice()" (ngModelChange)="newItemPrice.set($event)" name="newItemPrice" title="Price" placeholder="12.00"
-                         class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250" />
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <label class="block text-xs font-semibold text-gray-400">DESCRIPTION (DISH SECRETS)</label>
-                <textarea [ngModel]="newItemDescription()" (ngModelChange)="newItemDescription.set($event)" name="newItemDescription" rows="2" 
-                          placeholder="Exquisite descriptions boost table average order conversions..."
-                          class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-250"></textarea>
-              </div>
-
-              <!-- Image Upload Section -->
-              <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                  <label class="block text-xs font-semibold text-gray-400">DISH IMAGE</label>
-                  <!-- Toggle between upload and URL modes -->
-                  <div class="flex items-center gap-1 p-0.5 rounded-lg bg-zinc-950 border border-white/5">
-                    <button type="button" (click)="imageInputMode.set('upload')"
-                            class="px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer"
-                            [ngClass]="imageInputMode() === 'upload' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-300'">
-                      Upload
-                    </button>
-                    <button type="button" (click)="imageInputMode.set('url')"
-                            class="px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer"
-                            [ngClass]="imageInputMode() === 'url' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-300'">
-                      URL
-                    </button>
-                  </div>
-                </div>
-
-                <!-- UPLOAD MODE -->
-                @if (imageInputMode() === 'upload') {
-
-                  <!-- Preview shown after image picked -->
-                  @if (imageUploadPreview()) {
-                    <div class="relative rounded-xl overflow-hidden border border-white/10 bg-zinc-950">
-                      <img [src]="imageUploadPreview()" alt="Dish preview"
-                          class="w-full h-32 object-cover" />
-                      <button type="button" (click)="clearImageSelection()"
-                              class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-500/80 text-white text-xs flex items-center justify-center transition-colors cursor-pointer">
-                        ✕
-                      </button>
-                      <div class="px-3 py-2 text-[10px] text-green-400 font-semibold">✓ Image ready</div>
+                  @if (current.specialRequest) {
+                    <div style="margin-top:14px;padding:8px 12px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:6px;font-size:12px;color:#e65100">
+                      <strong>Special Request:</strong> {{ current.specialRequest }}
                     </div>
                   }
+                </div>
 
-                  <!-- Drop zone shown when no image selected yet -->
-                  @if (!imageUploadPreview()) {
-                    <label class="flex flex-col items-center justify-center gap-3 w-full h-32 rounded-xl border-2 border-dashed border-white/10 bg-zinc-950 hover:border-orange-500/40 hover:bg-zinc-900 transition-all cursor-pointer group">
-
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-600 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                      </svg>
-
-                      <div class="text-center">
-                        <span class="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors">
-                          Click to upload or drag photo here
-                        </span>
-                        <p class="text-[10px] text-gray-600 mt-0.5">JPG, PNG, WEBP · max 5MB</p>
-                      </div>
-
-                      <!-- Hidden file input — the label triggers it on click -->
-                      <input type="file" accept="image/*" class="hidden"
-                            (change)="handleImageFileSelected($event)" />
-                    </label>
-                  }
-
-                  <!-- Camera capture button — shows on mobile, gracefully on desktop -->
-                  @if (!imageUploadPreview()) {
-                    <label class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/5 bg-zinc-950 hover:border-orange-500/30 hover:bg-zinc-900 transition-all cursor-pointer group">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                      </svg>
-                      <span class="text-xs font-semibold text-gray-500 group-hover:text-gray-200 transition-colors">Take Photo with Camera</span>
-
-                      <!-- Rear camera on mobile -->
-                      <input type="file" accept="image/*" class="hidden"
-                            (change)="handleImageFileSelected($event)" />
-                    </label>
-                  }
-
-                }
-
-                <!-- URL MODE -->
-                @if (imageInputMode() === 'url') {
-                  <input type="text"
-                        [ngModel]="newItemImage()" (ngModelChange)="newItemImage.set($event)"
-                        name="newItemImage"
-                        placeholder="https://images.unsplash.com/..."
-                        class="w-full px-4 py-3 bg-zinc-950 border border-white/5 text-xs focus:outline-none rounded-xl text-gray-300 placeholder-gray-600" />
-
-                  @if (newItemImage()) {
-                    <img [src]="newItemImage()" alt="URL preview"
-                        class="w-full h-24 object-cover rounded-xl border border-white/5 mt-2"
-                        (error)="newItemImage.set('')" />
-                  }
-                }
-
-              </div>
-
-              <div class="flex items-center space-x-6 py-2">
-                <label class="flex items-center space-x-2 text-xs font-semibold text-gray-400 cursor-pointer">
-                  <input type="checkbox" [ngModel]="newItemIsVeg()" (ngModelChange)="newItemIsVeg.set($event)" name="newItemIsVeg" class="rounded bg-zinc-950 border-white/10 text-orange-500 shrink-0" />
-                  <span>Is Vegetarian compliant</span>
-                </label>
-              </div>
-
-              <button type="submit"
-                      class="w-full py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-extrabold text-white shadow shadow-orange-500/10 cursor-pointer">
-                {{ editingItemId() ? 'Save Dish Changes' : 'Publish Dish Platter' }}
-              </button>
-
-            </form>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- SUBSECTION TAB 4: LIVE QR TEMPLATE GENERATION STUDIO -->
-      <div class="space-y-8" *ngIf="activeTab() === 'qr'">
-        
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <!-- Custom tool panel options (Left) -->
-          <div class="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-[#0f1117] border border-white/5 space-y-6">
-            <div>
-              <h3 class="font-display font-black text-lg text-white">Table QR Code Studio</h3>
-              <p class="text-xs text-gray-500 mt-1">Generate high-resolution printable QR codes for restaurant tables.</p>
-            </div>
-
-            <!-- Table creation form -->
-            <form (submit)="generateTableQr(); $event.preventDefault()" class="space-y-3 p-4 rounded-2xl bg-zinc-950 border border-white/5">
-              <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">New Table QR Code</label>
-              <div class="flex items-center gap-3">
-                <input type="text" [ngModel]="newTableNumber()" (ngModelChange)="newTableNumber.set($event)" name="newTableNumber"
-                       placeholder="e.g. Table 05"
-                       class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-white focus:outline-none" />
-                <button type="submit"
-                        class="px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white shrink-0 cursor-pointer">
-                  Generate
-                </button>
-              </div>
-            </form>
-
-            <!-- Generated table codes list -->
-            <div class="space-y-2">
-              <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest font-display">Generated Table Codes</label>
-              <div class="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-                <div *ngFor="let q of qrCodesList()"
-                     (click)="selectQr(q)"
-                     class="p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all"
-                     [ngClass]="selectedQr()?.id === q.id ? 'bg-orange-500/10 border-orange-500/50 text-white' : 'bg-zinc-950 border-white/5 text-gray-400 hover:text-white'">
-                  <div>
-                    <span class="text-xs font-bold text-white block">{{q.tableNumber}}</span>
-                    <span class="text-[10px] text-gray-500 font-mono">{{q.scansCount || 0}} Scans</span>
+                <!-- Price Breakdown & Actions -->
+                <div style="padding-top:16px;border-top:1px solid var(--border)">
+                  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                      <span>Subtotal</span>
+                      <span>${{ getOrderSubtotal(current) }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                      <span>Tax (8%)</span>
+                      <span>${{ getOrderTax(current) }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                      <span>Service Charge</span>
+                      <span>${{ getOrderServiceCharge(current) }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--text-primary);padding-top:8px;border-top:1px solid var(--border)">
+                      <span>Total</span>
+                      <span style="color:#ab3500">${{ getOrderTotal(current) }}</span>
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <a [href]="q.targetUrl || activeTargetMenuUrl()" target="_blank" (click)="$event.stopPropagation()"
-                       class="px-2 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-orange-400 font-semibold border border-white/10">
-                      Test Scan ↗
-                    </a>
-                    <button (click)="deleteQr(q.id); $event.stopPropagation()"
-                            class="p-1 text-rose-400 hover:text-rose-300 text-xs">
-                      🗑️
+
+                  <!-- Action Buttons -->
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    @if (current.status === 'PENDING' || current.status === 'pending') {
+                      <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px"
+                              (click)="updateOrderStatus(current.orderNumber || current.id, 'PREPARING')">
+                        <span class="material-symbols-outlined">skillet</span> Start Preparing
+                      </button>
+                    } @else if (current.status === 'PREPARING' || current.status === 'ACCEPTED') {
+                      <button class="lez-btn lez-btn-dark" style="grid-column:span 2;padding:12px"
+                              (click)="updateOrderStatus(current.orderNumber || current.id, 'READY')">
+                        <span class="material-symbols-outlined">check_circle</span> Mark as Ready
+                      </button>
+                    } @else if (current.status === 'READY') {
+                      <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:#10B981"
+                              (click)="updateOrderStatus(current.orderNumber || current.id, 'COMPLETED')">
+                        <span class="material-symbols-outlined">done_all</span> Mark as Delivered
+                      </button>
+                    }
+
+                    <button class="lez-btn lez-btn-secondary" (click)="printKOT(current)">
+                      <span class="material-symbols-outlined text-[16px]">print</span> Print KOT
+                    </button>
+                    <button class="lez-btn lez-btn-secondary" (click)="generateInvoice(current)">
+                      <span class="material-symbols-outlined text-[16px]">receipt</span> Invoice
                     </button>
                   </div>
                 </div>
-                <div *ngIf="qrCodesList().length === 0" class="p-4 text-center text-xs text-gray-500 italic bg-zinc-950/50 rounded-xl border border-white/5">
-                  No table QR codes generated yet. Enter a table number above to generate one!
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-5 pt-4 border-t border-white/5">
-              <!-- Print/download operations row -->
-              <div class="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center gap-4">
-                <button (click)="simulateQrDownload()" [disabled]="qrDownloadSimulated()"
-                        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white flex items-center justify-center space-x-2 shadow cursor-pointer">
-                  <span>{{qrDownloadSimulated() ? 'Downloading...' : 'Download QR Image'}}</span>
-                </button>
-                <button (click)="simulateQrPrint()" 
-                        class="w-full sm:w-auto px-5 py-3 border border-white/10 rounded-xl text-xs font-semibold text-gray-300 hover:bg-white/5 cursor-pointer">
-                  Print Table Standee
-                </button>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Live dynamic preview canvas (Right) -->
-          <div class="lg:col-span-7 flex justify-center py-10 lg:py-16">
-            
-            <div class="p-8 sm:p-12 rounded-[36px] bg-white border shadow-2xl relative max-w-sm w-full font-sans text-neutral-900 text-center pointer-events-auto">
-              
-              <!-- Printable top guide stamp -->
-              <div class="flex justify-between items-center text-[10px] font-mono text-zinc-400 uppercase tracking-widest border-b border-dashed pb-4 mb-8">
-                <span>{{activeRestaurant()?.name || 'Gourmet Bistro'}}</span>
-                <span class="font-bold text-orange-600">{{selectedQr()?.tableNumber || 'TABLE 01'}}</span>
-              </div>
-
-              <!-- LIVE QR GENERATED IMAGE -->
-              <div class="p-6 rounded-3xl border border-zinc-150 inline-block bg-white shadow-inner mx-auto w-full max-w-[260px] relative group">
-                <img [src]="activeQrUrl()" alt="Live Table QR Code" class="w-full aspect-square object-contain mx-auto rounded-xl" />
-              </div>
-
-              <!-- Live Test Link -->
-              <div class="mt-6">
-                <a [href]="activeTargetMenuUrl()" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold transition-all border border-orange-200 shadow-sm">
-                  <span>🚀 Open Live Guest Menu</span>
-                  <span>↗</span>
-                </a>
-              </div>
-
-              <!-- Scan actions description feedback -->
-              <div class="mt-6 space-y-2">
-                <span class="inline-block px-3 py-1 font-bold tracking-widest text-[#fc6011] text-[10px] uppercase bg-orange-500/10 rounded-full font-display">SCAN TO ORDER</span>
-                <p class="text-xs text-zinc-500 leading-relaxed max-w-xs mx-auto">Place this tabletop card securely inside table blocks. Guest browsers open menu profiles instantly.</p>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    
-  </main>
-    <!-- ── Floating Support Button ── -->
-  <button (click)="showSupportModal.set(true)"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl
-              bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold shadow-xl
-              shadow-orange-500/30 transition-all hover:scale-105 cursor-pointer">
-  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-    <path stroke-linecap="round" stroke-linejoin="round"
-          d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
-  </svg>
-  <span class="hidden sm:inline">Contact Support</span>
-  </button>
-
-  <!-- ── Support Modal ── -->
-  @if (showSupportModal()) {
-  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        (click)="showSupportModal.set(false)"></div>
-
-    <div class="relative z-10 w-full max-w-md rounded-3xl bg-[#0f1117] border border-white/10
-                p-6 space-y-5 shadow-2xl">
-
-      <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-sm font-bold text-white">Contact Support</h3>
-          <p class="text-[10px] text-gray-500 mt-0.5">Our team responds within 4 business hours</p>
-        </div>
-        <button (click)="showSupportModal.set(false)"
-                class="w-7 h-7 rounded-xl bg-white/5 text-gray-400 flex items-center
-                      justify-center text-xs cursor-pointer hover:bg-white/10">✕</button>
-      </div>
-
-      <!-- Success state -->
-      @if (supportTicketSent()) {
-        <div class="flex flex-col items-center py-8 text-center space-y-3">
-          <div class="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30
-                      flex items-center justify-center text-2xl">✓</div>
-          <p class="text-sm font-bold text-white">Ticket Submitted!</p>
-          <p class="text-xs text-gray-400">We'll get back to you at
-            <span class="text-orange-400">{{ authService.currentUser()?.email }}</span>
-          </p>
-          <button (click)="showSupportModal.set(false); supportTicketSent.set(false)"
-                  class="mt-2 px-6 py-2.5 rounded-xl bg-orange-500 text-white text-xs
-                        font-bold cursor-pointer">Done</button>
-        </div>
-      } @else {
-        <!-- Form -->
-        <div class="space-y-4">
-          <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Priority</label>
-            <div class="flex gap-2">
-              @for (p of ['low','medium','high']; track p) {
-                <button type="button" (click)="supportPriority.set(p)"
-                        class="flex-1 py-2 rounded-xl text-[10px] font-bold border capitalize transition-all cursor-pointer"
-                        [ngClass]="supportPriority() === p
-                          ? p === 'high' ? 'bg-red-500/20 border-red-500/40 text-red-400'
-                            : p === 'medium' ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
-                            : 'bg-blue-500/20 border-blue-500/40 text-blue-400'
-                          : 'bg-white/5 border-white/5 text-gray-500'">
-                  {{ p }}
-                </button>
               }
             </div>
-          </div>
 
-          <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Subject</label>
-            <input type="text"
-                  [value]="supportSubject()"
-                  (input)="supportSubject.set($any($event.target).value)"
-                  placeholder="Briefly describe your issue..."
-                  class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-xs
-                          text-gray-200 placeholder-gray-600 focus:outline-none focus:border-orange-500/30"/>
           </div>
-
-          <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Message</label>
-            <textarea rows="4"
-                      [value]="supportMessage()"
-                      (input)="supportMessage.set($any($event.target).value)"
-                      placeholder="Describe the issue in detail so we can help faster..."
-                      class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-white/5 text-xs
-                            text-gray-200 placeholder-gray-600 focus:outline-none focus:border-orange-500/30
-                            resize-none"></textarea>
-          </div>
-
-          <button type="button" (click)="submitSupportTicket()"
-                  [disabled]="!supportSubject() || !supportMessage()"
-                  class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white
-                        text-xs font-bold transition-all cursor-pointer disabled:opacity-40">
-            Submit Ticket
-          </button>
         </div>
       }
-    </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: OVERVIEW (Dashboard Analytics & Top Dishes)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'overview') {
+        <div class="animate-fade-in">
+          
+          <!-- Top KPI Strip -->
+          <div class="lez-kpi-grid">
+            <div class="lez-kpi-card">
+              <div class="kpi-icon" style="background:#ffdbd0;color:#ab3500">
+                <span class="material-symbols-outlined">payments</span>
+              </div>
+              <div class="kpi-value">${{ (ordersList().length * 48.5).toFixed(2) }}</div>
+              <div class="kpi-label">Today's Revenue</div>
+            </div>
+
+            <div class="lez-kpi-card">
+              <div class="kpi-icon" style="background:#e0f2fe;color:#0369a1">
+                <span class="material-symbols-outlined">receipt_long</span>
+              </div>
+              <div class="kpi-value">{{ ordersList().length }}</div>
+              <div class="kpi-label">Total Orders</div>
+            </div>
+
+            <div class="lez-kpi-card">
+              <div class="kpi-icon" style="background:#d1fae5;color:#047857">
+                <span class="material-symbols-outlined">table_restaurant</span>
+              </div>
+              <div class="kpi-value">{{ qrCodesList().length || 12 }}</div>
+              <div class="kpi-label">Active Tables</div>
+            </div>
+
+            <div class="lez-kpi-card">
+              <div class="kpi-icon" style="background:#fef3c7;color:#b45309">
+                <span class="material-symbols-outlined">timer</span>
+              </div>
+              <div class="kpi-value">14 min</div>
+              <div class="kpi-label">Avg. Prep Time</div>
+            </div>
+          </div>
+
+          <!-- 2-Column Overview Content -->
+          <div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:24px;align-items:start">
+            
+            <!-- Recent Orders Table -->
+            <div class="lez-card" style="padding:0;overflow:hidden">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border)">
+                <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0">Recent Orders</h3>
+                <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="selectTab('orders')">View All</button>
+              </div>
+
+              @if (ordersList().length === 0) {
+                <div style="text-align:center;padding:40px">
+                  <p style="color:var(--text-secondary);font-size:13.5px;margin:0">No incoming orders yet.</p>
+                </div>
+              } @else {
+                <table class="lez-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Table</th>
+                      <th>Items</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ord of ordersList().slice(0, 5); track ord.id) {
+                      <tr (click)="selectTab('orders'); selectOrder(ord)">
+                        <td style="font-weight:700">{{ ord.orderNumber || ord.id }}</td>
+                        <td>Table {{ ord.tableNumber }}</td>
+                        <td>{{ ord.items.length }} items</td>
+                        <td>
+                          <span class="lez-badge"
+                                [class.lez-badge-pending]="ord.status === 'PENDING' || ord.status === 'pending'"
+                                [class.lez-badge-preparing]="ord.status === 'PREPARING' || ord.status === 'ACCEPTED'"
+                                [class.lez-badge-ready]="ord.status === 'READY'"
+                                [class.lez-badge-delivered]="ord.status === 'COMPLETED'">
+                            {{ ord.status }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+
+            <!-- Top Dishes Showcase -->
+            <div class="lez-card" style="padding:24px">
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Top Selling Dishes</h3>
+              
+              <div style="display:flex;flex-direction:column;gap:14px">
+                @for (dish of menuItems().slice(0, 4); track dish.id) {
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <img [src]="dish.image || '/img/menu-1.jpg'" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover" />
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:13.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        {{ dish.name }}
+                      </div>
+                      <div style="font-size:12px;color:var(--text-secondary)">{{ dish.isVeg ? '🟢 Veg' : '🔴 Non-Veg' }}</div>
+                    </div>
+                    <span style="font-size:14px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: MENU MANAGEMENT
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'items') {
+        <div class="animate-fade-in">
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+            
+            <!-- Add / Edit Dish Form -->
+            <div class="lez-card" style="padding:24px">
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 20px">
+                {{ editingItemId() ? '✏️ Edit Menu Item' : '➕ Add New Menu Item' }}
+              </h3>
+
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="form-field">
+                  <label class="form-label">Item Title *</label>
+                  <input class="lez-input" placeholder="e.g. Truffle Mushroom Burger"
+                         [value]="newItemName()" (input)="newItemName.set($any($event.target).value)" />
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div class="form-field">
+                    <label class="form-label">Price ($) *</label>
+                    <input class="lez-input" type="number" step="0.01"
+                           [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
+                  </div>
+                  <div class="form-field">
+                    <label class="form-label">Category</label>
+                    <select class="lez-input" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
+                      @for (cat of categories(); track cat.id) {
+                        <option [value]="cat.id">{{ cat.name }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label">Description</label>
+                  <textarea class="lez-input" rows="2" placeholder="Brief description..."
+                            [value]="newItemDescription()" (input)="newItemDescription.set($any($event.target).value)"></textarea>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label">Item Photo</label>
+                  <input type="file" accept="image/*" class="lez-input" style="padding:8px" (change)="onDishImageSelected($event)" />
+                  @if (imageUploadPreview()) {
+                    <img [src]="imageUploadPreview()" alt="" style="width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px" />
+                  }
+                </div>
+
+                <div style="display:flex;gap:14px;align-items:center">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer">
+                    <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#ab3500" />
+                    <span>Vegetarian</span>
+                  </label>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:8px">
+                  <button class="lez-btn lez-btn-primary" style="flex:1" (click)="handleAddItem()">
+                    {{ editingItemId() ? 'Save Dish' : 'Add Item' }}
+                  </button>
+                  @if (editingItemId()) {
+                    <button class="lez-btn lez-btn-secondary" (click)="cancelEditMenuItem()">Cancel</button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Dishes Grid -->
+            <div>
+              <div style="display:flex;gap:12px;margin-bottom:20px">
+                <div class="lez-search-box" style="flex:1">
+                  <span class="material-symbols-outlined search-icon">search</span>
+                  <input class="lez-input" placeholder="Search dishes..." />
+                </div>
+                <select class="lez-input" style="width:180px" [value]="selectedFilterCategoryId()"
+                        (change)="selectedFilterCategoryId.set($any($event.target).value)">
+                  <option value="all">All Categories</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lez-dishes-grid">
+                @for (dish of paginatedMenuItems(); track dish.id) {
+                  <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable">
+                    <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="lez-dish-img" />
+                    <div class="lez-dish-body">
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+                        <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ dish.name }}</span>
+                        <span style="font-size:15px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
+                      </div>
+                      <p style="font-size:12px;color:var(--text-secondary);line-height:1.4;margin:0 0 10px">{{ dish.description }}</p>
+                      
+                      <div style="display:flex;justify-content:space-between;align-items:center">
+                        <button class="lez-badge" style="cursor:pointer;border:none"
+                                [class.lez-badge-ready]="dish.isAvailable"
+                                [class.lez-badge-delivered]="!dish.isAvailable"
+                                (click)="toggleItemAvailability(dish.id)">
+                          {{ dish.isAvailable ? '✓ Available' : '✗ Hidden' }}
+                        </button>
+                        <div style="display:flex;gap:4px">
+                          <button class="icon-btn-pill" (click)="startEditMenuItem(dish)"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+                          <button class="icon-btn-pill" style="color:#b91c1c" (click)="deleteMenuItem(dish.id)"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (totalPages() > 1) {
+                <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">
+                  <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() <= 1" (click)="prevPage()">Prev</button>
+                  <span style="font-size:13px;color:var(--text-secondary);align-self:center">Page {{ currentPage() }} of {{ totalPages() }}</span>
+                  <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() >= totalPages()" (click)="nextPage()">Next</button>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: TABLES MANAGEMENT (Floor Plan & Statuses)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'tables') {
+        <div class="animate-fade-in">
+          
+          <!-- Floor Status Summary -->
+          <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+            <span class="lez-badge lez-badge-ready" style="font-size:13px;padding:6px 14px">● 8 Tables Available</span>
+            <span class="lez-badge lez-badge-pending" style="font-size:13px;padding:6px 14px">● 3 Tables Occupied</span>
+            <span class="lez-badge lez-badge-preparing" style="font-size:13px;padding:6px 14px">● 2 Tables Reserved</span>
+            <span class="lez-badge lez-badge-delivered" style="font-size:13px;padding:6px 14px">● 1 Table Cleaning</span>
+          </div>
+
+          <!-- Table Cards Grid -->
+          <div class="lez-table-grid">
+            <div class="lez-floor-table-card occupied" (click)="selectTab('orders')">
+              <span class="material-symbols-outlined text-[32px]" style="color:#ff6b35">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 01</h4>
+              <span class="lez-badge lez-badge-pending">Occupied</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Order #ORD-8821</p>
+            </div>
+
+            <div class="lez-floor-table-card available">
+              <span class="material-symbols-outlined text-[32px]" style="color:#10B981">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 02</h4>
+              <span class="lez-badge lez-badge-ready">Available</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">4 Seats</p>
+            </div>
+
+            <div class="lez-floor-table-card reserved">
+              <span class="material-symbols-outlined text-[32px]" style="color:#3B82F6">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 03</h4>
+              <span class="lez-badge lez-badge-preparing">Reserved</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">7:30 PM • 2 Guests</p>
+            </div>
+
+            <div class="lez-floor-table-card occupied" (click)="selectTab('orders')">
+              <span class="material-symbols-outlined text-[32px]" style="color:#ff6b35">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 04</h4>
+              <span class="lez-badge lez-badge-pending">Occupied</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Order #ORD-8822</p>
+            </div>
+
+            <div class="lez-floor-table-card available">
+              <span class="material-symbols-outlined text-[32px]" style="color:#10B981">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 05</h4>
+              <span class="lez-badge lez-badge-ready">Available</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">6 Seats</p>
+            </div>
+
+            <div class="lez-floor-table-card cleaning">
+              <span class="material-symbols-outlined text-[32px]" style="color:#F59E0B">table_restaurant</span>
+              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 06</h4>
+              <span class="lez-badge lez-badge-delivered">Cleaning</span>
+              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Being reset</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: CATEGORIES
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'categories') {
+        <div class="animate-fade-in">
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+            <div class="lez-card" style="padding:24px">
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Add Category</h3>
+              <div class="form-field" style="margin-bottom:14px">
+                <label class="form-label">Category Name</label>
+                <input class="lez-input" placeholder="e.g. Appetizers, Main Course"
+                       [value]="newCategoryName()" (input)="newCategoryName.set($any($event.target).value)" />
+              </div>
+              <button class="lez-btn lez-btn-primary w-full" (click)="handleAddCategory()">Add Category</button>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px">
+              @for (cat of categories(); track cat.id) {
+                <div class="lez-card" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span class="material-symbols-outlined" style="color:#ab3500">label</span>
+                    <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ cat.name }}</span>
+                  </div>
+                  <button class="lez-btn lez-btn-danger lez-btn-sm" (click)="deleteCategory(cat.id)">Delete</button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: QR CODES
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'qr') {
+        <div class="animate-fade-in">
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+            
+            <div class="lez-card" style="padding:24px">
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Generate Table QR</h3>
+              <div class="form-field" style="margin-bottom:14px">
+                <label class="form-label">Table Label</label>
+                <input class="lez-input" placeholder="e.g. Table 01"
+                       [value]="newTableNumber()" (input)="newTableNumber.set($any($event.target).value)" />
+              </div>
+              <button class="lez-btn lez-btn-primary w-full" (click)="generateTableQr()">Generate QR Code</button>
+
+              @if (selectedQr()) {
+                <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);text-align:center">
+                  <img [src]="activeQrUrl()" alt="QR Code" style="width:160px;height:160px;margin:0 auto 12px;border:1px solid var(--border);border-radius:10px;padding:8px" />
+                  <div style="display:flex;gap:8px">
+                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="simulateQrDownload()">Download</button>
+                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="simulateQrPrint()">Print</button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- QR Grid -->
+            <div class="lez-table-grid">
+              @for (qr of qrCodesList(); track qr.id) {
+                <div class="lez-card" style="padding:16px;text-align:center;cursor:pointer" (click)="selectQr(qr)">
+                  <img [src]="qr.qrImageUrl || qr.qrCodeUrl" alt="" style="width:120px;height:120px;margin:0 auto 10px" />
+                  <h4 style="font-size:14px;font-weight:700;margin:0 0 2px">{{ qr.tableNumber }}</h4>
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0 0 10px">{{ qr.scansCount || 0 }} Scans</p>
+                  <button class="lez-btn lez-btn-danger lez-btn-sm w-full" (click)="deleteQr(qr.id); $event.stopPropagation()">Delete</button>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: SETTINGS
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'settings') {
+        <div class="animate-fade-in" style="max-width:600px">
+          <div class="lez-card" style="padding:28px">
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0 0 20px">Restaurant Profile</h3>
+
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div class="form-field">
+                <label class="form-label">Restaurant Name</label>
+                <input class="lez-input" [value]="activeRestaurant()?.name || ''" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Venue Address</label>
+                <input class="lez-input" [value]="activeRestaurant()?.address || ''" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Phone Number</label>
+                <input class="lez-input" [value]="activeRestaurant()?.phone || ''" />
+              </div>
+              <button class="lez-btn lez-btn-primary" style="width:fit-content">Save Settings</button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </main>
   </div>
-  }
 
 </div>

@@ -24,7 +24,7 @@ export interface CartItem {
 
 @Component({
   selector: 'app-customer-menu',
-  imports: [CommonModule, FormsModule, BackButton],
+  imports: [CommonModule, FormsModule],
   templateUrl: './customer-menu.html',
   styleUrls: ['./customer-menu.css']
 })

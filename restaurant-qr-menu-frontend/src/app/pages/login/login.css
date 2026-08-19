@@ -1,0 +1,271 @@
+/* ── Lezato Login Page Layout ────────────────────────────────────── */
+.lezato-login-root {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+/* Left Hero Showcase */
+.lezato-login-hero {
+  flex: 1.1;
+  background: linear-gradient(135deg, #1b0a04 0%, #3d1404 50%, #0b1c30 100%), url('/img/bg-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+  overflow: hidden;
+}
+
+.login-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 107, 53, 0.25) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.login-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 440px;
+}
+
+.lezato-login-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 46px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 16px;
+  letter-spacing: -0.03em;
+}
+
+.lezato-login-logo .dot {
+  color: #ff6b35;
+}
+
+.lezato-login-tagline {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: #cbd5e1;
+  margin: 0 0 40px;
+}
+
+.login-hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stat-pill {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stat-pill-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-pill-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.stat-pill-lbl {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Right Login Form */
+.lezato-login-panel {
+  flex: 0.9;
+  min-width: 440px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 36px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-box-header {
+  margin-bottom: 28px;
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0b1c30;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #594139;
+  margin: 0;
+}
+
+/* Role selector */
+.login-role-selector {
+  display: flex;
+  background: #f4f6fa;
+  border: 1px solid #e8ecf4;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.role-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #594139;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-btn:hover {
+  color: #0b1c30;
+}
+
+.role-btn.active {
+  background: #ffffff;
+  color: #ab3500;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.login-error-alert {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #594139;
+  margin-bottom: 6px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 12px;
+  color: #8c9ba5;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.input-with-icon .lez-input {
+  padding-left: 40px;
+}
+
+.forgot-link {
+  font-size: 12.5px;
+  color: #ab3500;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  margin-top: -4px;
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #594139;
+  cursor: pointer;
+}
+
+.login-footer {
+  margin-top: 28px;
+  text-align: center;
+  border-top: 1px solid #e8ecf4;
+  padding-top: 24px;
+}
+
+.signup-link {
+  color: #ab3500;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .lezato-login-hero {
+    display: none;
+  }
+  .lezato-login-panel {
+    flex: 1;
+    min-width: unset;
+  }
+}

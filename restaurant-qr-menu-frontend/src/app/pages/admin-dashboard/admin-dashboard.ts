@@ -10,7 +10,7 @@ import { BackButton } from '../../components/back-button/back-button';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, RouterLink, BackButton],
+  imports: [CommonModule],
   templateUrl: './admin-dashboard.html',
 })
 export class AdminDashboard implements OnInit, OnDestroy {

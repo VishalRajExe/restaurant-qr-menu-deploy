@@ -1,143 +1,559 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════
+   LEZATO DESIGN SYSTEM — GLOBAL CSS
+   ═══════════════════════════════════════════════════════════════════ */
+
 :root {
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-mono: "Fira Code", "JetBrains Mono", monospace;
-  --font-display: "Geist", "Plus Jakarta Sans", sans-serif;
+  /* Surface & Backgrounds */
+  --bg-base: #f8f9ff;
+  --bg-surface: #ffffff;
+  --bg-surface-low: #eff4ff;
+  --bg-surface-dim: #cbdbf5;
+  --bg-input: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+
+  /* Typography Colors */
+  --text-primary: #0b1c30;
+  --text-secondary: #594139;
+  --text-muted: #8c9ba5;
+  --text-inverse: #ffffff;
+
+  /* Brand Primary Accents */
+  --primary: #ab3500;
+  --primary-container: #ff6b35;
+  --primary-hover: #8f2c00;
+  --primary-soft: rgba(255, 107, 53, 0.1);
+  --primary-soft-active: rgba(255, 107, 53, 0.16);
+
+  /* Borders & Dividers */
+  --border: #e8ecf4;
+  --border-focus: #ff6b35;
+  --border-card: #eef2f8;
+
+  /* Semantic Status Indicators */
+  --status-pending-text: #b45309;
+  --status-pending-bg: #fef3c7;
+  --status-preparing-text: #0369a1;
+  --status-preparing-bg: #e0f2fe;
+  --status-ready-text: #047857;
+  --status-ready-bg: #d1fae5;
+  --status-delivered-text: #4b5563;
+  --status-delivered-bg: #f3f4f6;
+  --status-cancelled-text: #b91c1c;
+  --status-cancelled-bg: #fee2e2;
+
+  /* Tables Status Indicators */
+  --table-available: #10B981;
+  --table-occupied: #ff6b35;
+  --table-reserved: #3B82F6;
+  --table-cleaning: #F59E0B;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(11, 28, 48, 0.04), 0 1px 2px rgba(11, 28, 48, 0.02);
+  --shadow-md: 0 4px 12px rgba(11, 28, 48, 0.06), 0 1px 3px rgba(11, 28, 48, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(11, 28, 48, 0.08), 0 8px 10px -6px rgba(11, 28, 48, 0.04);
+  --shadow-xl: 0 20px 35px -5px rgba(11, 28, 48, 0.12);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Layout dimensions */
+  --sidebar-w: 240px;
+  --topbar-h: 68px;
 }
 
-/* Custom premium scrollbar utility */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0b0c0e;
-}
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+/* ── Base Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Glassmorphism glass card styling helper */
-.glass-panel {
-  background: rgba(15, 17, 23, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-.glass-panel-light {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-/* Metallic warm gold text gradient */
-.text-gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #eab308 50%, #fef08a 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Premium card hover elevate accent */
-.card-hover {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.card-hover:hover {
-  transform: translateY(-4px);
-  border-color: rgba(251, 146, 60, 0.3); /* Soft accent glow borders */
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
-}
-
-/* Custom cinematic animations */
-@keyframes gradientGlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-glow {
-  background-size: 200% 200%;
-  animation: gradientGlow 6s ease infinite;
-}
-
-/* Floating food card animation states */
-@keyframes floatUpAndDown {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-  100% { transform: translateY(0); }
-}
-
-.animate-float {
-  animation: floatUpAndDown 6s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: floatUpAndDown 6s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-/* Drag sorting placeholder styling */
-.drag-placeholder {
-  background: rgba(251, 146, 60, 0.05);
-  border: 2px dashed rgba(251, 146, 60, 0.3);
-  height: 64px;
-  border-radius: 12px;
-}
-
-
-
-
-/* Trust Logo Marquee */
-@keyframes logo-marquee {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.logo-marquee {
+/* ── Lezato Layout Grid ─────────────────────────────────────────── */
+.lezato-layout {
   display: flex;
-  width: max-content;
-  animation: logo-marquee 25s linear infinite;
+  min-height: 100vh;
+  background: var(--bg-base);
 }
 
-.logo-track {
+.lezato-sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+  transition: transform 0.3s ease;
+}
+
+.lezato-sidebar-brand {
+  height: var(--topbar-h);
+  padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 4rem;
-  padding-right: 4rem;
-  flex-shrink: 0;
+  gap: 8px;
+  border-bottom: 1px solid transparent;
 }
 
-.client-logo {
-  white-space: nowrap;
-  font-size: 1.125rem;
+.lezato-brand-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ab3500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.lezato-brand-dot {
+  color: #ff6b35;
+}
+
+.lezato-sidebar-menu {
+  flex: 1;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.lezato-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #636467;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.lezato-nav-item:hover {
+  background: rgba(11, 28, 48, 0.04);
+  color: var(--text-primary);
+}
+
+.lezato-nav-item.active {
+  background: #ffdbd0;
+  color: #ab3500;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
 }
 
-.client-logo:hover {
-  opacity: 1;
+.lezato-nav-item.active svg,
+.lezato-nav-item.active .material-symbols-outlined {
+  color: #ab3500;
 }
 
-.logo-marquee:hover {
-  animation-play-state: paused;
+.lezato-sidebar-footer {
+  padding: 16px 14px;
+  border-top: 1px solid var(--border);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .logo-marquee {
-    animation: none;
+.lezato-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lezato-topbar {
+  height: var(--topbar-h);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.lezato-content {
+  flex: 1;
+  padding: 28px 32px;
+}
+
+/* ── UI Components ──────────────────────────────────────────────── */
+
+/* Cards */
+.lez-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.lez-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Buttons */
+.lez-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.lez-btn-primary {
+  background: #ff6b35;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.25);
+}
+
+.lez-btn-primary:hover {
+  background: #ab3500;
+  box-shadow: 0 4px 12px rgba(171, 53, 0, 0.3);
+}
+
+.lez-btn-dark {
+  background: #ab3500;
+  color: #ffffff;
+}
+
+.lez-btn-dark:hover {
+  background: #8f2c00;
+}
+
+.lez-btn-secondary {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.lez-btn-secondary:hover {
+  background: var(--bg-input);
+  border-color: #cbd5e1;
+}
+
+.lez-btn-outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.lez-btn-outline:hover {
+  background: var(--bg-input);
+}
+
+.lez-btn-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.lez-btn-danger:hover {
+  background: #fecaca;
+}
+
+.lez-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+}
+
+/* Inputs & Form Controls */
+.lez-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.lez-input:focus {
+  background: #ffffff;
+  border-color: var(--primary-container);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12);
+}
+
+.lez-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lez-search-box input {
+  padding-left: 38px;
+}
+
+.lez-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+/* Status Badges */
+.lez-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
+}
+
+.lez-badge-pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.lez-badge-preparing {
+  background: var(--status-preparing-bg);
+  color: var(--status-preparing-text);
+}
+
+.lez-badge-ready {
+  background: var(--status-ready-bg);
+  color: var(--status-ready-text);
+}
+
+.lez-badge-delivered {
+  background: var(--status-delivered-bg);
+  color: var(--status-delivered-text);
+}
+
+.lez-badge-cancelled {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+
+/* Filter Pills */
+.lez-filter-pill {
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: #636467;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lez-filter-pill:hover {
+  border-color: #cbd5e1;
+  color: var(--text-primary);
+}
+
+.lez-filter-pill.active {
+  background: #ffdbd0;
+  border-color: #ffdbd0;
+  color: #ab3500;
+  font-weight: 700;
+}
+
+/* Tables */
+.lez-table-container {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.lez-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.lez-table th {
+  background: #fafbfd;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8c9ba5;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lez-table td {
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  background: #ffffff;
+}
+
+.lez-table tr:last-child td {
+  border-bottom: none;
+}
+
+.lez-table tr.selected td {
+  background: #fff8f5;
+}
+
+.lez-table tr.selected td:first-child {
+  border-left: 3px solid #ab3500;
+}
+
+.lez-table tr:hover td {
+  background: #fbfcfe;
+  cursor: pointer;
+}
+
+.lez-table tr.selected:hover td {
+  background: #fff4ef;
+}
+
+/* Orders 3-Pane Layout */
+.lez-orders-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .lez-orders-layout {
+    grid-template-columns: 1fr;
   }
+}
+
+/* Detail Drawer (Right side) */
+.lez-order-detail-panel {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+
+/* Table Floor Grid */
+.lez-table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.lez-floor-table-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.lez-floor-table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.lez-floor-table-card.available { border-top: 4px solid var(--table-available); }
+.lez-floor-table-card.occupied { border-top: 4px solid var(--table-occupied); }
+.lez-floor-table-card.reserved { border-top: 4px solid var(--table-reserved); }
+.lez-floor-table-card.cleaning { border-top: 4px solid var(--table-cleaning); }
+
+/* Toast Notifications */
+.lez-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lez-toast {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  animation: slideInUp 0.25s ease;
+}
+
+.lez-toast.success { border-left: 4px solid #10B981; }
+.lez-toast.error { border-left: 4px solid #EF4444; }
+.lez-toast.warning { border-left: 4px solid #F59E0B; }
+.lez-toast.info { border-left: 4px solid #3B82F6; }
+
+/* Modals */
+.lez-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 28, 48, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lez-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
+  max-width: 500px;
+  width: 100%;
+  padding: 28px;
+  position: relative;
+  animation: popIn 0.2s ease;
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 }

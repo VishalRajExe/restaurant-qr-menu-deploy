@@ -1,167 +1,163 @@
-<div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#0b0c0e] relative overflow-hidden font-sans">
-  
-  <!-- Background Ambient Glows -->
-  <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-orange-500/5 blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-amber-500/5 blur-3xl pointer-events-none"></div>
+<!-- ═══════════════════════════════════════════════════════════
+     LEZATO — AUTHENTICATION & LOGIN
+     ═══════════════════════════════════════════════════════════ -->
+<div class="lezato-login-root">
 
-  <!-- Main Login Card Container -->
-  <div class="max-w-4xl w-full min-h-[500px] rounded-3xl overflow-hidden glass-panel flex flex-col md:flex-row relative z-10 shadow-2xl">
-    
-    <!-- Left Hand Side: Cinematic Hospitality Imagery -->
-    <div class="md:w-1/2 relative bg-neutral-900 hidden md:block">
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10 z-10"></div>
-      <img class="absolute inset-0 w-full h-full object-cover opacity-80" 
-           src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=600&auto=format&fit=crop&q=80" 
-           alt="Premium Dining" referrerPolicy="no-referrer" />
-      
-      <!-- Brand stamp -->
-      <div class="absolute bottom-8 left-8 right-8 z-20 space-y-3">
-        <a routerLink="/" class="flex items-center space-x-2">
-          <div class="w-15 h-15 flex items-center justify-center">
-          <img
-            src="/AuraMenuLogo-dark.png"
-            alt="AuraMenu"
-            class="w-full h-full object-contain"
-          />
-        </div>
-          <span class="font-display font-black text-lg tracking-tight text-white">Aura<span class="text-orange-500">Menu</span></span>
-        </a>
-        <p class="text-xs text-gray-300 leading-relaxed font-sans">
-          "Great hospitality begins before the first bite. A seamless digital menu creates the perfect welcome for every guest."
+  <!-- Left Branded Showcase Panel -->
+  <div class="lezato-login-hero">
+    <div class="login-hero-overlay"></div>
+    <div class="login-hero-content">
+      <div class="lezato-login-brand">
+        <h1 class="lezato-login-logo">RestQR<span class="dot">.</span></h1>
+        <p class="lezato-login-tagline">
+          The all-in-one restaurant operating system. Streamline live orders, digital QR menus, table turnover, and culinary kitchen operations.
         </p>
-        <span class="block text-[10px] font-semibold text-orange-400 font-mono">— Chef de Cuisine, Reims</span>
+      </div>
+
+      <!-- Floating Stat Cards -->
+      <div class="login-hero-stats">
+        <div class="stat-pill">
+          <div class="stat-pill-icon" style="background:#ffdbd0;color:#ab3500">
+            <span class="material-symbols-outlined">qr_code_2</span>
+          </div>
+          <div>
+            <div class="stat-pill-val">12,450+</div>
+            <div class="stat-pill-lbl">QR Scans Today</div>
+          </div>
+        </div>
+
+        <div class="stat-pill">
+          <div class="stat-pill-icon" style="background:#d1fae5;color:#047857">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div>
+            <div class="stat-pill-val">99.2%</div>
+            <div class="stat-pill-lbl">Order Accuracy</div>
+          </div>
+        </div>
+
+        <div class="stat-pill">
+          <div class="stat-pill-icon" style="background:#e0f2fe;color:#0369a1">
+            <span class="material-symbols-outlined">restaurant</span>
+          </div>
+          <div>
+            <div class="stat-pill-val">3,200+</div>
+            <div class="stat-pill-lbl">Restaurants Powered</div>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Right Hand Side: Dynamic Form Interface -->
-    <div class="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-zinc-950/40">
-      
-      <!-- Back button -->
-      <div class="mb-6 flex justify-start">
-        <app-back-button label="Back"></app-back-button>
+  <!-- Right Login Form Panel -->
+  <div class="lezato-login-panel">
+    <div class="login-box animate-fade-in">
+
+      <!-- Header -->
+      <div class="login-box-header">
+        <h2 class="login-title">Welcome back</h2>
+        <p class="login-subtitle">Sign in to your restaurant dashboard</p>
       </div>
 
-      <!-- Logo for Mobile Only -->
-      <div class="md:hidden flex items-center space-x-2 mb-8 justify-center">
-        <div class="w-10 h-10 flex items-center justify-center">
-          <img
-            src="/AuraMenuLogo-dark.png"
-            alt="AuraMenu"
-            class="w-full h-full object-contain"
-          />
+      <!-- Role Selector Tabs -->
+      <div class="login-role-selector">
+        <button class="role-btn" [class.active]="activeTab() === 'owner'" (click)="setRoleTab('owner')" type="button">
+          <span class="material-symbols-outlined text-[18px]">storefront</span>
+          <span>Owner</span>
+        </button>
+        <button class="role-btn" [class.active]="activeTab() === 'chef'" (click)="setRoleTab('chef')" type="button">
+          <span class="material-symbols-outlined text-[18px]">skillet</span>
+          <span>Chef</span>
+        </button>
+        <button class="role-btn" [class.active]="activeTab() === 'super-admin'" (click)="setRoleTab('super-admin')" type="button">
+          <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+          <span>Admin</span>
+        </button>
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="login-error-alert">
+          <span class="material-symbols-outlined text-[18px]">error</span>
+          <span>{{ errorMessage() }}</span>
         </div>
-        <span class="font-display font-black text-lg tracking-tight text-white">Aura<span class="text-orange-500">Menu</span></span>
-      </div>
-
-      <!-- Segment Tabs Selector -->
-      <div class="flex p-1 bg-zinc-900/80 rounded-xl mb-8 border border-white/5">
-        <button (click)="setRoleTab('owner')" type="button" 
-                class="flex-1 py-2 rounded-lg text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'owner' ? 'bg-orange-500 text-white shadow shadow-orange-500/10' : 'text-gray-400 hover:text-white'">
-          RESTAURANT OWNER
-        </button>
-        <button (click)="setRoleTab('chef')" type="button" 
-                class="flex-1 py-2 rounded-lg text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'chef' ? 'bg-green-500 text-white border border-white/10' : 'text-gray-400 hover:text-white'">
-          CHEF
-        </button>
-        <button (click)="setRoleTab('super-admin')" type="button" 
-                class="flex-1 py-2 rounded-lg text-xs font-semibold tracking-wider transition-all cursor-pointer font-display"
-                [ngClass]="activeTab() === 'super-admin' ? 'bg-orange-500 text-white shadow shadow-orange-500/10': 'text-gray-400 hover:text-white'">
-          SUPER ADMIN
-        </button>
-      </div>
-
-      <!-- Title / Greeting -->
-      <div class="space-y-2 mb-8 text-center md:text-left">
-        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white">
-          Welcome back
-        </h2>
-        <p class="text-xs sm:text-sm text-gray-500 font-sans" *ngIf="activeTab() === 'owner'">
-          Sign in to your dashboard to edit menus and view scan metrics.
-        </p>
-        <p class="text-xs sm:text-sm text-gray-500 font-sans" *ngIf="activeTab() === 'super-admin'">
-          Access the operations panel to review core SaaS subscriptions.
-        </p>
-      </div>
-
-      <!-- Display error if exists -->
-      <div *ngIf="errorMessage()" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs sm:text-sm text-rose-400 mb-6 font-medium">
-        {{errorMessage()}}
-      </div>
+      }
 
       <!-- Form -->
-      <form (ngSubmit)="onSubmit()" class="space-y-6">
-        
-        <!-- Email Address -->
-        <div class="space-y-2">
-          <label class="block text-xs font-semibold tracking-wide text-gray-400 font-display">BUSINESS EMAIL</label>
-          <div class="relative">
-            <input [ngModel]="email()" (ngModelChange)="email.set($event)"
-                   name="email" type="email" required
-                   class="w-full px-4 py-3.5 rounded-xl bg-zinc-900/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors text-xs sm:text-sm font-sans"
-                   placeholder="e.g. manager@domain.com" />
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-field">
+          <label class="form-label" for="login-email">Email Address</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input id="login-email"
+                   class="lez-input"
+                   type="email"
+                   autocomplete="email"
+                   placeholder="owner@restaurant.com"
+                   [value]="email()"
+                   (input)="email.set($any($event.target).value)"
+                   required />
           </div>
         </div>
 
-        <!-- Password -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-semibold tracking-wide text-gray-400 font-display">PASSWORD</label>
-            <a class="text-[10px] text-gray-500 hover:text-orange-400 font-semibold font-mono cursor-pointer">Forgot password?</a>
+        <div class="form-field">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label class="form-label" for="login-password" style="margin:0">Password</label>
+            <a href="#" class="forgot-link">Forgot password?</a>
           </div>
-          <div class="relative">
-            <input [ngModel]="password()" (ngModelChange)="password.set($event)"
-                   name="password" type="password" required
-                   title="Password" placeholder="••••••••"
-                   class="w-full px-4 py-3.5 rounded-xl bg-zinc-900/60 border border-white/5 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-orange-500/50 transition-colors text-xs sm:text-sm font-sans" />
+          <div class="input-with-icon">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input id="login-password"
+                   class="lez-input"
+                   type="password"
+                   autocomplete="current-password"
+                   placeholder="Enter your password"
+                   [value]="password()"
+                   (input)="password.set($any($event.target).value)"
+                   required />
           </div>
         </div>
 
-        <!-- Checkbox: Remember me -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center space-x-2.5 text-xs text-gray-400 font-sans cursor-pointer select-none">
+        <div class="remember-row">
+          <label class="remember-label">
             <input type="checkbox"
-                   [ngModel]="rememberMe()" (ngModelChange)="rememberMe.set($event)"
-                   name="rememberMe"
-                   class="rounded border-zinc-700 bg-zinc-900 text-orange-500 focus:ring-0" />
-            <span>Keep me checked in</span>
+                   [checked]="rememberMe()"
+                   (change)="rememberMe.set($any($event.target).checked)"
+                   style="accent-color:#ab3500;width:16px;height:16px" />
+            <span>Keep me logged in</span>
           </label>
         </div>
 
-        <!-- Submit CTA -->
-        <button type="submit" [disabled]="isLoading()"
-                class="w-full py-4 rounded-xl font-semibold text-xs sm:text-sm text-white transition-all duration-300 relative overflow-hidden cursor-pointer"
-                [ngClass]="activeTab() === 'owner' ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-[1.01]' : 'bg-white text-zinc-950 font-bold hover:bg-gray-100'">
-                
-          <span class="flex items-center justify-center space-x-2" *ngIf="!isLoading()">
-            <span>Sign In to Executive Portal</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 shrink-0">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-            </svg>
-          </span>
-
-          <!-- Loader view -->
-          <span class="flex items-center justify-center space-x-3 text-xs" *ngIf="isLoading()">
-            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Securing encrypted handshake...</span>
-          </span>
-
+        <button class="lez-btn lez-btn-primary w-full"
+                type="submit"
+                id="login-submit-btn"
+                style="padding:13px;font-size:15px;border-radius:10px"
+                [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign In to Dashboard</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          }
         </button>
-
       </form>
 
-      <!-- Account helper fallback -->
-      <p class="text-xs text-center text-gray-500 mt-8 font-sans">
-        Don't have an enterprise account? 
-        <a routerLink="/signup" class="text-orange-400 hover:underline font-semibold">Sign Up</a>
-      </p>
+      <!-- Signup Redirect -->
+      <div class="login-footer">
+        <p style="margin:0;font-size:13.5px;color:#594139">
+          Don't have an account? 
+          <a routerLink="/signup" class="signup-link">Register your restaurant</a>
+        </p>
+        <div style="margin-top:16px">
+          <a routerLink="/" style="color:#8c9ba5;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            Back to RestQR Home
+          </a>
+        </div>
+      </div>
 
     </div>
-
   </div>
 
 </div>

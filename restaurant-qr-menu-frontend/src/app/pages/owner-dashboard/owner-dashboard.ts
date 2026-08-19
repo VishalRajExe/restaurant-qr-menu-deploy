@@ -21,7 +21,7 @@ import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-owner-dashboard',
-  imports: [CommonModule, FormsModule, RouterLink, BackButton],
+  imports: [CommonModule, FormsModule],
   templateUrl: './owner-dashboard.html',
   styleUrls: ['./owner-dashboard.css']
 })
@@ -53,6 +53,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   // Orders Signal
   ordersList = computed(() => this.orderService.ordersSignal()());
   activeOrderFilter = signal<string>('ALL');
+  selectedOrder = signal<Order | null>(null);
 
   filteredOrders = computed(() => {
     const list = this.ordersList();
@@ -60,6 +61,39 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     if (filter === 'ALL') return list;
     return list.filter(o => o.status.toUpperCase() === filter.toUpperCase());
   });
+
+  selectOrder(order: Order) {
+    this.selectedOrder.set(order);
+  }
+
+  getOrderSubtotal(order: Order | null): number {
+    if (!order) return 0;
+    if (order.totalAmount) return order.totalAmount;
+    return order.items.reduce((sum, i) => sum + (i.subtotal || (i.price || 15) * i.qty), 0);
+  }
+
+  getOrderTax(order: Order | null): number {
+    return +(this.getOrderSubtotal(order) * 0.08).toFixed(2);
+  }
+
+  getOrderServiceCharge(order: Order | null): number {
+    return +(this.getOrderSubtotal(order) * 0.05).toFixed(2);
+  }
+
+  getOrderTotal(order: Order | null): number {
+    const sub = this.getOrderSubtotal(order);
+    return +(sub + this.getOrderTax(order) + this.getOrderServiceCharge(order)).toFixed(2);
+  }
+
+  printKOT(order?: Order | null) {
+    const target = order || this.selectedOrder();
+    this.toastService.success('KOT Printed', `Kitchen Order Ticket printed for ${target?.orderNumber || target?.id || 'Order'}`);
+  }
+
+  generateInvoice(order?: Order | null) {
+    const target = order || this.selectedOrder();
+    this.toastService.success('Invoice Generated', `Invoice generated for ${target?.orderNumber || target?.id || 'Order'}`);
+  }
 
   // --- Category Management States ---
   newCategoryName     = signal<string>('');

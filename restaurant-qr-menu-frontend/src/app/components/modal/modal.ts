@@ -7,43 +7,44 @@ import { ModalService } from '../../services/modal.service';
   imports: [CommonModule],
   template: `
     @if (modalService.activeModal(); as config) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in font-sans">
-        <div class="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-[#0f1117] border border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
+      <div class="lez-overlay" (click)="onOverlayClick($event)">
+        <div class="lez-modal" role="dialog" aria-modal="true">
           
-          <!-- Background Glow Accent -->
-          <div class="absolute -top-24 -right-24 w-48 h-48 rounded-full pointer-events-none blur-3xl"
-               [ngClass]="{
-                 'bg-rose-500/10': config.type === 'danger',
-                 'bg-amber-500/10': config.type === 'warning',
-                 'bg-orange-500/10': !config.type || config.type === 'info'
-               }">
+          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px">
+            <div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"
+                 [style.background]="config.type === 'danger' ? '#fee2e2' : config.type === 'warning' ? '#fef3c7' : '#ffdbd0'"
+                 [style.color]="config.type === 'danger' ? '#b91c1c' : config.type === 'warning' ? '#b45309' : '#ab3500'">
+              @if (config.type === 'danger') {
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+              } @else if (config.type === 'warning') {
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/>
+                </svg>
+              } @else {
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4m0-4h.01"/>
+                </svg>
+              }
+            </div>
+
+            <div>
+              <h3 style="font-size:18px;font-weight:700;color:#0b1c30;margin:0 0 6px 0;">{{ config.title }}</h3>
+              <p style="font-size:13.5px;color:#594139;line-height:1.5;margin:0;">{{ config.message }}</p>
+            </div>
           </div>
 
-          <div class="space-y-2">
-            <h3 class="font-display font-black text-xl text-white tracking-tight">
-              {{ config.title }}
-            </h3>
-            <p class="text-xs text-gray-400 leading-relaxed">
-              {{ config.message }}
-            </p>
-          </div>
-
-          <div class="flex items-center justify-end space-x-3 pt-4 border-t border-white/5">
-            <button (click)="modalService.close()" type="button"
-                    class="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all cursor-pointer">
+          <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid #e8ecf4">
+            <button class="lez-btn lez-btn-secondary" type="button" (click)="modalService.close()">
               {{ config.cancelText || 'Cancel' }}
             </button>
-            <button (click)="modalService.proceed()" type="button"
-                    class="px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-all cursor-pointer"
-                    [ngClass]="{
-                      'bg-rose-500 hover:bg-rose-600 shadow-rose-500/20': config.type === 'danger',
-                      'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20': config.type === 'warning',
-                      'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20': !config.type || config.type === 'info'
-                    }">
+            <button class="lez-btn" type="button" (click)="modalService.proceed()"
+                    [style.background]="config.type === 'danger' ? '#b91c1c' : '#ff6b35'"
+                    style="color:#ffffff">
               {{ config.confirmText || 'Confirm' }}
             </button>
           </div>
-
         </div>
       </div>
     }
@@ -51,4 +52,10 @@ import { ModalService } from '../../services/modal.service';
 })
 export class ConfirmModal {
   modalService = inject(ModalService);
+
+  onOverlayClick(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('lez-overlay')) {
+      this.modalService.close();
+    }
+  }
 }

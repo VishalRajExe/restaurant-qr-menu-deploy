@@ -8,7 +8,7 @@ import { BackButton } from '../../components/back-button/back-button';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, RouterLink, FormsModule, BackButton],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
