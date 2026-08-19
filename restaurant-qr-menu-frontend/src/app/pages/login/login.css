@@ -7,23 +7,13 @@
 
 /* Left Hero Showcase */
 .lezato-login-hero {
-  flex: 1.1;
-  background: linear-gradient(180deg, rgba(8, 10, 15, 0.6) 0%, rgba(8, 10, 15, 0.82) 100%), url('/img/login-hero.jpg');
+  flex: 1.15;
+  background-image: url('/img/login-hero.jpg');
   background-size: cover;
   background-position: center center;
+  background-repeat: no-repeat;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 48px;
-  overflow: hidden;
-}
-
-.login-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
-  pointer-events: none;
+  min-height: 100vh;
 }
 
 .login-hero-content {
