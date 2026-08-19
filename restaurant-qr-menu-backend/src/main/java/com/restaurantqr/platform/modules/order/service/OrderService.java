@@ -85,6 +85,13 @@ public class OrderService {
     }
 
     public List<Order> trackOrders(String identifier) {
+        return trackOrders(identifier, null);
+    }
+
+    public List<Order> trackOrders(String identifier, Long restaurantId) {
+        if (restaurantId != null) {
+            return orderRepository.findByRestaurantIdAndCustomerMobileOrOrderNumber(restaurantId, identifier);
+        }
         return orderRepository.findByCustomerMobileOrOrderNumber(identifier);
     }
 

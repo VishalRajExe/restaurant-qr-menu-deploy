@@ -73,6 +73,12 @@
             <span>Non-Veg</span>
           </button>
 
+          <!-- Order History Button -->
+          <button class="pos-diet-pill" (click)="openOrderHistory()" title="View Order History">
+            <span class="material-symbols-outlined text-[16px]">history</span>
+            <span>My Orders</span>
+          </button>
+
           <!-- Order Status Tracker Icon -->
           <button class="pos-track-icon-btn" (click)="openOrderTracker()" title="Track Active Order">
             <span class="material-symbols-outlined text-[20px] text-gray-700">receipt_long</span>
@@ -431,6 +437,78 @@
           <button class="lez-btn lez-btn-primary" style="flex:1" (click)="confirmTableEdit()">Save Table</button>
           <button class="lez-btn lez-btn-secondary" (click)="cancelTableEdit()">Cancel</button>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       CUSTOMER ORDER HISTORY MODAL (Isolated by Restaurant)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showOrderHistoryModal()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeOrderHistory()">
+      <div class="pos-modal-card" style="max-width:520px" (click)="$event.stopPropagation()">
+        
+        <div class="pos-modal-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-amber-500 text-[24px]">history</span>
+            <h3 class="pos-modal-title">My Orders at {{ restaurant()?.name || 'Gourmet Bistro' }}</h3>
+          </div>
+          <button class="pos-modal-close" (click)="closeOrderHistory()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="pos-modal-body" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:14px">
+          @if (customerOrderHistory().length === 0) {
+            <div style="text-align:center;padding:32px 16px">
+              <span class="material-symbols-outlined text-[48px] text-gray-300">receipt_long</span>
+              <h4 style="font-size:16px;font-weight:700;color:#0b1c30;margin:12px 0 4px">No Previous Orders</h4>
+              <p style="font-size:13px;color:#64748b;margin:0">You have not placed any orders at this restaurant yet.</p>
+            </div>
+          } @else {
+            @for (pastOrder of customerOrderHistory(); track pastOrder.id) {
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <span style="font-size:14px;font-weight:800;color:#0b1c30">Order #{{ pastOrder.orderNumber || pastOrder.id }}</span>
+                    <div style="font-size:11.5px;color:#64748b">{{ pastOrder.table || 'Table 01' }} • {{ pastOrder.placedAt | date:'mediumTime' }}</div>
+                  </div>
+                  <span class="pos-tracker-pill" [class]="'status-' + (pastOrder.status.toLowerCase() || 'pending')">
+                    {{ pastOrder.status }}
+                  </span>
+                </div>
+
+                <div style="border-top:1px dashed #cbd5e1;padding-top:8px;display:flex;flex-direction:column;gap:4px">
+                  @for (itm of pastOrder.items; track itm.name) {
+                    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#334155">
+                      <span>{{ itm.qty }}x {{ itm.name }}</span>
+                      <span style="font-weight:600">${{ (itm.subtotal || ((itm.price || 15) * itm.qty)).toFixed(2) }}</span>
+                    </div>
+                  }
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">
+                  <span style="font-size:13px;font-weight:800;color:#0b1c30">Total: ${{ (pastOrder.totalAmount || 0).toFixed(2) }}</span>
+                  <div style="display:flex;gap:8px">
+                    <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="trackSpecificOrder(pastOrder)">
+                      <span class="material-symbols-outlined text-[15px]">radar</span>
+                      <span>Track</span>
+                    </button>
+                    <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="reorderItems(pastOrder)">
+                      <span class="material-symbols-outlined text-[15px]">add_shopping_cart</span>
+                      <span>Re-order</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="pos-modal-footer">
+          <button class="lez-btn lez-btn-secondary w-full" (click)="closeOrderHistory()">Close</button>
+        </div>
+
       </div>
     </div>
   }

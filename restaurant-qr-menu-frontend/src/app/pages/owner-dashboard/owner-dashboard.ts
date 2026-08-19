@@ -271,6 +271,25 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   settingAddress = signal<string>('124 Culinary Boulevard, Downtown Gourmet District');
   settingPhone   = signal<string>('+1 (555) 234-5678');
 
+  chefInviteCode = computed(() => {
+    return this.authService.currentUser()?.chefInviteCode || (this.activeRestaurant() as any)?.chefInviteCode || 'CHEF-REST01';
+  });
+
+  restaurantSlug = computed(() => {
+    return this.authService.currentUser()?.restaurantSlug || (this.activeRestaurant() as any)?.slug || 'gourmet-bistro';
+  });
+
+  copyChefInviteCode() {
+    navigator.clipboard.writeText(this.chefInviteCode());
+    this.toastService.success('Copied to Clipboard', `Chef registration code ${this.chefInviteCode()} copied.`);
+  }
+
+  copyPublicMenuUrl() {
+    const url = `${window.location.origin}/restaurant/${this.restaurantSlug()}`;
+    navigator.clipboard.writeText(url);
+    this.toastService.success('Copied Public Menu URL', url);
+  }
+
   openAddItemModal() {
     this.cancelEditMenuItem();
     this.showAddItemModal.set(true);

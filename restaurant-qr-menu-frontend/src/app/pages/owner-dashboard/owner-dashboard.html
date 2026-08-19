@@ -770,9 +770,14 @@
            TAB: SETTINGS
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'settings') {
-        <div class="animate-fade-in" style="max-width:600px">
+        <div class="animate-fade-in" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:24px;max-width:960px">
+          
+          <!-- Restaurant Profile Card -->
           <div class="lez-card" style="padding:28px">
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0 0 20px">Restaurant Profile</h3>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-accent">storefront</span>
+              <span>Restaurant Profile</span>
+            </h3>
 
             <div style="display:flex;flex-direction:column;gap:16px">
               <div class="form-field">
@@ -788,10 +793,55 @@
                 <input class="lez-input" [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
               </div>
               <button class="lez-btn lez-btn-primary" style="width:fit-content" (click)="saveRestaurantSettings()">
-                Save Settings
+                Save Profile Settings
               </button>
             </div>
           </div>
+
+          <!-- Chef Registration Code & Public URL Card -->
+          <div style="display:flex;flex-direction:column;gap:20px">
+            
+            <!-- Chef Registration Invite Code -->
+            <div class="lez-card" style="padding:24px;border:2px dashed #ff6b35;background:#fffaf6">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
+                <div>
+                  <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Chef Registration Code</h4>
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0">Share this code with your kitchen staff to join your station.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #fed7aa;border-radius:12px;padding:10px 16px;margin:14px 0">
+                <span style="font-family:monospace;font-size:18px;font-weight:800;letter-spacing:0.1em;color:#ab3500;flex:1">{{ chefInviteCode() }}</span>
+                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="copyChefInviteCode()">
+                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                  <span>Copy Code</span>
+                </button>
+              </div>
+              <span style="font-size:11.5px;color:#7c2d12">Chefs will enter this code on the signup page to automatically link to your orders.</span>
+            </div>
+
+            <!-- Public Restaurant URL & Slug -->
+            <div class="lez-card" style="padding:24px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <span class="material-symbols-outlined text-[24px] text-emerald-600">link</span>
+                <div>
+                  <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Unique Restaurant URL</h4>
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0">Public digital menu link for your diners and social media.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin:14px 0">
+                <span style="font-size:13px;font-weight:600;color:#0b1c30;flex:1;word-break:break-all">/restaurant/{{ restaurantSlug() }}</span>
+                <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="copyPublicMenuUrl()">
+                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                  <span>Copy</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       }
 

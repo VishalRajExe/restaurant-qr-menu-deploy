@@ -39,6 +39,9 @@ public class Restaurant extends BaseEntity {
     @Column(name = "phone", length = 20)
     private String phone;
 
+    @Column(name = "chef_invite_code", length = 50)
+    private String chefInviteCode;
+
     @Column(name = "email", length = 150)
     private String email;
 

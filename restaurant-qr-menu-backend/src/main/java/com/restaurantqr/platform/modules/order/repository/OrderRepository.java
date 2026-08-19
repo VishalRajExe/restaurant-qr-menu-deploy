@@ -20,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o WHERE (o.customerMobile = :identifier OR o.orderNumber = :identifier) AND o.isDeleted = false ORDER BY o.createdAt DESC")
     List<Order> findByCustomerMobileOrOrderNumber(@Param("identifier") String identifier);
+
+    @Query("SELECT o FROM Order o WHERE o.restaurant.id = :restaurantId AND (o.customerMobile = :identifier OR o.orderNumber = :identifier) AND o.isDeleted = false ORDER BY o.createdAt DESC")
+    List<Order> findByRestaurantIdAndCustomerMobileOrOrderNumber(@Param("restaurantId") Long restaurantId, @Param("identifier") String identifier);
 }

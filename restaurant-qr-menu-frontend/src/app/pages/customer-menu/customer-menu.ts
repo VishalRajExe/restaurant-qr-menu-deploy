@@ -321,9 +321,9 @@ export class CustomerMenu implements OnInit, OnDestroy {
   placeOrder() {
     if (this.cartIsEmpty() || this.isPlacingOrder()) return;
 
-    const mobile = this.customerMobile().trim();
-    if (!mobile || mobile.length < 7) {
-      this.toastService.show('Please enter a valid mobile number to place order', 'error');
+    const cleanMobile = this.customerMobile().trim().replace(/\D/g, '');
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      this.toastService.show('Please enter a valid 10-digit mobile number to place your order', 'error');
       return;
     }
 
@@ -337,7 +337,7 @@ export class CustomerMenu implements OnInit, OnDestroy {
       restaurantId: restId,
       restaurantSlug: restSlug,
       tableNumber: tableNum,
-      customerMobile: mobile,
+      customerMobile: cleanMobile,
       customerName: this.customerName().trim() || 'Customer',
       specialInstructions: this.specialInstructions().trim(),
       items: this.cartItems().map((i: CartItem) => ({
@@ -361,9 +361,13 @@ export class CustomerMenu implements OnInit, OnDestroy {
     });
   }
 
+  private getHistoryStorageKey(): string {
+    return 'aura_customer_orders_' + (this.restaurant()?.id || '1');
+  }
+
   loadCustomerOrderHistory() {
     try {
-      const stored = localStorage.getItem('aura_customer_orders');
+      const stored = localStorage.getItem(this.getHistoryStorageKey());
       if (stored) {
         const list = JSON.parse(stored);
         if (Array.isArray(list)) {
@@ -384,7 +388,7 @@ export class CustomerMenu implements OnInit, OnDestroy {
     const updated = [order, ...filtered];
     this.customerOrderHistory.set(updated);
     try {
-      localStorage.setItem('aura_customer_orders', JSON.stringify(updated));
+      localStorage.setItem(this.getHistoryStorageKey(), JSON.stringify(updated));
     } catch (e) {
       console.warn('Failed to save order to history', e);
     }

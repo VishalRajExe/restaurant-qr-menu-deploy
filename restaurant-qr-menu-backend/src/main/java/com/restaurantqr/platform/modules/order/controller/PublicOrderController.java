@@ -27,8 +27,10 @@ public class PublicOrderController {
     }
 
     @GetMapping("/track")
-    public ResponseEntity<ApiResponse<List<Order>>> trackOrders(@RequestParam String identifier) {
-        List<Order> orders = orderService.trackOrders(identifier);
+    public ResponseEntity<ApiResponse<List<Order>>> trackOrders(
+            @RequestParam String identifier,
+            @RequestParam(required = false) Long restaurantId) {
+        List<Order> orders = orderService.trackOrders(identifier, restaurantId);
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 

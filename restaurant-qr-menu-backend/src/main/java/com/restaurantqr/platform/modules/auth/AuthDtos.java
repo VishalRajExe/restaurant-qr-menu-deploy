@@ -57,6 +57,8 @@ class AuthResponse {
         public String role;
         public Long restaurantId;
         public String restaurantName;
+        public String restaurantSlug;
+        public String chefInviteCode;
     }
 }
 

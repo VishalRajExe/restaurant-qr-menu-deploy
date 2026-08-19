@@ -26,12 +26,14 @@ export class Signup {
   ownerName = signal<string>('');
   ownerEmail = signal<string>('');
   ownerPassword = signal<string>('');
+  ownerPhone = signal<string>('');
 
   // Step 1: Chef Info
   chefName = signal<string>('');
   chefEmail = signal<string>('');
   chefPassword = signal<string>('');
-  restaurantCode = signal<string>('');
+  chefPhone = signal<string>('');
+  chefInviteCode = signal<string>('');
 
   // Step 2: Restaurant Info
   restaurantName = signal<string>('');
@@ -60,18 +62,32 @@ export class Signup {
 
     if (this.currentStep() === 1) {
       if (this.activePortal() === 'chef') {
-        if (!this.chefName() || !this.chefEmail() || !this.chefPassword()) {
-          this.errorMessage.set('Please fill out all your details.');
+        if (!this.chefName().trim() || !this.chefEmail().trim() || !this.chefPassword().trim()) {
+          this.errorMessage.set('Please fill out all chef fields.');
+          return;
+        }
+        if (!this.chefInviteCode().trim()) {
+          this.errorMessage.set('Please enter your Restaurant Chef Registration Code (e.g. CHEF-REST01).');
+          return;
+        }
+        const phone = this.chefPhone().trim().replace(/\D/g, '');
+        if (phone && phone.length !== 10) {
+          this.errorMessage.set('Phone number must be exactly 10 digits.');
           return;
         }
       } else {
-        if (!this.ownerName() || !this.ownerEmail() || !this.ownerPassword()) {
+        if (!this.ownerName().trim() || !this.ownerEmail().trim() || !this.ownerPassword().trim()) {
           this.errorMessage.set('Please fill out all owner details before proceeding.');
+          return;
+        }
+        const cleanPhone = this.ownerPhone().trim().replace(/\D/g, '');
+        if (!cleanPhone || cleanPhone.length !== 10) {
+          this.errorMessage.set('Owner phone number is required and must be exactly 10 digits.');
           return;
         }
       }
     } else if (this.currentStep() === 2) {
-      if (!this.restaurantName() || !this.venueAddress()) {
+      if (!this.restaurantName().trim() || !this.venueAddress().trim()) {
         this.errorMessage.set('Please input restaurant name and operational address.');
         return;
       }
@@ -94,6 +110,14 @@ export class Signup {
   }
 
   handleChefRegister() {
+    if (!this.chefName().trim() || !this.chefEmail().trim() || !this.chefPassword().trim()) {
+      this.errorMessage.set('Please fill out all chef fields.');
+      return;
+    }
+    if (!this.chefInviteCode().trim()) {
+      this.errorMessage.set('Please enter your Restaurant Chef Registration Code (e.g. CHEF-REST01).');
+      return;
+    }
     this.onRegister();
   }
 
@@ -109,19 +133,22 @@ export class Signup {
 
     if (this.activePortal() === 'owner') {
       action$ = this.authService.signupOwner({
-        name: this.ownerName(),
-        email: this.ownerEmail(),
+        name: this.ownerName().trim(),
+        email: this.ownerEmail().trim(),
         password: this.ownerPassword(),
-        restaurantName: this.restaurantName(),
+        phone: this.ownerPhone().trim().replace(/\D/g, ''),
+        restaurantName: this.restaurantName().trim(),
+        restaurantAddress: this.venueAddress().trim(),
         planId: this.selectedPlanId(),
         photo: this.restaurantPhoto()
       });
     } else if (this.activePortal() === 'chef') {
       action$ = this.authService.signupChef({
-        name: this.chefName(),
-        email: this.chefEmail(),
-        restaurantName: this.restaurantCode(),
-        planId: 'chef-free'
+        name: this.chefName().trim(),
+        email: this.chefEmail().trim(),
+        password: this.chefPassword(),
+        phone: this.chefPhone().trim().replace(/\D/g, '') || '9876543210',
+        chefInviteCode: this.chefInviteCode().trim().toUpperCase()
       });
     } else {
       action$ = this.authService.signupSuperAdmin({
@@ -137,7 +164,7 @@ export class Signup {
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.message || 'Registration failed.');
+        this.errorMessage.set(err.message || 'Registration failed. Please verify credentials.');
       }
     });
   }

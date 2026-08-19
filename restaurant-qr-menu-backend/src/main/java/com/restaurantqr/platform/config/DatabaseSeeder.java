@@ -66,12 +66,18 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .country("USA")
                     .websiteUrl("https://restqr.com")
                     .primaryColor("#AB3500")
+                    .chefInviteCode("CHEF-REST01")
                     .status(Restaurant.Status.ACTIVE)
                     .verificationStatus("VERIFIED")
                     .subscriptionPlan(Restaurant.SubscriptionPlan.PROFESSIONAL)
                     .build();
             return restaurantRepository.save(r);
         });
+
+        if (restaurant.getChefInviteCode() == null) {
+            restaurant.setChefInviteCode("CHEF-REST01");
+            restaurant = restaurantRepository.save(restaurant);
+        }
 
         // 2. Seed or update Branch
         Branch branch = branchRepository.findAll().stream().findFirst().orElseGet(() -> {

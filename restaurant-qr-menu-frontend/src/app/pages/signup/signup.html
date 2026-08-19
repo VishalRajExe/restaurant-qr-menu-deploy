@@ -151,6 +151,15 @@
                   </div>
                   <span class="field-hint">Must contain at least 8 characters.</span>
                 </div>
+
+                <div class="field-group">
+                  <label class="field-label">Mobile Phone Number (10 Digits) *</label>
+                  <div class="input-wrap">
+                    <span class="material-symbols-outlined input-icon">call</span>
+                    <input type="tel" [(ngModel)]="ownerPhone" placeholder="e.g. 9876543210" maxlength="10" class="custom-input" />
+                  </div>
+                  <span class="field-hint">Required for owner login & critical store alerts (numbers only).</span>
+                </div>
               </div>
 
               <button (click)="nextStep()" type="button" class="btn-primary-action">
@@ -327,11 +336,20 @@
                 </div>
 
                 <div class="field-group">
-                  <label class="field-label">Restaurant ID or Invite Code *</label>
+                  <label class="field-label">Mobile Phone (10 Digits)</label>
+                  <div class="input-wrap">
+                    <span class="material-symbols-outlined input-icon">call</span>
+                    <input type="tel" [(ngModel)]="chefPhone" placeholder="e.g. 9876543210" maxlength="10" class="custom-input" />
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label">Restaurant Chef Registration Code *</label>
                   <div class="input-wrap">
                     <span class="material-symbols-outlined input-icon">key</span>
-                    <input type="text" [(ngModel)]="restaurantCode" placeholder="e.g. 1 or RESTQR-INV-89" class="custom-input" />
+                    <input type="text" [(ngModel)]="chefInviteCode" placeholder="e.g. CHEF-REST01" class="custom-input" />
                   </div>
+                  <span class="field-hint">Obtain this invite code from your restaurant owner.</span>
                 </div>
               </div>
 

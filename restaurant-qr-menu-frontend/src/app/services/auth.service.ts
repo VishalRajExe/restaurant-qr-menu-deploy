@@ -11,6 +11,8 @@ export interface UserSession {
   name: string;
   restaurantId?: string;
   restaurantName?: string;
+  restaurantSlug?: string;
+  chefInviteCode?: string;
   restaurantPhoto?: string;
   verificationStatus?: 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
   isTrialActive?: boolean;
@@ -28,6 +30,8 @@ export interface AuthResponseData {
     role: string;
     restaurantId?: number | string;
     restaurantName?: string;
+    restaurantSlug?: string;
+    chefInviteCode?: string;
   };
 }
 
@@ -142,23 +146,29 @@ export class AuthService {
     this.isLoggedIn.set(false);
   }
 
-  signupOwner(info: { name: string; email: string; password?: string; restaurantName: string; planId: string; photo?: string }): Observable<boolean> {
+  signupOwner(info: { name: string; email: string; password?: string; phone?: string; restaurantName: string; restaurantAddress?: string; planId: string; photo?: string }): Observable<boolean> {
     const registerPayload = {
       name: info.name,
       email: info.email,
       password: info.password || 'Password123!',
-      phone: '+919876543210'
+      phone: info.phone || '9876543210',
+      restaurantName: info.restaurantName,
+      restaurantAddress: info.restaurantAddress || 'Main Venue',
+      role: 'OWNER'
     };
 
     return this.http.post<ApiResponse<AuthResponseData>>(`${environment.apiUrl}/auth/register`, registerPayload).pipe(
       map((res: ApiResponse<AuthResponseData>) => {
+        const user = res?.data?.user;
         const session: UserSession = {
-          id: res?.data?.user?.id ? String(res.data.user.id) : 'u_' + Date.now(),
+          id: user?.id ? String(user.id) : 'u_' + Date.now(),
           email: info.email,
           role: 'owner',
           name: info.name,
-          restaurantId: '1',
-          restaurantName: info.restaurantName,
+          restaurantId: user?.restaurantId ? String(user.restaurantId) : '1',
+          restaurantName: user?.restaurantName || info.restaurantName,
+          restaurantSlug: (user as any)?.restaurantSlug,
+          chefInviteCode: (user as any)?.chefInviteCode,
           restaurantPhoto: info.photo || '',
           verificationStatus: 'PENDING_VERIFICATION',
           isTrialActive: true,
@@ -171,44 +181,43 @@ export class AuthService {
         this.currentUser.set(session);
         this.isLoggedIn.set(true);
         return true;
-      }),
-      catchError((err: { message: string }) => {
-        console.warn('Backend register call fallback:', err.message);
-        const session: UserSession = {
-          id: 'u_' + Date.now(),
-          email: info.email,
-          role: 'owner',
-          name: info.name,
-          restaurantId: '1',
-          restaurantName: info.restaurantName,
-          restaurantPhoto: info.photo || '',
-          verificationStatus: 'PENDING_VERIFICATION',
-          isTrialActive: true,
-          trialDaysRemaining: 14
-        };
-        localStorage.setItem('user_session', JSON.stringify(session));
-        this.currentUser.set(session);
-        this.isLoggedIn.set(true);
-        return of(true);
       })
     );
   }
 
-  signupChef(info: { name: string; email: string; restaurantName: string; planId: string }): Observable<boolean> {
-    const session: UserSession = {
-      id: 'uchef_' + Date.now(),
-      email: info.email,
-      role: 'chef',
+  signupChef(info: { name: string; email: string; password?: string; phone?: string; chefInviteCode: string }): Observable<boolean> {
+    const registerPayload = {
       name: info.name,
-      restaurantId: '1',
-      verificationStatus: 'PENDING_VERIFICATION',
-      isTrialActive: true,
-      trialDaysRemaining: 14
+      email: info.email,
+      password: info.password || 'Password123!',
+      phone: info.phone || '9876543210',
+      role: 'CHEF',
+      chefInviteCode: info.chefInviteCode
     };
-    localStorage.setItem('user_session', JSON.stringify(session));
-    this.currentUser.set(session);
-    this.isLoggedIn.set(true);
-    return of(true);
+
+    return this.http.post<ApiResponse<AuthResponseData>>(`${environment.apiUrl}/auth/register`, registerPayload).pipe(
+      map((res: ApiResponse<AuthResponseData>) => {
+        const user = res?.data?.user;
+        const session: UserSession = {
+          id: user?.id ? String(user.id) : 'uchef_' + Date.now(),
+          email: info.email,
+          role: 'chef',
+          name: info.name,
+          restaurantId: user?.restaurantId ? String(user.restaurantId) : '1',
+          restaurantName: user?.restaurantName || 'Kitchen Operations',
+          restaurantSlug: (user as any)?.restaurantSlug,
+          verificationStatus: 'VERIFIED',
+          isTrialActive: false
+        };
+        if (res?.data?.accessToken) {
+          localStorage.setItem('jwt_access_token', res.data.accessToken);
+        }
+        localStorage.setItem('user_session', JSON.stringify(session));
+        this.currentUser.set(session);
+        this.isLoggedIn.set(true);
+        return true;
+      })
+    );
   }
 
   signupSuperAdmin(info: { name: string; email: string }): Observable<boolean> {

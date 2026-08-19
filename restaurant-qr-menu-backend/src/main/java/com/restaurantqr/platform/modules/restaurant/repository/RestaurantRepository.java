@@ -14,6 +14,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     Optional<Restaurant> findBySlugAndIsDeletedFalse(String slug);
 
+    Optional<Restaurant> findByChefInviteCodeAndIsDeletedFalse(String chefInviteCode);
+
     boolean existsBySlugAndIsDeletedFalse(String slug);
 
     @Query("SELECT r FROM Restaurant r WHERE r.isDeleted = false " +
