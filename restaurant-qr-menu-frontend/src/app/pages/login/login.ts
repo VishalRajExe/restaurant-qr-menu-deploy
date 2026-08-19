@@ -20,8 +20,8 @@ export class Login implements OnInit {
   activeTab = signal<'owner' | 'chef' | 'super-admin'>('owner');
 
   // Input states
-  email      = signal<string>('owner@example.com');
-  password   = signal<string>('Password123!');
+  email      = signal<string>('owner@restaurant.com');
+  password   = signal<string>('Owner@12345');
   rememberMe = signal<boolean>(true);
 
   isLoading    = signal<boolean>(false);
@@ -47,11 +47,11 @@ export class Login implements OnInit {
     this.authService.logout();
 
     if (role === 'owner') {
-      this.email.set('owner@example.com');
-      this.password.set('Password123!');
+      this.email.set('owner@restaurant.com');
+      this.password.set('Owner@12345');
     } else if (role === 'chef') {
-      this.email.set('chef@jardinprovence.fr');
-      this.password.set('Password123!');
+      this.email.set('chef@restaurant.com');
+      this.password.set('Chef@12345');
     } else {
       this.email.set('admin@restaurantqr.com');
       this.password.set('Admin@12345');
