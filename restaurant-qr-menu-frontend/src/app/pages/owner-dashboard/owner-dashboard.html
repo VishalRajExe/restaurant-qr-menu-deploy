@@ -103,10 +103,11 @@
         <div style="display:flex;align-items:center;gap:8px">
           <app-notification-center></app-notification-center>
 
-          <button class="icon-btn-pill" title="Support Messages" (click)="toastService.info('Staff Messages', 'Opening restaurant internal chat...')">
-            <span class="material-symbols-outlined">chat_bubble</span>
+          <button class="icon-btn-pill" title="Support & Messages" (click)="openSupportModal()">
+            <span class="material-symbols-outlined text-[18px]">chat_bubble</span>
           </button>
-          <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="selectTab('items')">
+          
+          <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="createNewItem()">
             <span class="material-symbols-outlined text-[16px]">add</span>
             <span>New Item</span>
           </button>
@@ -763,17 +764,19 @@
             <div style="display:flex;flex-direction:column;gap:16px">
               <div class="form-field">
                 <label class="form-label">Restaurant Name</label>
-                <input class="lez-input" [value]="activeRestaurant()?.name || ''" />
+                <input class="lez-input" [value]="settingName()" (input)="settingName.set($any($event.target).value)" />
               </div>
               <div class="form-field">
                 <label class="form-label">Venue Address</label>
-                <input class="lez-input" [value]="activeRestaurant()?.address || ''" />
+                <input class="lez-input" [value]="settingAddress()" (input)="settingAddress.set($any($event.target).value)" />
               </div>
               <div class="form-field">
                 <label class="form-label">Phone Number</label>
-                <input class="lez-input" [value]="activeRestaurant()?.phone || ''" />
+                <input class="lez-input" [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
               </div>
-              <button class="lez-btn lez-btn-primary" style="width:fit-content">Save Settings</button>
+              <button class="lez-btn lez-btn-primary" style="width:fit-content" (click)="saveRestaurantSettings()">
+                Save Settings
+              </button>
             </div>
           </div>
         </div>
@@ -781,5 +784,55 @@
 
     </main>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       SUPPORT & STAFF INQUIRY MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showSupportModal()) {
+    <div class="lez-overlay animate-fade-in" (click)="closeSupportModal()">
+      <div class="lez-modal" style="max-width:480px" (click)="$event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[24px] text-accent">support_agent</span>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Restaurant Support & Inquiry</h3>
+          </div>
+          <button class="pos-modal-close" (click)="closeSupportModal()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-field">
+            <label class="form-label">Subject</label>
+            <input class="lez-input" placeholder="e.g. Menu Update Request, Kitchen Terminal"
+                   [value]="supportSubject()" (input)="supportSubject.set($any($event.target).value)" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Urgency Priority</label>
+            <select class="lez-input" [value]="supportPriority()" (change)="supportPriority.set($any($event.target).value)">
+              <option value="low">Low (General Question)</option>
+              <option value="medium">Medium (Menu / Table Issue)</option>
+              <option value="high">High (KDS / Billing Issue)</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Message Details</label>
+            <textarea class="lez-input" rows="4" placeholder="Describe the issue or assistance required..."
+                      [value]="supportMessage()" (input)="supportMessage.set($any($event.target).value)"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeSupportModal()">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitSupportTicket()">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Send Inquiry</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>

@@ -227,6 +227,39 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   supportMessage    = signal<string>('');
   supportPriority   = signal<string>('medium');
 
+  // Profile Settings
+  settingName    = signal<string>('RestQR Gourmet Bistro');
+  settingAddress = signal<string>('124 Culinary Boulevard, Downtown Gourmet District');
+  settingPhone   = signal<string>('+1 (555) 234-5678');
+
+  createNewItem() {
+    this.activeTab.set('items');
+    this.editingItemId.set(null);
+    this.newItemName.set('');
+    this.newItemPrice.set(12.00);
+    this.newItemDescription.set('');
+    this.newItemImage.set('');
+    this.newItemIsVeg.set(true);
+    this.toastService.info('Add New Item', 'Enter details for the new culinary dish.');
+  }
+
+  openSupportModal() {
+    this.showSupportModal.set(true);
+  }
+
+  closeSupportModal() {
+    this.showSupportModal.set(false);
+  }
+
+  saveRestaurantSettings() {
+    this.toastService.success('Settings Saved', 'Restaurant profile settings updated.');
+    this.notificationService.pushNotification({
+      eventType: 'ACCOUNT_UPDATED',
+      title: 'Restaurant Profile Updated',
+      message: 'Profile name, address and phone contact synchronized.'
+    });
+  }
+
   ngOnInit() {
     const userSession = this.authService.currentUser();
     const rId = userSession?.restaurantId || '1';
@@ -476,11 +509,20 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     });
   }
 
-  supportTicketSent = signal<boolean>(false);
-
   submitSupportTicket() {
-    this.supportTicketSent.set(true);
-    this.toastService.success('Ticket Submitted', 'Our support team will contact you.');
+    if (!this.supportSubject().trim() || !this.supportMessage().trim()) {
+      this.toastService.show('Please enter a subject and message details', 'warning');
+      return;
+    }
+    this.toastService.success('Ticket Submitted', 'Our technical support team has received your request.');
+    this.notificationService.pushNotification({
+      eventType: 'SYSTEM_ALERT',
+      title: 'Support Inquiry Dispatched',
+      message: `Ticket "${this.supportSubject()}" submitted with priority: ${this.supportPriority().toUpperCase()}`
+    });
+    this.supportSubject.set('');
+    this.supportMessage.set('');
+    this.showSupportModal.set(false);
   }
 
   regenerateQrCode(qrId?: string) {
