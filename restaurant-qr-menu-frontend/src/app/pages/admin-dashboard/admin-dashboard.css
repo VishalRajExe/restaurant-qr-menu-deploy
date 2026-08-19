@@ -1,0 +1,840 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   RESTQR — ADMIN & ANALYTICS DASHBOARD STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.adm-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────── */
+.adm-sidebar {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e8ecf4;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.adm-sidebar-brand {
+  padding: 0 10px 20px;
+}
+
+.adm-brand-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ab3500;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.adm-brand-dot {
+  color: #ff6b35;
+}
+
+.adm-brand-subtitle {
+  font-size: 11px;
+  color: #8c9ba5;
+  margin: 2px 0 0;
+  font-weight: 500;
+}
+
+.adm-nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.adm-nav-section-header {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #8c9ba5;
+  letter-spacing: 0.08em;
+  padding: 18px 12px 6px;
+  text-transform: uppercase;
+}
+
+.adm-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #594139;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.adm-nav-item:hover {
+  background: #f4f6fa;
+  color: #0b1c30;
+}
+
+.adm-nav-item.active {
+  background: #ffdbd0;
+  color: #ab3500;
+  font-weight: 700;
+}
+
+.adm-badge-count {
+  margin-left: auto;
+  background: #ff6b35;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+}
+
+/* Promo Card inside Sidebar */
+.adm-promo-box {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ab3500 100%);
+  border-radius: 16px;
+  padding: 16px;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(171, 53, 0, 0.2);
+}
+
+.adm-promo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.adm-promo-title {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 2px;
+}
+
+.adm-promo-desc {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 12px;
+  line-height: 1.35;
+}
+
+.adm-promo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #ab3500;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.adm-promo-btn:hover {
+  transform: translateX(2px);
+}
+
+/* Sidebar Footer */
+.adm-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #e8ecf4;
+}
+
+.adm-footer-copyright {
+  font-size: 11px;
+  color: #8c9ba5;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.adm-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #594139;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+.adm-logout-btn:hover {
+  color: #b91c1c;
+}
+
+/* ── Main Canvas ────────────────────────────────────────────────────── */
+.adm-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.adm-topbar {
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8ecf4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.adm-search-wrap {
+  position: relative;
+  width: 280px;
+}
+
+.adm-search-wrap .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c9ba5;
+  font-size: 18px;
+}
+
+.adm-search-input {
+  width: 100%;
+  background: #f8f9ff;
+  border: 1px solid #e8ecf4;
+  border-radius: 9999px;
+  padding: 8px 16px 8px 38px;
+  font-size: 13px;
+  color: #0b1c30;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.adm-search-input:focus {
+  border-color: #ff6b35;
+}
+
+.adm-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.adm-recipe-btn {
+  background: #ff6b35;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 18px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.adm-recipe-btn:hover {
+  background: #ab3500;
+}
+
+.adm-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f4f6fa;
+  border: none;
+  color: #594139;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.adm-icon-btn:hover {
+  background: #e8ecf4;
+  color: #0b1c30;
+}
+
+.adm-notification-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+
+.adm-chat-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ff6b35;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 9999px;
+}
+
+.adm-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.adm-user-profile:hover {
+  background: #f4f6fa;
+}
+
+.adm-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.adm-user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+  line-height: 1.1;
+}
+
+.adm-user-role {
+  font-size: 11px;
+  color: #8c9ba5;
+}
+
+.adm-lang-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f4f6fa;
+  border: 1px solid #e8ecf4;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Content Canvas ──────────────────────────────────────────────────── */
+.adm-content {
+  flex: 1;
+  padding: 24px 32px 40px;
+}
+
+.adm-page-header {
+  margin-bottom: 20px;
+}
+
+.adm-page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0b1c30;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.adm-breadcrumb {
+  font-size: 12px;
+  color: #8c9ba5;
+  margin-top: 2px;
+}
+
+/* ── 4 Donut KPI Cards Row ───────────────────────────────────────────── */
+.adm-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.adm-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e8ecf4;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.adm-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 28, 48, 0.08);
+}
+
+.adm-kpi-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.adm-kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8c9ba5;
+  margin-bottom: 4px;
+}
+
+.adm-kpi-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0b1c30;
+}
+
+.adm-donut-wrap {
+  width: 44px;
+  height: 44px;
+}
+
+.adm-donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-bg {
+  fill: none;
+  stroke: #f4f6fa;
+  stroke-width: 3.8;
+}
+
+.donut-segment {
+  fill: none;
+  stroke: #ff6b35;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+}
+
+/* ── Bento Grid ──────────────────────────────────────────────────────── */
+.adm-bento-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.adm-col-left,
+.adm-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Card Base */
+.adm-card {
+  background: #ffffff;
+  border: 1px solid #e8ecf4;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.04);
+}
+
+.adm-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.adm-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0b1c30;
+  margin: 0;
+}
+
+.adm-card-sub {
+  font-size: 11.5px;
+  color: #8c9ba5;
+  margin: 2px 0 0;
+}
+
+.adm-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-select-sm {
+  background: #f8f9ff;
+  border: 1px solid #e8ecf4;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #594139;
+  outline: none;
+}
+
+.adm-dot-btn {
+  background: transparent;
+  border: none;
+  color: #8c9ba5;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Sales Statistic Legend & Chart ──────────────────────────────────── */
+.adm-chart-legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f4f6fa;
+}
+
+.adm-legend-items {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.adm-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #594139;
+}
+
+.adm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.adm-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-toggle-label {
+  font-size: 12px;
+  color: #8c9ba5;
+}
+
+.adm-toggle-switch {
+  width: 36px;
+  height: 20px;
+  background: #ff6b35;
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+}
+
+.adm-toggle-handle {
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  right: 3px;
+}
+
+/* Bar Chart */
+.adm-chart-container {
+  display: flex;
+  gap: 12px;
+  height: 220px;
+  margin-top: 10px;
+}
+
+.chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8c9ba5;
+  text-align: right;
+  padding-bottom: 24px;
+  width: 24px;
+}
+
+.chart-bars-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-grid-lines {
+  position: absolute;
+  inset: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.grid-line {
+  border-bottom: 1px dashed #edf0f7;
+  width: 100%;
+}
+
+.chart-bars-columns {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100%;
+  padding-bottom: 24px;
+}
+
+.chart-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 170px;
+}
+
+.chart-bar {
+  width: 14px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.bar-blue {
+  background: #2563eb;
+}
+
+.bar-orange {
+  background: #ff6b35;
+}
+
+.bar-blue-striped {
+  background: repeating-linear-gradient(
+    45deg,
+    #93c5fd,
+    #93c5fd 4px,
+    #bfdbfe 4px,
+    #bfdbfe 8px
+  );
+}
+
+.bar-col-label {
+  font-size: 11px;
+  color: #8c9ba5;
+  margin-top: 4px;
+}
+
+/* Sales Summary Placeholder */
+.adm-summary-placeholder {
+  text-align: center;
+  padding: 30px 16px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  border: 1px dashed #e8ecf4;
+}
+
+/* ── Customer Map ────────────────────────────────────────────────────── */
+.adm-customer-map-chart {
+  height: 140px;
+  display: flex;
+  align-items: flex-end;
+  padding-top: 10px;
+}
+
+.cmap-bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+}
+
+.cmap-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.cmap-bar {
+  width: 10px;
+  background: #ff6b35;
+  border-radius: 4px 4px 0 0;
+}
+
+.cmap-col span {
+  font-size: 11px;
+  color: #8c9ba5;
+}
+
+/* ── Best Sellers List ───────────────────────────────────────────────── */
+.adm-bestsellers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adm-bestseller-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f8f9ff;
+  border: 1px solid #e8ecf4;
+}
+
+.adm-bs-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.adm-bs-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-bs-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-bs-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+}
+
+.adm-bs-price {
+  font-weight: 800;
+  color: #ab3500;
+}
+
+.adm-bs-stat {
+  color: #8c9ba5;
+}
+
+/* ── Loyal Customers ─────────────────────────────────────────────────── */
+.adm-loyal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adm-loyal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8f9ff;
+  border: 1px solid #e8ecf4;
+}
+
+.adm-loyal-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.adm-loyal-avatar-skeleton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+}
+
+.skeleton-line {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.adm-loyal-info {
+  flex: 1;
+}
+
+.adm-loyal-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1c30;
+}
+
+.adm-loyal-sub {
+  font-size: 11.5px;
+  color: #8c9ba5;
+}
+
+/* ── Responsive Rules ────────────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .adm-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .adm-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .adm-sidebar {
+    display: none;
+  }
+  .adm-topbar {
+    padding: 0 16px;
+  }
+  .adm-content {
+    padding: 16px;
+  }
+  .adm-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}

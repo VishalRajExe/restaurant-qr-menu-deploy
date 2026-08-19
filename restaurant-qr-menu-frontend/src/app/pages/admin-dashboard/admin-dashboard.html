@@ -1,109 +1,465 @@
 <!-- ═══════════════════════════════════════════════════════════════════════
-     LEZATO — SUPER ADMIN CONTROL PANEL
+     RESTQR — RESTAURANT ADMIN & ANALYTICS DASHBOARD
      ═══════════════════════════════════════════════════════════════════════ -->
-<div class="lezato-layout">
+<div class="adm-layout">
 
-  <!-- Sidebar -->
-  <aside class="lezato-sidebar">
-    <div class="lezato-sidebar-brand">
-      <h1 class="lezato-brand-title">RestQR<span class="lezato-brand-dot">.</span></h1>
+  <!-- ────────────────────── SIDEBAR ────────────────────────── -->
+  <aside class="adm-sidebar">
+    <!-- Brand -->
+    <div class="adm-sidebar-brand">
+      <h1 class="adm-brand-title">RestQR<span class="adm-brand-dot">.</span></h1>
+      <p class="adm-brand-subtitle">Restaurant Admin Dashboard</p>
     </div>
 
-    <nav class="lezato-sidebar-menu">
-      <button class="lezato-nav-item" [class.active]="activeTab() === 'restaurants'" (click)="activeTab.set('restaurants')">
-        <span class="material-symbols-outlined">storefront</span>
-        <span>Restaurants</span>
-        <span class="sidebar-pill-badge">{{ totalRestaurants() }}</span>
+    <!-- Navigation -->
+    <nav class="adm-nav-menu">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'analytics'" (click)="activeTab.set('analytics')">
+        <span class="material-symbols-outlined">leaderboard</span>
+        <span>Analytics</span>
       </button>
 
-      <button class="lezato-nav-item" [class.active]="activeTab() === 'tickets'" (click)="activeTab.set('tickets')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'restaurants'" (click)="activeTab.set('restaurants')">
+        <span class="material-symbols-outlined">storefront</span>
+        <span>Venues & Partners</span>
+        <span class="adm-badge-count">{{ totalRestaurants() }}</span>
+      </button>
+
+      <button class="adm-nav-item" [class.active]="activeTab() === 'tickets'" (click)="activeTab.set('tickets')">
         <span class="material-symbols-outlined">support_agent</span>
-        <span>Support</span>
+        <span>Support Desk</span>
         @if (openTicketsCount() > 0) {
-          <span class="sidebar-pill-badge" style="background:#b91c1c">{{ openTicketsCount() }}</span>
+          <span class="adm-badge-count" style="background:#b91c1c">{{ openTicketsCount() }}</span>
         }
       </button>
+
+      <div class="adm-nav-section-header">MENUS & OPS</div>
+
+      <button class="adm-nav-item" (click)="toastService.info('Menu Management', 'Redirecting to Menu Designer...')">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span>Add New Menu</span>
+      </button>
+
+      <button class="adm-nav-item" (click)="toastService.info('Menu Catalog', 'Loading dishes catalogue...')">
+        <span class="material-symbols-outlined">restaurant_menu</span>
+        <span>Menu List</span>
+      </button>
+
+      <button class="adm-nav-item" (click)="toastService.info('Categories', 'Managing category taxonomy...')">
+        <span class="material-symbols-outlined">category</span>
+        <span>Categories</span>
+      </button>
+
+      <button class="adm-nav-item" (click)="toastService.info('Customer Directory', 'Loading customer CRM...')">
+        <span class="material-symbols-outlined">group</span>
+        <span>Customer</span>
+      </button>
+
+      <!-- Promo Box (Matching Image 2!) -->
+      <div class="adm-promo-box">
+        <div class="adm-promo-icon">
+          <span class="material-symbols-outlined">restaurant</span>
+        </div>
+        <h4 class="adm-promo-title">Add Menus</h4>
+        <p class="adm-promo-desc">Manage your food and beverages menus</p>
+        <button class="adm-promo-btn" (click)="toastService.success('Menu Creator', 'Opening Add Menu Wizard')">
+          <span>Add New Menu</span>
+          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+      </div>
     </nav>
 
-    <div class="lezato-sidebar-footer">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div class="lezato-user-avatar" style="background:#fee2e2;color:#b91c1c">
-          A
-        </div>
-        <div>
-          <p style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin:0">Super Admin</p>
-          <p style="font-size:11.5px;color:var(--text-secondary);margin:0">Platform Operator</p>
-        </div>
+    <!-- Footer -->
+    <div class="adm-sidebar-footer">
+      <div class="adm-footer-copyright">
+        RestQR Restaurant Admin<br>© 2026 All Rights Reserved
       </div>
-      <button class="lez-btn lez-btn-outline lez-btn-sm w-full" (click)="logout()">
-        <span class="material-symbols-outlined text-[16px]">logout</span>
-        <span>Sign Out</span>
+      <button class="adm-logout-btn" (click)="logout()">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+        <span>Logout</span>
       </button>
     </div>
   </aside>
 
-  <!-- Main Area -->
-  <div class="lezato-main">
-    <header class="lezato-topbar">
-      <h2 style="font-size:20px;font-weight:800;margin:0">Platform Management</h2>
+  <!-- ────────────────────── MAIN CONTENT ────────────────────── -->
+  <div class="adm-main">
 
-      <div style="display:flex;align-items:center;gap:12px">
-        <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="refreshData()">
-          <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+    <!-- Topbar -->
+    <header class="adm-topbar">
+      <!-- Search Input -->
+      <div class="adm-search-wrap">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" class="adm-search-input" placeholder="Search here"
+               [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+      </div>
+
+      <!-- Right Topbar Actions -->
+      <div class="adm-topbar-actions">
+        <button class="adm-recipe-btn" (click)="toastService.info('Recipe Guide', 'Loading kitchen culinary manual...')">
+          Recipe Guide
         </button>
+
+        <button class="adm-icon-btn relative" title="Notifications">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="adm-notification-dot"></span>
+        </button>
+
+        <button class="adm-icon-btn relative" title="Messages">
+          <span class="material-symbols-outlined">chat_bubble</span>
+          <span class="adm-chat-badge">21</span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="adm-user-profile">
+          <img src="/img/testimonial-1.jpg" alt="Manager" class="adm-avatar-img" />
+          <div class="adm-user-info">
+            <div class="adm-user-name">Main Branch</div>
+            <div class="adm-user-role">Manager</div>
+          </div>
+          <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+        </div>
+
+        <!-- Language Pill -->
+        <div class="adm-lang-pill">
+          <span style="font-size:14px">🇺🇸</span>
+          <span>English</span>
+          <span class="material-symbols-outlined text-[16px] text-gray-400">expand_more</span>
+        </div>
       </div>
     </header>
 
-    <main class="lezato-content">
+    <!-- Canvas -->
+    <main class="adm-content">
 
-      <!-- Metrics -->
-      <div class="lez-kpi-grid">
-        <div class="lez-kpi-card">
-          <div class="kpi-icon" style="background:#ffdbd0;color:#ab3500">
-            <span class="material-symbols-outlined">storefront</span>
-          </div>
-          <div class="kpi-value">{{ totalRestaurants() }}</div>
-          <div class="kpi-label">Total Venues</div>
-        </div>
-
-        <div class="lez-kpi-card">
-          <div class="kpi-icon" style="background:#d1fae5;color:#047857">
-            <span class="material-symbols-outlined">verified</span>
-          </div>
-          <div class="kpi-value">{{ activeRestaurants() }}</div>
-          <div class="kpi-label">Active Partners</div>
-        </div>
-
-        <div class="lez-kpi-card">
-          <div class="kpi-icon" style="background:#e0f2fe;color:#0369a1">
-            <span class="material-symbols-outlined">qr_code_2</span>
-          </div>
-          <div class="kpi-value">{{ totalScans() | number }}</div>
-          <div class="kpi-label">Global QR Scans</div>
-        </div>
-
-        <div class="lez-kpi-card">
-          <div class="kpi-icon" style="background:#fef3c7;color:#b45309">
-            <span class="material-symbols-outlined">support_agent</span>
-          </div>
-          <div class="kpi-value">{{ openTicketsCount() }}</div>
-          <div class="kpi-label">Open Tickets</div>
-        </div>
-      </div>
-
-      <!-- Restaurants Tab -->
-      @if (activeTab() === 'restaurants') {
+      <!-- ════════════════════════════════════════════════════════
+           TAB: ANALYTICS (Matching Stitch Screen Exactly)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'analytics') {
         <div class="animate-fade-in">
           
-          <div style="display:flex;gap:12px;margin-bottom:20px">
-            <div class="lez-search-box" style="width:340px">
-              <span class="material-symbols-outlined search-icon">search</span>
-              <input class="lez-input" placeholder="Search venues, owners..."
-                     [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
-            </div>
+          <!-- Page Header -->
+          <div class="adm-page-header">
+            <h2 class="adm-page-title">Analytics</h2>
+            <div class="adm-breadcrumb">Analytics / Analytics</div>
           </div>
 
-          <div class="lez-table-container">
+          <!-- 4 Circular KPI Metric Cards -->
+          <div class="adm-kpi-row">
+            
+            <!-- Card 1: Menus Today -->
+            <div class="adm-kpi-card">
+              <div class="adm-kpi-data">
+                <span class="adm-kpi-label">Menus Today</span>
+                <span class="adm-kpi-num">{{ menusToday() }}</span>
+              </div>
+              <div class="adm-donut-wrap">
+                <svg class="adm-donut-svg" viewBox="0 0 36 36">
+                  <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="donut-segment" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 2: Customer Today -->
+            <div class="adm-kpi-card">
+              <div class="adm-kpi-data">
+                <span class="adm-kpi-label">Customer Today</span>
+                <span class="adm-kpi-num">{{ customersToday() }}</span>
+              </div>
+              <div class="adm-donut-wrap">
+                <svg class="adm-donut-svg" viewBox="0 0 36 36">
+                  <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="donut-segment" stroke-dasharray="62, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 3: Total Revenue -->
+            <div class="adm-kpi-card">
+              <div class="adm-kpi-data">
+                <span class="adm-kpi-label">Total Revenue</span>
+                <span class="adm-kpi-num">$ {{ totalRevenue() }}</span>
+              </div>
+              <div class="adm-donut-wrap">
+                <svg class="adm-donut-svg" viewBox="0 0 36 36">
+                  <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="donut-segment" stroke-dasharray="88, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 4: Employee -->
+            <div class="adm-kpi-card">
+              <div class="adm-kpi-data">
+                <span class="adm-kpi-label">Employee</span>
+                <span class="adm-kpi-num">{{ employeeCount() }}</span>
+              </div>
+              <div class="adm-donut-wrap">
+                <svg class="adm-donut-svg" viewBox="0 0 36 36">
+                  <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="donut-segment" stroke-dasharray="68, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Main 2-Column Bento Grid (68% Left, 32% Right) -->
+          <div class="adm-bento-grid">
+            
+            <!-- ── Left Column ── -->
+            <div class="adm-col-left">
+
+              <!-- Sales Statistic Card -->
+              <div class="adm-card">
+                <div class="adm-card-header">
+                  <div>
+                    <h3 class="adm-card-title">Sales Statistic</h3>
+                    <p class="adm-card-sub">Daily revenue and order volume tracking</p>
+                  </div>
+                  <div class="adm-card-header-actions">
+                    <select class="adm-select-sm">
+                      <option>Weekly</option>
+                      <option>Monthly</option>
+                      <option>Yearly</option>
+                    </select>
+                    <button class="adm-dot-btn"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                  </div>
+                </div>
+
+                <!-- Legend & Toggle -->
+                <div class="adm-chart-legend-row">
+                  <div class="adm-legend-items">
+                    <span class="adm-legend-item">
+                      <span class="adm-dot" style="background:#ff6b35"></span>
+                      <span>Beverages <strong style="color:var(--text-primary)">569</strong></span>
+                    </span>
+                    <span class="adm-legend-item">
+                      <span class="adm-dot" style="background:#2563eb"></span>
+                      <span>Food <strong style="color:var(--text-primary)">1,567</strong></span>
+                    </span>
+                  </div>
+
+                  <div class="adm-toggle-wrap">
+                    <span class="adm-toggle-label">Number</span>
+                    <div class="adm-toggle-switch active">
+                      <div class="adm-toggle-handle"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Custom Bar Chart (Matching Image 2) -->
+                <div class="adm-chart-container">
+                  <!-- Y-Axis Lines -->
+                  <div class="chart-y-axis">
+                    <span>100</span>
+                    <span>80</span>
+                    <span>60</span>
+                    <span>40</span>
+                    <span>20</span>
+                    <span>0</span>
+                  </div>
+
+                  <div class="chart-bars-area">
+                    <div class="chart-grid-lines">
+                      <div class="grid-line"></div>
+                      <div class="grid-line"></div>
+                      <div class="grid-line"></div>
+                      <div class="grid-line"></div>
+                      <div class="grid-line"></div>
+                      <div class="grid-line"></div>
+                    </div>
+
+                    <!-- 5 Weeks Bars -->
+                    <div class="chart-bars-columns">
+                      <!-- Week 01 -->
+                      <div class="chart-bar-group">
+                        <div class="bar-pair">
+                          <div class="chart-bar bar-blue" style="height:60%"></div>
+                          <div class="chart-bar bar-orange" style="height:82%"></div>
+                        </div>
+                        <span class="bar-col-label">Week 01</span>
+                      </div>
+
+                      <!-- Week 02 -->
+                      <div class="chart-bar-group">
+                        <div class="bar-pair">
+                          <div class="chart-bar bar-blue-striped" style="height:70%"></div>
+                          <div class="chart-bar bar-orange" style="height:88%"></div>
+                        </div>
+                        <span class="bar-col-label">Week 02</span>
+                      </div>
+
+                      <!-- Week 03 -->
+                      <div class="chart-bar-group">
+                        <div class="bar-pair">
+                          <div class="chart-bar bar-blue" style="height:82%"></div>
+                          <div class="chart-bar bar-orange" style="height:40%"></div>
+                        </div>
+                        <span class="bar-col-label">Week 03</span>
+                      </div>
+
+                      <!-- Week 04 -->
+                      <div class="chart-bar-group">
+                        <div class="bar-pair">
+                          <div class="chart-bar bar-blue" style="height:52%"></div>
+                          <div class="chart-bar bar-orange" style="height:78%"></div>
+                        </div>
+                        <span class="bar-col-label">Week 04</span>
+                      </div>
+
+                      <!-- Week 05 -->
+                      <div class="chart-bar-group">
+                        <div class="bar-pair">
+                          <div class="chart-bar bar-blue" style="height:36%"></div>
+                          <div class="chart-bar bar-orange" style="height:48%"></div>
+                        </div>
+                        <span class="bar-col-label">Week 05</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sales Summary Card -->
+              <div class="adm-card">
+                <div class="adm-card-header">
+                  <div>
+                    <h3 class="adm-card-title">Sales Summary</h3>
+                    <p class="adm-card-sub">Aggregated performance and revenue insights</p>
+                  </div>
+                  <select class="adm-select-sm">
+                    <option>Monthly</option>
+                    <option>Weekly</option>
+                  </select>
+                </div>
+                <div class="adm-summary-placeholder">
+                  <span class="material-symbols-outlined text-[32px] text-gray-300">query_stats</span>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:8px 0 0">Detailed summary data would appear here...</p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ── Right Column ── -->
+            <div class="adm-col-right">
+
+              <!-- Customer Map Card -->
+              <div class="adm-card">
+                <div class="adm-card-header">
+                  <div>
+                    <h3 class="adm-card-title">Customer Map</h3>
+                    <p class="adm-card-sub">Daily customer arrival distribution</p>
+                  </div>
+                </div>
+
+                <div class="adm-customer-map-chart">
+                  <div class="cmap-bars">
+                    <div class="cmap-col"><div class="cmap-bar" style="height:25%"></div><span>4</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:60%"></div><span>5</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:35%"></div><span>6</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:85%"></div><span>7</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:50%"></div><span>8</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:18%"></div><span>9</span></div>
+                    <div class="cmap-col"><div class="cmap-bar" style="height:40%"></div><span>10</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Best Seller Menus Card -->
+              <div class="adm-card">
+                <div class="adm-card-header">
+                  <div>
+                    <h3 class="adm-card-title">Best Seller Menus</h3>
+                    <p class="adm-card-sub">Top ranked culinary dishes</p>
+                  </div>
+                  <button class="adm-dot-btn"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                </div>
+
+                <div class="adm-bestsellers-list">
+                  
+                  <!-- Best Seller 1 -->
+                  <div class="adm-bestseller-item">
+                    <img src="/img/menu-1.jpg" alt="Spinach with Roasted Crab" class="adm-bs-img" />
+                    <div class="adm-bs-content">
+                      <h4 class="adm-bs-title">Spinach with Roasted Crab</h4>
+                      <div class="adm-bs-meta">
+                        <span class="adm-bs-price">$6.73</span>
+                        <span class="adm-bs-stat">❤️ 256K</span>
+                        <span class="adm-bs-stat">📊 6,723</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Best Seller 2 -->
+                  <div class="adm-bestseller-item">
+                    <img src="/img/menu-2.jpg" alt="Chicken Teriyaki" class="adm-bs-img" />
+                    <div class="adm-bs-content">
+                      <h4 class="adm-bs-title">Chicken Teriyaki Khas Haji Muhidin Malang</h4>
+                      <div class="adm-bs-meta">
+                        <span class="adm-bs-price">$6.73</span>
+                        <span class="adm-bs-stat">❤️ 256K</span>
+                        <span class="adm-bs-stat">📊 6,723</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Loyal Customers Card -->
+              <div class="adm-card">
+                <div class="adm-card-header">
+                  <div>
+                    <h3 class="adm-card-title">Loyal Customers</h3>
+                    <p class="adm-card-sub">Frequent diners registry</p>
+                  </div>
+                </div>
+
+                <div class="adm-loyal-list">
+                  <!-- Customer 1 -->
+                  <div class="adm-loyal-item">
+                    <img src="/img/testimonial-1.jpg" alt="Claudya Chintia" class="adm-loyal-avatar" />
+                    <div class="adm-loyal-info">
+                      <div class="adm-loyal-name">Claudya Chintia</div>
+                      <div class="adm-loyal-sub">651 Times Order</div>
+                    </div>
+                    <span class="material-symbols-outlined text-[18px] text-gray-400">chevron_right</span>
+                  </div>
+
+                  <!-- Customer 2 Placeholder -->
+                  <div class="adm-loyal-item" style="opacity:0.6">
+                    <div class="adm-loyal-avatar-skeleton"></div>
+                    <div class="adm-loyal-info">
+                      <div class="skeleton-line" style="width:90px;height:12px;margin-bottom:4px"></div>
+                      <div class="skeleton-line" style="width:60px;height:10px"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: VENUES / RESTAURANTS (Partner Management)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'restaurants') {
+        <div class="animate-fade-in">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div>
+              <h2 class="adm-page-title">Restaurant Venues</h2>
+              <p class="adm-breadcrumb">Manage active restaurant partners & onboardings</p>
+            </div>
+            <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="refreshData()">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+            </button>
+          </div>
+
+          <div class="adm-card" style="padding:0;overflow:hidden">
             <table class="lez-table">
               <thead>
                 <tr>
@@ -122,7 +478,7 @@
                   <tr>
                     <td>
                       <div style="display:flex;align-items:center;gap:10px">
-                        <div style="width:36px;height:36px;border-radius:8px;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font-size:16px">
+                        <div style="width:38px;height:38px;border-radius:10px;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font-size:18px">
                           🏪
                         </div>
                         <div>
@@ -137,9 +493,7 @@
                     </td>
                     <td style="color:var(--text-secondary)">{{ r.location }}</td>
                     <td style="font-weight:700;color:var(--text-primary)">{{ r.totalScans | number }}</td>
-                    <td>
-                      <span class="lez-badge lez-badge-preparing">{{ r.plan }}</span>
-                    </td>
+                    <td><span class="lez-badge lez-badge-preparing">{{ r.plan }}</span></td>
                     <td>
                       <span class="lez-badge" [class.lez-badge-ready]="r.status === 'active'" [class.lez-badge-delivered]="r.status !== 'active'">
                         {{ r.status }}
@@ -181,12 +535,26 @@
         </div>
       }
 
-      <!-- Support Tickets Tab -->
+      <!-- ════════════════════════════════════════════════════════
+           TAB: SUPPORT TICKETS
+           ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'tickets') {
         <div class="animate-fade-in">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div>
+              <h2 class="adm-page-title">Support Desk</h2>
+              <p class="adm-breadcrumb">Resolve customer & restaurant inquiries</p>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'all'" (click)="ticketFilter.set('all')">All ({{ tickets().length }})</button>
+              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'open'" (click)="ticketFilter.set('open')">Open ({{ openTicketsCount() }})</button>
+              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'resolved'" (click)="ticketFilter.set('resolved')">Resolved ({{ resolvedTicketsCount() }})</button>
+            </div>
+          </div>
+
           <div style="display:flex;flex-direction:column;gap:12px">
             @for (ticket of filteredTickets(); track ticket.id) {
-              <div class="lez-card" style="padding:18px">
+              <div class="adm-card" style="padding:18px">
                 <div style="display:flex;justify-content:space-between;align-items:center">
                   <div style="display:flex;align-items:center;gap:12px">
                     <span class="lez-badge" [class.lez-badge-ready]="ticket.status === 'resolved'" [class.lez-badge-pending]="ticket.status === 'open'">
@@ -214,4 +582,5 @@
 
     </main>
   </div>
+
 </div>

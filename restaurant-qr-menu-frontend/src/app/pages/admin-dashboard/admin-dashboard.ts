@@ -1,17 +1,17 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminRestaurantData } from '../../services/admin.service';
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
-import { BackButton } from '../../components/back-button/back-button';
 
 @Component({
   selector: 'app-admin-dashboard',
   imports: [CommonModule],
   templateUrl: './admin-dashboard.html',
+  styleUrls: ['./admin-dashboard.css']
 })
 export class AdminDashboard implements OnInit, OnDestroy {
   authService   = inject(AuthService);
@@ -22,7 +22,16 @@ export class AdminDashboard implements OnInit, OnDestroy {
   router        = inject(Router);
 
   // ── Tab navigation ────────────────────────────────────────────────────────
-  activeTab = signal<'restaurants' | 'tickets'>('restaurants');
+  activeTab = signal<'analytics' | 'restaurants' | 'tickets'>('analytics');
+
+  // ── Analytics Stats (Stitch Analytics Reference) ─────────────────────────
+  menusToday     = signal<number>(346);
+  customersToday = signal<number>(221);
+  totalRevenue   = signal<number>(951.52);
+  employeeCount  = signal<number>(98);
+
+  salesFilterType = signal<'Weekly' | 'Monthly' | 'Yearly'>('Weekly');
+  isNumberToggle  = signal<boolean>(true);
 
   // ── Restaurants & Pagination ─────────────────────────────────────────────
   searchQuery = signal<string>('');
@@ -90,7 +99,7 @@ export class AdminDashboard implements OnInit, OnDestroy {
   ngOnInit() {
     this.refreshData();
 
-    // ── Live time running feature: Poll every 5 seconds for live updates ──
+    // Live refresh poll
     this.autoRefreshTimer = setInterval(() => {
       this.refreshData();
     }, 5000);
@@ -166,27 +175,6 @@ export class AdminDashboard implements OnInit, OnDestroy {
     this.ticketService.reopenTicket(id).subscribe(() => {
       this.toastService.info('Ticket Reopened', 'Ticket moved back to open queue.');
     });
-  }
-
-  planBadge(plan: string): string {
-    return plan === 'Pro'
-      ? 'bg-orange-500/15 text-orange-400 border-orange-500/20'
-      : 'bg-white/5 text-gray-400 border-white/10';
-  }
-
-  statusBadge(status: string): string {
-    return status === 'active'
-      ? 'bg-green-500/15 text-green-400 border-green-500/20'
-      : 'bg-red-500/15 text-red-400 border-red-500/20';
-  }
-
-  priorityBadge(priority: string): string {
-    return {
-      high:     'bg-red-500/15 text-red-400 border-red-500/20',
-      critical: 'bg-red-500/15 text-red-400 border-red-500/20',
-      medium:   'bg-amber-500/15 text-amber-400 border-amber-500/20',
-      low:      'bg-blue-500/15 text-blue-400 border-blue-500/20',
-    }[priority] ?? '';
   }
 
   timeAgo(dateInput: Date | string | undefined): string {
