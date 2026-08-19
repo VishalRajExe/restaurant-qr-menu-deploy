@@ -48,11 +48,20 @@ public class PublicMenuController {
             restaurant = qrCode.getRestaurant();
             analyticsService.recordScan(qrCode, request);
         } catch (Exception e) {
-            // Fallback: Try resolving as restaurant slug
+            // Fallback 1: Try numeric ID
             try {
-                restaurant = restaurantService.findBySlug(token);
-            } catch (Exception ex) {
-                throw new com.restaurantqr.platform.common.ResourceNotFoundException("QR code or Restaurant not found for identifier: " + token);
+                if (token.matches("\\d+")) {
+                    restaurant = restaurantService.findById(Long.parseLong(token));
+                }
+            } catch (Exception ignored) {}
+
+            // Fallback 2: Try resolving as restaurant slug
+            if (restaurant == null) {
+                try {
+                    restaurant = restaurantService.findBySlug(token);
+                } catch (Exception ex) {
+                    throw new com.restaurantqr.platform.common.ResourceNotFoundException("QR code or Restaurant not found for identifier: " + token);
+                }
             }
         }
 

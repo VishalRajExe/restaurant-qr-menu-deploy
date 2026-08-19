@@ -208,16 +208,21 @@ export class OwnerDashboard implements OnInit, OnDestroy {
       }
     });
 
+    this.categoryService.fetchCategories(rId).subscribe(cats => {
+      if (cats && cats.length > 0 && !this.newItemCategoryId()) {
+        this.newItemCategoryId.set(cats[0].id);
+      }
+    });
+
+    this.menuService.fetchMenuItems(rId).subscribe();
+    this.qrService.fetchQrCodes(rId).subscribe(qrs => {
+      if (qrs && qrs.length > 0) {
+        this.selectedQr.set(qrs[0]);
+      }
+    });
+
     this.analyticsService.loadDashboardMetrics().subscribe();
     this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
-
-    if (this.categories().length > 0 && !this.newItemCategoryId()) {
-      this.newItemCategoryId.set(this.categories()[0].id);
-    }
-
-    if (this.qrCodesList().length > 0) {
-      this.selectedQr.set(this.qrCodesList()[0]);
-    }
   }
 
   ngOnDestroy() {}
@@ -227,8 +232,14 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.editingCategoryId.set(null);
     this.editingItemId.set(null);
     this.currentPage.set(1);
+    const rId = this.activeRestaurant()?.id || '1';
     if (tabName === 'orders') {
-      this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
+      this.orderService.fetchOrders(rId).subscribe();
+    } else if (tabName === 'items' || tabName === 'categories') {
+      this.categoryService.fetchCategories(rId).subscribe();
+      this.menuService.fetchMenuItems(rId).subscribe();
+    } else if (tabName === 'qr') {
+      this.qrService.fetchQrCodes(rId).subscribe();
     }
   }
 
