@@ -23,11 +23,13 @@
       </span>
     </div>
 
-    <!-- Stats & Logout -->
+    <!-- Stats & Notification & Logout -->
     <div style="display:flex;align-items:center;gap:10px">
       <span class="lez-badge lez-badge-pending">Pending: {{ pendingCount() }}</span>
       <span class="lez-badge lez-badge-preparing">Preparing: {{ preparingCount() }}</span>
       <span class="lez-badge lez-badge-ready">Ready: {{ doneCount() }}</span>
+
+      <app-notification-center></app-notification-center>
 
       <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="logout()">
         <span class="material-symbols-outlined text-[16px]">logout</span>

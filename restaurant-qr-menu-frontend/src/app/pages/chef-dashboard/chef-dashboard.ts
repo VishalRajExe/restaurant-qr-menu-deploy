@@ -8,19 +8,23 @@ import { ModalService } from '../../services/modal.service';
 import { OrderService, Order } from '../../services/order.service';
 import { BackButton } from '../../components/back-button/back-button';
 
+import { NotificationCenter } from '../../components/notification-center/notification-center';
+import { NotificationService } from '../../services/notification.service';
+
 @Component({
   selector: 'app-chef-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, NotificationCenter],
   templateUrl: './chef-dashboard.html',
   styleUrls: ['./chef-dashboard.css'],
 })
 export class ChefDashboard implements OnInit, OnDestroy {
-  authService  = inject(AuthService);
-  toastService = inject(ToastService);
-  modalService = inject(ModalService);
-  orderService = inject(OrderService);
-  http         = inject(HttpClient);
-  router       = inject(Router);
+  authService         = inject(AuthService);
+  toastService        = inject(ToastService);
+  modalService        = inject(ModalService);
+  orderService        = inject(OrderService);
+  notificationService = inject(NotificationService);
+  http                = inject(HttpClient);
+  router              = inject(Router);
 
   currentTime  = signal<number>(Date.now());
   activeFilter = signal<'all' | 'pending' | 'preparing' | 'done'>('all');

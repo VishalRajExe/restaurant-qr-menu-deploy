@@ -6,20 +6,23 @@ import { AdminService, AdminRestaurantData } from '../../services/admin.service'
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
+import { NotificationCenter } from '../../components/notification-center/notification-center';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, NotificationCenter],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
 export class AdminDashboard implements OnInit, OnDestroy {
-  authService   = inject(AuthService);
-  adminService  = inject(AdminService);
-  ticketService = inject(TicketService);
-  toastService  = inject(ToastService);
-  modalService  = inject(ModalService);
-  router        = inject(Router);
+  authService         = inject(AuthService);
+  adminService        = inject(AdminService);
+  ticketService       = inject(TicketService);
+  toastService        = inject(ToastService);
+  modalService        = inject(ModalService);
+  notificationService = inject(NotificationService);
+  router              = inject(Router);
 
   // ── Tab navigation ────────────────────────────────────────────────────────
   activeTab = signal<'analytics' | 'restaurants' | 'tickets'>('analytics');

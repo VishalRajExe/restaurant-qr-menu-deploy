@@ -5,7 +5,8 @@ import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
 import com.restaurantqr.platform.modules.category.entity.Category;
 import com.restaurantqr.platform.modules.category.repository.CategoryRepository;
 import com.restaurantqr.platform.modules.menuitem.entity.MenuItem;
-import com.restaurantqr.platform.modules.menuitem.repository.MenuItemRepository;
+import com.restaurantqr.platform.modules.notification.entity.Notification;
+import com.restaurantqr.platform.modules.notification.repository.NotificationRepository;
 import com.restaurantqr.platform.modules.order.entity.Order;
 import com.restaurantqr.platform.modules.order.entity.OrderItem;
 import com.restaurantqr.platform.modules.order.repository.OrderRepository;
@@ -44,6 +45,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final QrCodeRepository qrCodeRepository;
     private final OrderRepository orderRepository;
     private final SupportTicketRepository supportTicketRepository;
+    private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -281,6 +283,81 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .status(SupportTicket.Status.RESOLVED)
                     .escalationLevel(SupportTicket.EscalationLevel.LEVEL_1)
                     .build());
+        // 8. Seed Notifications
+        if (notificationRepository.count() == 0) {
+            log.info("Seeding system notifications...");
+            User admin = userRepository.findByEmailAndIsDeletedFalse("admin@restaurantqr.com").orElse(null);
+            User chef = userRepository.findByEmailAndIsDeletedFalse("chef@restaurant.com").orElse(null);
+
+            // Owner Notifications
+            notificationRepository.save(Notification.builder()
+                    .user(owner)
+                    .restaurant(restaurant)
+                    .eventType(Notification.EventType.NEW_ORDER)
+                    .title("New Order #ORD-8821")
+                    .message("Table 01 placed an order for 2x Truffle Mushroom Burger + Chocolate Fondant ($46.00).")
+                    .isRead(false)
+                    .build());
+
+            notificationRepository.save(Notification.builder()
+                    .user(owner)
+                    .restaurant(restaurant)
+                    .eventType(Notification.EventType.PAYMENT_RECEIVED)
+                    .title("Settlement Received")
+                    .message("Daily dine-in revenue settlement of $951.52 processed successfully.")
+                    .isRead(false)
+                    .build());
+
+            notificationRepository.save(Notification.builder()
+                    .user(owner)
+                    .restaurant(restaurant)
+                    .eventType(Notification.EventType.QR_GENERATED)
+                    .title("High QR Traffic Alert")
+                    .message("Table 01 QR code has reached 42 active guest scans today.")
+                    .isRead(true)
+                    .build());
+
+            // Chef Notifications
+            if (chef != null) {
+                notificationRepository.save(Notification.builder()
+                        .user(chef)
+                        .restaurant(restaurant)
+                        .eventType(Notification.EventType.NEW_ORDER)
+                        .title("Kitchen Order #ORD-8821")
+                        .message("Table 01 - 2x Truffle Mushroom Burger (Medium rare) - Please start preparation.")
+                        .isRead(false)
+                        .build());
+
+                notificationRepository.save(Notification.builder()
+                        .user(chef)
+                        .restaurant(restaurant)
+                        .eventType(Notification.EventType.ORDER_READY)
+                        .title("Order #ORD-8823 Ready")
+                        .message("Table 03 - Wagyu Beef Ribeye ready for server pickup.")
+                        .isRead(true)
+                        .build());
+            }
+
+            // Admin Notifications
+            if (admin != null) {
+                notificationRepository.save(Notification.builder()
+                        .user(admin)
+                        .restaurant(restaurant)
+                        .eventType(Notification.EventType.NEW_STAFF_JOINED)
+                        .title("New Partner Venue")
+                        .message("RestQR Gourmet Bistro completed onboarding with 13 digital dishes.")
+                        .isRead(false)
+                        .build());
+
+                notificationRepository.save(Notification.builder()
+                        .user(admin)
+                        .restaurant(restaurant)
+                        .eventType(Notification.EventType.SUPPORT_TICKET_UPDATE)
+                        .title("Support Ticket #TICK-1001")
+                        .message("Sarah Jenkins opened a ticket for QR hardware stand setup.")
+                        .isRead(false)
+                        .build());
+            }
         }
 
         log.info("✅ RestQR Database seeded successfully in MySQL!");

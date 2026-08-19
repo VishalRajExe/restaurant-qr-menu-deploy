@@ -101,10 +101,9 @@
 
         <!-- Action icons -->
         <div style="display:flex;align-items:center;gap:8px">
-          <button class="icon-btn-pill" title="Notifications">
-            <span class="material-symbols-outlined">notifications</span>
-          </button>
-          <button class="icon-btn-pill" title="Messages">
+          <app-notification-center></app-notification-center>
+
+          <button class="icon-btn-pill" title="Support Messages" (click)="toastService.info('Staff Messages', 'Opening restaurant internal chat...')">
             <span class="material-symbols-outlined">chat_bubble</span>
           </button>
           <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="selectTab('items')">

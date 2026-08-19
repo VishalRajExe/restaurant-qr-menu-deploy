@@ -98,14 +98,11 @@
           Recipe Guide
         </button>
 
-        <button class="adm-icon-btn relative" title="Notifications">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="adm-notification-dot"></span>
-        </button>
+        <app-notification-center></app-notification-center>
 
-        <button class="adm-icon-btn relative" title="Messages">
+        <button class="adm-icon-btn relative" title="Messages" (click)="toastService.info('Support Messages', 'Opening internal support chat...')">
           <span class="material-symbols-outlined">chat_bubble</span>
-          <span class="adm-chat-badge">21</span>
+          <span class="adm-chat-badge">3</span>
         </button>
 
         <!-- User Profile Pill -->

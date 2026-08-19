@@ -52,11 +52,20 @@ public class Notification extends BaseEntity {
     private LocalDateTime readAt;
 
     public enum EventType {
+        NEW_ORDER,
+        ORDER_STATUS_CHANGED,
+        ORDER_READY,
+        ORDER_CANCELLED,
+        MENU_UPDATED,
+        CATEGORY_CREATED,
+        QR_GENERATED,
+        PAYMENT_RECEIVED,
         SUBSCRIPTION_EXPIRING,
         OFFER_ENDING,
         NEW_STAFF_JOINED,
-        QR_GENERATED,
-        PAYMENT_RECEIVED
+        SUPPORT_TICKET_UPDATE,
+        SECURITY_ALERT,
+        SYSTEM_NOTICE
     }
 
     public enum Channel {

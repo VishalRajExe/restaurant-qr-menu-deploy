@@ -18,27 +18,30 @@ import { BackButton } from '../../components/back-button/back-button';
 import { Category } from '../../models/category.model';
 import { MenuItem } from '../../models/menu-item.model';
 import { environment } from '../../environments/environment';
+import { NotificationCenter } from '../../components/notification-center/notification-center';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-owner-dashboard',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NotificationCenter],
   templateUrl: './owner-dashboard.html',
   styleUrls: ['./owner-dashboard.css']
 })
 export class OwnerDashboard implements OnInit, OnDestroy {
-  authService       = inject(AuthService);
-  restaurantService = inject(RestaurantService);
-  categoryService   = inject(CategoryService);
-  menuService       = inject(MenuService);
-  offerService      = inject(OfferService);
-  qrService         = inject(QrService);
-  analyticsService  = inject(AnalyticsService);
-  ticketService     = inject(TicketService);
-  uploadService     = inject(UploadService);
-  toastService      = inject(ToastService);
-  modalService      = inject(ModalService);
-  orderService      = inject(OrderService);
-  router            = inject(Router);
+  authService         = inject(AuthService);
+  restaurantService   = inject(RestaurantService);
+  categoryService     = inject(CategoryService);
+  menuService         = inject(MenuService);
+  offerService        = inject(OfferService);
+  qrService           = inject(QrService);
+  analyticsService    = inject(AnalyticsService);
+  ticketService       = inject(TicketService);
+  uploadService       = inject(UploadService);
+  toastService        = inject(ToastService);
+  modalService        = inject(ModalService);
+  orderService        = inject(OrderService);
+  notificationService = inject(NotificationService);
+  router              = inject(Router);
 
   // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'qr' | 'settings'
   activeTab = signal<string>('overview');
