@@ -6,11 +6,9 @@ import { AuthService } from '../../services/auth.service';
 import { PRICING_PLANS } from '../../mock-data/landing.data';
 import { PricingPlan } from '../../models/pricing-plan.model';
 
-import { BackButton } from '../../components/back-button/back-button';
-
 @Component({
   selector: 'app-signup',
-  imports: [CommonModule, RouterLink, FormsModule, BackButton],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './signup.html',
   styleUrls: ['./signup.css']
 })
@@ -77,16 +75,6 @@ export class Signup {
         this.errorMessage.set('Please input restaurant name and operational address.');
         return;
       }
-      if (!this.gstin()) {
-        this.errorMessage.set('GSTIN is required for tax & verification purposes. Please provide a valid GSTIN.');
-        return;
-      }
-
-      const gstinPattern = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-      if (!gstinPattern.test(this.gstin().toUpperCase())) {
-        this.errorMessage.set('Invalid GSTIN format. Please provide a valid GSTIN. Example: 27AAPFU0939F1ZV');
-        return;
-      }
     }
 
     this.currentStep.update(n => n + 1);
@@ -99,6 +87,18 @@ export class Signup {
 
   selectPlan(planId: string) {
     this.selectedPlanId.set(planId);
+  }
+
+  handleRegister() {
+    this.onRegister();
+  }
+
+  handleChefRegister() {
+    this.onRegister();
+  }
+
+  goToOwnerDashboard() {
+    this.enterDashboard();
   }
 
   onRegister() {
