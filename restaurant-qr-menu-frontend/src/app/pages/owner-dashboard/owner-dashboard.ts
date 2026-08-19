@@ -161,14 +161,27 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   });
 
   selectedFilterCategoryId = signal<string>('all');
+  menuSearchQuery          = signal<string>('');
 
   filteredMenuItems = computed(() => {
-    const list = this.menuItems();
+    let list = this.menuItems();
     const filterId = this.selectedFilterCategoryId();
-    if (filterId === 'all') return list;
-    return list.filter((item: MenuItem) =>
-      String(item.categoryId).toLowerCase().replace(/^c/, '') === String(filterId).toLowerCase().replace(/^c/, '')
-    );
+    const query = this.menuSearchQuery().trim().toLowerCase();
+
+    if (filterId !== 'all') {
+      list = list.filter((item: MenuItem) =>
+        String(item.categoryId).toLowerCase().replace(/^c/, '') === String(filterId).toLowerCase().replace(/^c/, '')
+      );
+    }
+
+    if (query) {
+      list = list.filter((item: MenuItem) =>
+        item.name.toLowerCase().includes(query) ||
+        (item.description && item.description.toLowerCase().includes(query))
+      );
+    }
+
+    return list;
   });
 
   paginatedMenuItems = computed(() => {

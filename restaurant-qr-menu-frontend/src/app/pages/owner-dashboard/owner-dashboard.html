@@ -516,49 +516,77 @@
               </div>
             </div>
 
-            <!-- Dishes Grid -->
+            <!-- Dishes Grid & Search Section -->
             <div>
-              <div style="display:flex;gap:12px;margin-bottom:20px">
+              <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
                 <div class="lez-search-box" style="flex:1">
                   <span class="material-symbols-outlined search-icon">search</span>
-                  <input class="lez-input" placeholder="Search dishes..." />
+                  <input class="lez-input" placeholder="Search dishes by name or ingredients..."
+                         [value]="menuSearchQuery()" (input)="menuSearchQuery.set($any($event.target).value)" />
+                  @if (menuSearchQuery()) {
+                    <button (click)="menuSearchQuery.set('')" class="clear-search-btn">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  }
                 </div>
-                <select class="lez-input" style="width:180px" [value]="selectedFilterCategoryId()"
+                <select class="lez-input" style="width:200px" [value]="selectedFilterCategoryId()"
                         (change)="selectedFilterCategoryId.set($any($event.target).value)">
-                  <option value="all">All Categories</option>
+                  <option value="all">All Categories ({{ menuItems().length }})</option>
                   @for (cat of categories(); track cat.id) {
                     <option [value]="cat.id">{{ cat.name }}</option>
                   }
                 </select>
               </div>
 
-              <div class="lez-dishes-grid">
-                @for (dish of paginatedMenuItems(); track dish.id) {
-                  <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable">
-                    <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="lez-dish-img" />
-                    <div class="lez-dish-body">
-                      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-                        <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ dish.name }}</span>
-                        <span style="font-size:15px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
+              @if (filteredMenuItems().length === 0) {
+                <div class="lez-card" style="text-align:center;padding:48px 24px">
+                  <div style="font-size:40px;margin-bottom:12px">🍽️</div>
+                  <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 6px">No menu items found</h4>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px">
+                    {{ menuSearchQuery() ? 'No dishes matched your search "' + menuSearchQuery() + '".' : 'Add your first menu item on the left panel.' }}
+                  </p>
+                  @if (menuSearchQuery()) {
+                    <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="menuSearchQuery.set('')">Clear Search Filter</button>
+                  }
+                </div>
+              } @else {
+                <div class="lez-dishes-grid">
+                  @for (dish of paginatedMenuItems(); track dish.id) {
+                    <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable" [class.is-editing]="editingItemId() === dish.id">
+                      <div class="dish-card-image-wrap">
+                        <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="lez-dish-img" />
+                        <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
+                          {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
+                        </span>
                       </div>
-                      <p style="font-size:12px;color:var(--text-secondary);line-height:1.4;margin:0 0 10px">{{ dish.description }}</p>
-                      
-                      <div style="display:flex;justify-content:space-between;align-items:center">
-                        <button class="lez-badge" style="cursor:pointer;border:none"
-                                [class.lez-badge-ready]="dish.isAvailable"
-                                [class.lez-badge-delivered]="!dish.isAvailable"
-                                (click)="toggleItemAvailability(dish.id)">
-                          {{ dish.isAvailable ? '✓ Available' : '✗ Hidden' }}
-                        </button>
-                        <div style="display:flex;gap:4px">
-                          <button class="icon-btn-pill" (click)="startEditMenuItem(dish)"><span class="material-symbols-outlined text-[16px]">edit</span></button>
-                          <button class="icon-btn-pill" style="color:#b91c1c" (click)="deleteMenuItem(dish.id)"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+                      <div class="lez-dish-body">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+                          <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ dish.name }}</span>
+                          <span style="font-size:15px;font-weight:800;color:#ab3500">${{ dish.price.toFixed(2) }}</span>
+                        </div>
+                        <p style="font-size:12px;color:var(--text-secondary);line-height:1.4;margin:0 0 12px;min-height:34px">{{ dish.description }}</p>
+                        
+                        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:10px">
+                          <button class="lez-badge" style="cursor:pointer;border:none"
+                                  [class.lez-badge-ready]="dish.isAvailable"
+                                  [class.lez-badge-delivered]="!dish.isAvailable"
+                                  (click)="toggleItemAvailability(dish.id)">
+                            {{ dish.isAvailable ? '✓ Available' : '✗ Hidden' }}
+                          </button>
+                          <div style="display:flex;gap:6px">
+                            <button class="icon-btn-pill edit-btn" title="Edit Menu Item" (click)="startEditMenuItem(dish)">
+                              <span class="material-symbols-outlined text-[16px]">edit</span>
+                            </button>
+                            <button class="icon-btn-pill delete-btn" title="Delete Menu Item" (click)="deleteMenuItem(dish.id)">
+                              <span class="material-symbols-outlined text-[16px]">delete</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                }
-              </div>
+                  }
+                </div>
+              }
 
               @if (totalPages() > 1) {
                 <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">

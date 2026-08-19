@@ -91,41 +91,177 @@
   font-weight: 500;
 }
 
+/* Form Fields & Controls */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b1c30 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lez-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  color: #0b1c30;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.lez-input:focus {
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+}
+
+.lez-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Search Box */
+.lez-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lez-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.lez-search-box .lez-input {
+  padding-left: 40px;
+  padding-right: 36px;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.clear-search-btn:hover {
+  color: #0b1c30;
+  background: #f1f5f9;
+}
+
+.clear-search-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
 /* Dishes Grid in Menu Management */
 .lez-dishes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
 }
 
 .lez-dish-card {
   background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .lez-dish-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.lez-dish-card.is-editing {
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
 }
 
 .lez-dish-card.unavailable {
   opacity: 0.6;
 }
 
+.dish-card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
 .lez-dish-img {
   width: 100%;
-  height: 140px;
+  height: 100%;
   object-fit: cover;
-  background: #f4f6fa;
-  display: block;
+  transition: transform 0.3s ease;
+}
+
+.lez-dish-card:hover .lez-dish-img {
+  transform: scale(1.04);
+}
+
+.dish-diet-pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.dish-diet-pill.veg {
+  background: rgba(16, 185, 129, 0.9);
+  color: #ffffff;
+}
+
+.dish-diet-pill.non-veg {
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
 }
 
 .lez-dish-body {
-  padding: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.icon-btn-pill.edit-btn:hover {
+  background: #fff7ed;
+  color: #ea580c;
+  border-color: #ffedd5;
+}
+
+.icon-btn-pill.delete-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fee2e2;
 }
 
 /* Responsive adjustments */
