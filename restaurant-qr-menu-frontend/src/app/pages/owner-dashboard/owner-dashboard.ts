@@ -58,6 +58,14 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   activeOrderFilter = signal<string>('ALL');
   selectedOrder = signal<Order | null>(null);
 
+  // Pending Orders Count for Sidebar Badge (turns off when worked/cancelled)
+  pendingOrdersCount = computed(() => {
+    return this.ordersList().filter(o => 
+      o.status.toUpperCase() === 'PENDING' || 
+      o.status.toUpperCase() === 'RECEIVED'
+    ).length;
+  });
+
   filteredOrders = computed(() => {
     const list = this.ordersList();
     const filter = this.activeOrderFilter();
@@ -67,6 +75,34 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   selectOrder(order: Order) {
     this.selectedOrder.set(order);
+  }
+
+  updateOrderStatus(orderId: string, newStatus: string) {
+    const rId = this.activeRestaurant()?.id || 1;
+    this.orderService.updateOrderStatus(orderId, newStatus, rId).subscribe(() => {
+      const current = this.selectedOrder();
+      if (current && (current.id === orderId || current.orderNumber === orderId)) {
+        this.selectedOrder.set({ ...current, status: newStatus.toUpperCase() as any });
+      }
+      this.toastService.success('Order Updated', `Order marked as ${newStatus}`);
+      this.notificationService.pushNotification({
+        eventType: 'ORDER_STATUS_CHANGED',
+        title: 'Order Status Updated',
+        message: `Order #${orderId} status changed to ${newStatus}.`
+      });
+    });
+  }
+
+  cancelOrder(orderId: string) {
+    this.modalService.confirm({
+      title: 'Cancel Order',
+      message: `Are you sure you want to cancel Order #${orderId}?`,
+      type: 'danger',
+      confirmText: 'Cancel Order',
+      onConfirm: () => {
+        this.updateOrderStatus(orderId, 'CANCELLED');
+      }
+    });
   }
 
   getOrderSubtotal(order: Order | null): number {
@@ -307,14 +343,6 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     } else if (tabName === 'qr') {
       this.qrService.fetchQrCodes(rId).subscribe();
     }
-  }
-
-  // Orders Management
-  updateOrderStatus(orderId: string, status: string) {
-    const rId = this.activeRestaurant()?.id || '1';
-    this.orderService.updateOrderStatus(orderId, status, rId).subscribe(() => {
-      this.toastService.success('Order Updated', `Order ${orderId} status set to ${status}`);
-    });
   }
 
   // Categories

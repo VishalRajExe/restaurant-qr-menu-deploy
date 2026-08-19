@@ -20,8 +20,8 @@
       <button class="lezato-nav-item" [class.active]="activeTab() === 'orders'" (click)="selectTab('orders')">
         <span class="material-symbols-outlined">receipt_long</span>
         <span>Orders</span>
-        @if (ordersList().length > 0) {
-          <span class="sidebar-pill-badge">{{ ordersList().length }}</span>
+        @if (pendingOrdersCount() > 0) {
+          <span class="sidebar-pill-badge">{{ pendingOrdersCount() }}</span>
         }
       </button>
 
@@ -306,20 +306,33 @@
 
                   <!-- Action Buttons -->
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    @if (current.status === 'PENDING' || current.status === 'pending') {
+                    @if (current.status === 'PENDING' || current.status === 'pending' || current.status === 'ACCEPTED') {
                       <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px"
                               (click)="updateOrderStatus(current.orderNumber || current.id, 'PREPARING')">
-                        <span class="material-symbols-outlined">skillet</span> Start Preparing
+                        <span class="material-symbols-outlined text-[18px]">skillet</span>
+                        <span>Start Preparing</span>
                       </button>
-                    } @else if (current.status === 'PREPARING' || current.status === 'ACCEPTED') {
+                      <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
+                              (click)="cancelOrder(current.orderNumber || current.id)">
+                        <span class="material-symbols-outlined text-[16px]">cancel</span>
+                        <span>Cancel Order</span>
+                      </button>
+                    } @else if (current.status === 'PREPARING' || current.status === 'preparing') {
                       <button class="lez-btn lez-btn-dark" style="grid-column:span 2;padding:12px"
                               (click)="updateOrderStatus(current.orderNumber || current.id, 'READY')">
-                        <span class="material-symbols-outlined">check_circle</span> Mark as Ready
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        <span>Mark as Ready</span>
+                      </button>
+                      <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
+                              (click)="cancelOrder(current.orderNumber || current.id)">
+                        <span class="material-symbols-outlined text-[16px]">cancel</span>
+                        <span>Cancel Order</span>
                       </button>
                     } @else if (current.status === 'READY') {
                       <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:#10B981"
                               (click)="updateOrderStatus(current.orderNumber || current.id, 'COMPLETED')">
-                        <span class="material-symbols-outlined">done_all</span> Mark as Delivered
+                        <span class="material-symbols-outlined text-[18px]">done_all</span>
+                        <span>Mark as Delivered</span>
                       </button>
                     }
 
