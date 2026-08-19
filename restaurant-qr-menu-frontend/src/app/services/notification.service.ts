@@ -132,10 +132,11 @@ export class NotificationService {
   /**
    * Push an instant real-time notification (e.g., when an order is placed in the current session)
    */
-  pushNotification(notif: Omit<AppNotification, 'id' | 'createdAt'> & { id?: string | number }): void {
+  pushNotification(notif: { eventType: string; title: string; message: string; id?: string | number; isRead?: boolean; restaurantId?: number; userId?: number; channel?: string }): void {
     const newNotif: AppNotification = {
       id: notif.id || 'notif_' + Date.now(),
       createdAt: new Date().toISOString(),
+      isRead: notif.isRead ?? false,
       ...notif
     };
 

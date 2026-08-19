@@ -128,6 +128,18 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   qrIncludeLogo       = signal<boolean>(true);
   qrDownloadSimulated = signal<boolean>(false);
   newTableNumber      = signal<string>('Table 01');
+  newTableDigit       = signal<number>(1);
+
+  onTableDigitInput(event: Event) {
+    const raw = (event.target as HTMLInputElement).value;
+    if (!raw) return;
+    let val = parseInt(raw, 10);
+    if (isNaN(val)) val = 1;
+    val = Math.max(1, Math.min(99, val));
+    this.newTableDigit.set(val);
+    const formatted = `Table ${String(val).padStart(2, '0')}`;
+    this.newTableNumber.set(formatted);
+  }
 
   // Pagination states
   currentPage = signal<number>(1);
@@ -440,10 +452,16 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   // QR Regeneration & Management
   generateTableQr() {
-    const tableNum = this.newTableNumber() || 'Table 01';
+    const digit = this.newTableDigit() || 1;
+    const tableNum = `Table ${String(digit).padStart(2, '0')}`;
     const rId = this.activeRestaurant()?.id || '1';
     this.qrService.generateQrCode(rId, tableNum).subscribe(() => {
       this.toastService.success('QR Code Generated', `QR code generated for ${tableNum}`);
+      this.notificationService.pushNotification({
+        eventType: 'QR_GENERATED',
+        title: 'New Table QR Generated',
+        message: `${tableNum} QR code generated successfully and ready for print.`
+      });
     });
   }
 
