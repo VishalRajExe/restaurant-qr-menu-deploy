@@ -227,20 +227,25 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   supportMessage    = signal<string>('');
   supportPriority   = signal<string>('medium');
 
+  // Add Item Modal
+  showAddItemModal  = signal<boolean>(false);
+
   // Profile Settings
   settingName    = signal<string>('RestQR Gourmet Bistro');
   settingAddress = signal<string>('124 Culinary Boulevard, Downtown Gourmet District');
   settingPhone   = signal<string>('+1 (555) 234-5678');
 
+  openAddItemModal() {
+    this.cancelEditMenuItem();
+    this.showAddItemModal.set(true);
+  }
+
+  closeAddItemModal() {
+    this.showAddItemModal.set(false);
+  }
+
   createNewItem() {
-    this.activeTab.set('items');
-    this.editingItemId.set(null);
-    this.newItemName.set('');
-    this.newItemPrice.set(12.00);
-    this.newItemDescription.set('');
-    this.newItemImage.set('');
-    this.newItemIsVeg.set(true);
-    this.toastService.info('Add New Item', 'Enter details for the new culinary dish.');
+    this.openAddItemModal();
   }
 
   openSupportModal() {
@@ -448,12 +453,20 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         isVeg: this.newItemIsVeg(),
         spicyLevel: this.newItemSpicyLevel()
       });
+      const updatedName = this.newItemName().trim();
       this.cancelEditMenuItem();
+      this.showAddItemModal.set(false);
       this.toastService.success('Dish Updated', 'Menu item changes saved successfully.');
+      this.notificationService.pushNotification({
+        eventType: 'MENU_ITEM_UPDATED',
+        title: 'Menu Item Updated',
+        message: `Dish "${updatedName}" modified in catalogue.`
+      });
     } else {
+      const createdName = this.newItemName().trim();
       this.menuService.addMenuItem({
         categoryId: selectedCatId,
-        name: this.newItemName().trim(),
+        name: createdName,
         price: this.newItemPrice(),
         description: this.newItemDescription().trim(),
         image: img,
@@ -462,7 +475,13 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         spicyLevel: this.newItemSpicyLevel()
       });
       this.cancelEditMenuItem();
-      this.toastService.success('Dish Added', 'New food item created and uploaded to menu.');
+      this.showAddItemModal.set(false);
+      this.toastService.success('Dish Added', `New food item "${createdName}" uploaded to menu.`);
+      this.notificationService.pushNotification({
+        eventType: 'MENU_ITEM_ADDED',
+        title: 'New Dish Added',
+        message: `"${createdName}" added to digital menu for diners.`
+      });
     }
   }
 

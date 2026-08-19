@@ -835,4 +835,80 @@
     </div>
   }
 
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADD / EDIT MENU ITEM MODAL (Works from any tab)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showAddItemModal()) {
+    <div class="lez-overlay animate-fade-in" (click)="closeAddItemModal()">
+      <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[24px] text-accent">{{ editingItemId() ? 'edit_note' : 'add_circle' }}</span>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
+              {{ editingItemId() ? 'Edit Culinary Dish' : 'Add New Menu Item' }}
+            </h3>
+          </div>
+          <button class="pos-modal-close" (click)="closeAddItemModal()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-field">
+            <label class="form-label">Dish Title *</label>
+            <input class="lez-input" placeholder="e.g. Grilled Salmon with Asparagus"
+                   [value]="newItemName()" (input)="newItemName.set($any($event.target).value)" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-field">
+              <label class="form-label">Price ($) *</label>
+              <input class="lez-input" type="number" step="0.01" min="0.5"
+                     [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Category</label>
+              <select class="lez-input" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Description</label>
+            <textarea class="lez-input" rows="2" placeholder="Describe the ingredients, flavors, culinary notes..."
+                      [value]="newItemDescription()" (input)="newItemDescription.set($any($event.target).value)"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Dish Image</label>
+            <input type="file" accept="image/*" class="lez-input" style="padding:8px" (change)="onDishImageSelected($event)" />
+            @if (imageUploadPreview() || newItemImage()) {
+              <img [src]="imageUploadPreview() || newItemImage()" alt="" style="width:100%;height:120px;border-radius:10px;object-fit:cover;margin-top:8px;border:1px solid var(--border)" />
+            }
+          </div>
+
+          <div style="display:flex;gap:16px;align-items:center;padding:4px 0">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer">
+              <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#10b981;width:18px;height:18px" />
+              <span>Vegetarian Dish</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddItemModal()">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="handleAddItem()">
+            <span class="material-symbols-outlined text-[16px]">{{ editingItemId() ? 'check' : 'add' }}</span>
+            <span>{{ editingItemId() ? 'Update Dish' : 'Add to Menu' }}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>
