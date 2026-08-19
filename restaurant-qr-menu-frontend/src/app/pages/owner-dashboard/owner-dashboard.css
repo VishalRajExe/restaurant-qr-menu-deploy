@@ -98,12 +98,20 @@
   gap: 6px;
 }
 
-.form-label {
+.form-label,
+label.form-label,
+.lez-card label {
   font-size: 12px;
   font-weight: 700;
   color: #0b1c30 !important;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  display: block;
+}
+
+.lez-card h3,
+.lez-card h4 {
+  color: #0b1c30 !important;
 }
 
 .lez-input {

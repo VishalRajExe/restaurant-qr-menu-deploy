@@ -485,6 +485,20 @@ html, body {
   position: relative;
 }
 
+.lez-floor-table-card h4 {
+  color: #0b1c30 !important;
+  font-weight: 800 !important;
+  font-size: 16px;
+  margin: 8px 0 4px;
+}
+
+.lez-floor-table-card p {
+  color: #475569 !important;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 8px 0 0;
+}
+
 .lez-floor-table-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -494,6 +508,16 @@ html, body {
 .lez-floor-table-card.occupied { border-top: 4px solid var(--table-occupied); }
 .lez-floor-table-card.reserved { border-top: 4px solid var(--table-reserved); }
 .lez-floor-table-card.cleaning { border-top: 4px solid var(--table-cleaning); }
+
+/* Global Form Labels & High-Contrast Typography */
+.form-label, label.form-label, label {
+  color: #0b1c30 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  display: block;
+}
 
 /* Toast Notifications */
 .lez-toast-container {
