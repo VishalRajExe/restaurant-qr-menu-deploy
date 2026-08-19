@@ -28,8 +28,9 @@ import { RouterLink } from '@angular/router';
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-white/5">
           <button (click)="reloadPage()" type="button"
-                  class="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all cursor-pointer">
-            🔄 Retry Connection
+                  class="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-xs font-semibold text-gray-300 hover:bg-white/5 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[15px]">refresh</span>
+            <span>Retry Connection</span>
           </button>
           <a routerLink="/"
              class="w-full sm:w-auto px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white shadow-lg transition-all cursor-pointer">

@@ -117,7 +117,7 @@
 
         <!-- Language Pill -->
         <div class="adm-lang-pill">
-          <span style="font-size:14px">🇺🇸</span>
+          <span class="material-symbols-outlined text-[16px] text-gray-500">language</span>
           <span>English</span>
           <span class="material-symbols-outlined text-[16px] text-gray-400">expand_more</span>
         </div>
@@ -347,6 +347,7 @@
                     <h3 class="adm-card-title">Customer Map</h3>
                     <p class="adm-card-sub">Daily customer arrival distribution</p>
                   </div>
+                  <button class="adm-dot-btn"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
                 </div>
 
                 <div class="adm-customer-map-chart">
@@ -362,18 +363,17 @@
                 </div>
               </div>
 
-              <!-- Best Seller Menus Card -->
+              <!-- Trending Dishes Card -->
               <div class="adm-card">
                 <div class="adm-card-header">
                   <div>
-                    <h3 class="adm-card-title">Best Seller Menus</h3>
+                    <h3 class="adm-card-title">Trending Dishes</h3>
                     <p class="adm-card-sub">Top ranked culinary dishes</p>
                   </div>
                   <button class="adm-dot-btn"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
                 </div>
 
                 <div class="adm-bestsellers-list">
-                  
                   <!-- Best Seller 1 -->
                   <div class="adm-bestseller-item">
                     <img src="/img/menu-1.jpg" alt="Spinach with Roasted Crab" class="adm-bs-img" />
@@ -381,8 +381,12 @@
                       <h4 class="adm-bs-title">Spinach with Roasted Crab</h4>
                       <div class="adm-bs-meta">
                         <span class="adm-bs-price">$6.73</span>
-                        <span class="adm-bs-stat">❤️ 256K</span>
-                        <span class="adm-bs-stat">📊 6,723</span>
+                        <span class="adm-bs-stat">
+                          <span class="material-symbols-outlined text-[13px] text-rose-500">favorite</span> 256K
+                        </span>
+                        <span class="adm-bs-stat">
+                          <span class="material-symbols-outlined text-[13px] text-blue-500">bar_chart</span> 6,723
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -391,15 +395,18 @@
                   <div class="adm-bestseller-item">
                     <img src="/img/menu-2.jpg" alt="Chicken Teriyaki" class="adm-bs-img" />
                     <div class="adm-bs-content">
-                      <h4 class="adm-bs-title">Chicken Teriyaki Khas Haji Muhidin Malang</h4>
+                      <h4 class="adm-bs-title">Chicken Teriyaki Khas Haji Muhidin</h4>
                       <div class="adm-bs-meta">
                         <span class="adm-bs-price">$6.73</span>
-                        <span class="adm-bs-stat">❤️ 256K</span>
-                        <span class="adm-bs-stat">📊 6,723</span>
+                        <span class="adm-bs-stat">
+                          <span class="material-symbols-outlined text-[13px] text-rose-500">favorite</span> 256K
+                        </span>
+                        <span class="adm-bs-stat">
+                          <span class="material-symbols-outlined text-[13px] text-blue-500">bar_chart</span> 6,723
+                        </span>
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
 
@@ -423,13 +430,14 @@
                     <span class="material-symbols-outlined text-[18px] text-gray-400">chevron_right</span>
                   </div>
 
-                  <!-- Customer 2 Placeholder -->
-                  <div class="adm-loyal-item" style="opacity:0.6">
-                    <div class="adm-loyal-avatar-skeleton"></div>
+                  <!-- Customer 2 -->
+                  <div class="adm-loyal-item">
+                    <img src="/img/testimonial-2.jpg" alt="Gourmet Diner" class="adm-loyal-avatar" />
                     <div class="adm-loyal-info">
-                      <div class="skeleton-line" style="width:90px;height:12px;margin-bottom:4px"></div>
-                      <div class="skeleton-line" style="width:60px;height:10px"></div>
+                      <div class="adm-loyal-name">Marcus Vance</div>
+                      <div class="adm-loyal-sub">412 Times Order</div>
                     </div>
+                    <span class="material-symbols-outlined text-[18px] text-gray-400">chevron_right</span>
                   </div>
                 </div>
               </div>
@@ -475,8 +483,8 @@
                   <tr>
                     <td>
                       <div style="display:flex;align-items:center;gap:10px">
-                        <div style="width:38px;height:38px;border-radius:10px;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font-size:18px">
-                          🏪
+                        <div style="width:38px;height:38px;border-radius:10px;background:#f4f6fa;color:#475569;display:flex;align-items:center;justify-content:center;font-size:18px">
+                          <span class="material-symbols-outlined text-[20px]">storefront</span>
                         </div>
                         <div>
                           <div style="font-weight:700;color:var(--text-primary)">{{ r.name }}</div>
@@ -498,7 +506,9 @@
                     </td>
                     <td>
                       @if (r.verificationStatus === 'VERIFIED') {
-                        <span class="lez-badge lez-badge-ready">✓ Verified</span>
+                        <span class="lez-badge lez-badge-ready">
+                          <span class="material-symbols-outlined text-[12px]">check</span> Verified
+                        </span>
                       } @else if (r.verificationStatus === 'REJECTED') {
                         <span class="lez-badge lez-badge-cancelled">Rejected</span>
                       } @else {

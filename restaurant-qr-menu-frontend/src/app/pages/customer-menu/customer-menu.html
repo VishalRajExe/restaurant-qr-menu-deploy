@@ -14,7 +14,9 @@
   <!-- ── Error State ── -->
   @if (!isLoading() && loadError()) {
     <div class="menu-error-screen">
-      <div style="font-size:48px;margin-bottom:16px">😕</div>
+      <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <span class="material-symbols-outlined text-[32px] text-zinc-400">search_off</span>
+      </div>
       <h2 style="font-size:20px;font-weight:700;color:#fff;margin:0 0 8px">Menu Not Found</h2>
       <p style="font-size:14px;color:#71717A;text-align:center;max-width:300px">{{ loadError() }}</p>
     </div>
@@ -39,7 +41,7 @@
           @if (restaurant()?.logo || restaurant()?.logoUrl) {
             <img [src]="restaurant()?.logo || restaurant()?.logoUrl" [alt]="restaurant()?.name" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>
           } @else {
-            <span style="font-size:28px">🍽</span>
+            <span class="material-symbols-outlined text-[28px] text-zinc-400">restaurant</span>
           }
         </div>
 
@@ -51,18 +53,28 @@
           }
           <div class="menu-hero-meta">
             @if (restaurant()?.cuisineType) {
-              <span class="menu-meta-pill">🍜 {{ restaurant()?.cuisineType }}</span>
+              <span class="menu-meta-pill">
+                <span class="material-symbols-outlined text-[13px]">restaurant_menu</span>
+                <span>{{ restaurant()?.cuisineType }}</span>
+              </span>
             }
             @if (restaurant()?.rating) {
-              <span class="menu-meta-pill">⭐ {{ restaurant()?.rating }}</span>
+              <span class="menu-meta-pill">
+                <span class="material-symbols-outlined text-[13px] text-amber-400">star</span>
+                <span>{{ restaurant()?.rating }}</span>
+              </span>
             }
             @if (restaurant()?.openingHours) {
-              <span class="menu-meta-pill">🕐 {{ restaurant()?.openingHours }}</span>
+              <span class="menu-meta-pill">
+                <span class="material-symbols-outlined text-[13px]">schedule</span>
+                <span>{{ restaurant()?.openingHours }}</span>
+              </span>
             }
             <!-- Table badge -->
             @if (tableNumber() > 0) {
               <span class="menu-meta-pill menu-table-pill" (click)="startEditTable()">
-                🪑 Table {{ tableNumber() }}
+                <span class="material-symbols-outlined text-[13px]">table_restaurant</span>
+                <span>Table {{ tableNumber() }}</span>
                 <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               </span>
             }
@@ -105,21 +117,28 @@
       </div>
     }
 
-    <!-- ── Search + Filter bar ── -->
-    <div class="menu-search-bar">
-      <div class="epi-search" style="flex:1">
-        <svg class="epi-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+    <!-- ── Search & Filter Bar ── -->
+    <div class="menu-filter-bar">
+      <!-- Search Input -->
+      <div class="menu-search-wrap">
+        <svg class="menu-search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input class="epi-input" type="search" placeholder="Search dishes..."
+        <input class="menu-search-input" placeholder="Search dishes, drinks..."
                [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
       </div>
 
       <!-- Food type filter -->
       <div style="display:flex;gap:6px">
         <button class="menu-type-btn" [class.active]="foodTypeFilter() === 'all'" (click)="setFoodFilter('all')">All</button>
-        <button class="menu-type-btn veg-btn" [class.active]="foodTypeFilter() === 'veg'" (click)="setFoodFilter('veg')">🟢 Veg</button>
-        <button class="menu-type-btn nonveg-btn" [class.active]="foodTypeFilter() === 'non-veg'" (click)="setFoodFilter('non-veg')">🔴 Non-Veg</button>
+        <button class="menu-type-btn veg-btn" [class.active]="foodTypeFilter() === 'veg'" (click)="setFoodFilter('veg')">
+          <span class="diet-dot veg"></span>
+          <span>Veg</span>
+        </button>
+        <button class="menu-type-btn nonveg-btn" [class.active]="foodTypeFilter() === 'non-veg'" (click)="setFoodFilter('non-veg')">
+          <span class="diet-dot nonveg"></span>
+          <span>Non-Veg</span>
+        </button>
       </div>
     </div>
 
@@ -127,7 +146,8 @@
     <div class="menu-cat-tabs-wrap">
       <div class="menu-cat-tabs">
         <button class="menu-cat-tab" [class.active]="activeCategoryTagId() === 'all'" (click)="selectCategory('all')">
-          🍽 All
+          <span class="material-symbols-outlined text-[15px]">restaurant_menu</span>
+          <span>All</span>
           <span class="cat-count">{{ menuItems().length }}</span>
         </button>
         @for (cat of categories(); track cat.id) {
@@ -146,7 +166,7 @@
       <div class="menu-offers-scroll">
         @for (offer of activeOffers(); track offer.id) {
           <div class="menu-offer-card">
-            <div style="font-size:20px;margin-bottom:6px">🎉</div>
+            <span class="material-symbols-outlined text-[20px] text-amber-400 mb-1">local_offer</span>
             <div style="font-size:13px;font-weight:700;color:#fff">{{ offer.title }}</div>
             @if (offer.description) {
               <div style="font-size:11px;color:#A1A1AA;margin-top:2px">{{ offer.description }}</div>
@@ -160,7 +180,9 @@
     <div class="menu-content">
       @if (filteredDishes().length === 0) {
         <div class="epi-empty" style="padding:80px 20px">
-          <div class="epi-empty-icon">🍽</div>
+          <div class="epi-empty-icon">
+            <span class="material-symbols-outlined text-[36px]">restaurant</span>
+          </div>
           <div class="epi-empty-title">No dishes found</div>
           <div class="epi-empty-desc">Try adjusting your search or filter</div>
         </div>
@@ -174,10 +196,15 @@
                   @if (dish.image) {
                     <img [src]="dish.image" [alt]="dish.name" class="menu-dish-img" />
                   } @else {
-                    <div class="menu-dish-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--bg-input)">🍽</div>
+                    <div class="menu-dish-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--bg-input)">
+                      <span class="material-symbols-outlined text-[32px] text-zinc-500">restaurant</span>
+                    </div>
                   }
                   @if (dish.isPopular) {
-                    <div class="menu-dish-popular-badge">🔥 Popular</div>
+                    <div class="menu-dish-popular-badge">
+                      <span class="material-symbols-outlined text-[12px] text-amber-400">local_fire_department</span>
+                      <span>Popular</span>
+                    </div>
                   }
                 </div>
 
@@ -254,7 +281,9 @@
       <div class="cart-drawer-body">
         @if (cartIsEmpty()) {
           <div class="epi-empty" style="padding:40px 16px">
-            <div class="epi-empty-icon">🛒</div>
+            <div class="epi-empty-icon">
+              <span class="material-symbols-outlined text-[36px]">shopping_cart</span>
+            </div>
             <div class="epi-empty-title">Your cart is empty</div>
             <div class="epi-empty-desc">Add dishes from the menu to get started</div>
           </div>
@@ -335,7 +364,9 @@
     @if (orderPlaced()) {
       <div class="epi-overlay animate-fade-in">
         <div class="epi-modal animate-slide-up" style="text-align:center">
-          <div style="font-size:56px;margin-bottom:16px">🎉</div>
+          <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.12);color:#10b981;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <span class="material-symbols-outlined text-[36px]">check_circle</span>
+          </div>
           <h3 style="font-size:20px;font-weight:800;color:#fff;margin:0 0 8px">Order Placed!</h3>
           <p style="font-size:14px;color:#A1A1AA;margin:0 0 8px">Your order has been confirmed</p>
           <div class="epi-badge epi-badge-success" style="margin:0 auto 20px">Order #{{ orderId() }}</div>
@@ -365,10 +396,18 @@
                  [class.status-preparing]="activeOrder()?.status === 'PREPARING'"
                  [class.status-ready]="activeOrder()?.status === 'READY'"
                  [class.status-completed]="activeOrder()?.status === 'COMPLETED'">
-              @if (activeOrder()?.status === 'PENDING' || activeOrder()?.status === 'pending') { 🔔 Order Received }
-              @else if (activeOrder()?.status === 'PREPARING') { 👨‍🍳 Being Prepared }
-              @else if (activeOrder()?.status === 'READY') { ✅ Ready for Pickup! }
-              @else if (activeOrder()?.status === 'COMPLETED') { ✓ Completed }
+              @if (activeOrder()?.status === 'PENDING' || activeOrder()?.status === 'pending') {
+                <span class="material-symbols-outlined text-[16px] align-middle">notifications</span> Order Received
+              }
+              @else if (activeOrder()?.status === 'PREPARING') {
+                <span class="material-symbols-outlined text-[16px] align-middle">skillet</span> Being Prepared
+              }
+              @else if (activeOrder()?.status === 'READY') {
+                <span class="material-symbols-outlined text-[16px] align-middle text-emerald-400">check_circle</span> Ready for Pickup!
+              }
+              @else if (activeOrder()?.status === 'COMPLETED') {
+                <span class="material-symbols-outlined text-[16px] align-middle">done_all</span> Completed
+              }
               @else { {{ activeOrder()?.status }} }
             </div>
           </div>
@@ -376,20 +415,26 @@
           <!-- Status steps -->
           <div class="order-tracker-steps">
             <div class="tracker-step" [class.done]="true">
-              <div class="tracker-dot done">✓</div>
+              <div class="tracker-dot done">
+                <span class="material-symbols-outlined text-[12px]">check</span>
+              </div>
               <div class="tracker-label">Order Placed</div>
             </div>
             <div class="tracker-line" [class.done]="activeOrder()?.status !== 'PENDING'"></div>
             <div class="tracker-step" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
               <div class="tracker-dot" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-                @if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') { ✓ } @else { 2 }
+                @if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') {
+                  <span class="material-symbols-outlined text-[12px]">check</span>
+                } @else { 2 }
               </div>
               <div class="tracker-label">Preparing</div>
             </div>
             <div class="tracker-line" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'"></div>
             <div class="tracker-step" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
               <div class="tracker-dot" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-                @if (activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') { ✓ } @else { 3 }
+                @if (activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') {
+                  <span class="material-symbols-outlined text-[12px]">check</span>
+                } @else { 3 }
               </div>
               <div class="tracker-label">Ready!</div>
             </div>
@@ -437,7 +482,12 @@
             </button>
           </div>
           @if (customerOrderHistory().length === 0) {
-            <div class="epi-empty" style="padding:32px"><div class="epi-empty-icon">📋</div><div class="epi-empty-title">No orders yet</div></div>
+            <div class="epi-empty" style="padding:32px">
+              <div class="epi-empty-icon">
+                <span class="material-symbols-outlined text-[32px]">receipt_long</span>
+              </div>
+              <div class="epi-empty-title">No orders yet</div>
+            </div>
           } @else {
             <div style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto">
               @for (ord of customerOrderHistory(); track ord.id) {

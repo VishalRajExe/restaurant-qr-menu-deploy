@@ -239,8 +239,9 @@
                     <div style="font-size:13.5px;font-weight:700;color:var(--text-primary)">
                       {{ current.customerName || 'Guest Customer' }}
                     </div>
-                    <div style="font-size:12px;color:var(--text-secondary)">
-                      📱 {{ current.customerMobile }}
+                    <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
+                      <span class="material-symbols-outlined text-[14px]">smartphone</span>
+                      <span>{{ current.customerMobile }}</span>
                     </div>
                   </div>
                 </div>
@@ -254,8 +255,8 @@
                   <div style="display:flex;flex-direction:column;gap:14px">
                     @for (item of current.items; track $index) {
                       <div style="display:flex;gap:12px;align-items:flex-start">
-                        <div style="width:48px;height:48px;border-radius:8px;background:#eff4ff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
-                          🍽
+                        <div style="width:48px;height:48px;border-radius:8px;background:#eff4ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+                          <span class="material-symbols-outlined text-[22px]">restaurant</span>
                         </div>
                         <div style="flex:1;min-width:0">
                           <div style="display:flex;justify-content:space-between;align-items:baseline">
@@ -264,8 +265,9 @@
                           </div>
                           <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Qty: {{ item.qty }}</p>
                           @if (item.note) {
-                            <div style="margin-top:4px;padding:4px 8px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:4px;font-size:11px;color:#e65100">
-                              ℹ️ {{ item.note }}
+                            <div style="margin-top:4px;padding:4px 8px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:4px;font-size:11px;color:#e65100;display:flex;align-items:center;gap:4px">
+                              <span class="material-symbols-outlined text-[13px]">info</span>
+                              <span>{{ item.note }}</span>
                             </div>
                           }
                         </div>
@@ -434,7 +436,10 @@
                       <div style="font-size:13.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                         {{ dish.name }}
                       </div>
-                      <div style="font-size:12px;color:var(--text-secondary)">{{ dish.isVeg ? '🟢 Veg' : '🔴 Non-Veg' }}</div>
+                      <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
+                        <span [style.color]="dish.isVeg ? '#10b981' : '#ef4444'" class="material-symbols-outlined text-[14px]">circle</span>
+                        <span>{{ dish.isVeg ? 'Vegetarian' : 'Non-Vegetarian' }}</span>
+                      </div>
                     </div>
                     <span style="font-size:14px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
                   </div>
@@ -456,8 +461,9 @@
             
             <!-- Add / Edit Dish Form -->
             <div class="lez-card" style="padding:24px">
-              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 20px">
-                {{ editingItemId() ? '✏️ Edit Menu Item' : '➕ Add New Menu Item' }}
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined text-[20px] text-accent">{{ editingItemId() ? 'edit_note' : 'add_circle' }}</span>
+                <span>{{ editingItemId() ? 'Edit Menu Item' : 'Add New Menu Item' }}</span>
               </h3>
 
               <div style="display:flex;flex-direction:column;gap:14px">
@@ -539,7 +545,9 @@
 
               @if (filteredMenuItems().length === 0) {
                 <div class="lez-card" style="text-align:center;padding:48px 24px">
-                  <div style="font-size:40px;margin-bottom:12px">🍽️</div>
+                  <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                    <span class="material-symbols-outlined text-[28px]">restaurant_menu</span>
+                  </div>
                   <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 6px">No menu items found</h4>
                   <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px">
                     {{ menuSearchQuery() ? 'No dishes matched your search "' + menuSearchQuery() + '".' : 'Add your first menu item on the left panel.' }}
@@ -570,7 +578,7 @@
                                   [class.lez-badge-ready]="dish.isAvailable"
                                   [class.lez-badge-delivered]="!dish.isAvailable"
                                   (click)="toggleItemAvailability(dish.id)">
-                            {{ dish.isAvailable ? '✓ Available' : '✗ Hidden' }}
+                            {{ dish.isAvailable ? 'Available' : 'Hidden' }}
                           </button>
                           <div style="display:flex;gap:6px">
                             <button class="icon-btn-pill edit-btn" title="Edit Menu Item" (click)="startEditMenuItem(dish)">
