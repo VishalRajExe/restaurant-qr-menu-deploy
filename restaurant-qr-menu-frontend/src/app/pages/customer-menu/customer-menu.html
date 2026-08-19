@@ -1,518 +1,440 @@
-<!-- ═══════════════════════════════════════════════════════════════════════
-     EPICURE OS — CUSTOMER MENU
-     ═══════════════════════════════════════════════════════════════════════ -->
-<div class="menu-root" [class.dark]="isDarkMode()" [class.light]="!isDarkMode()">
+<div class="pos-screen-wrapper" [class.dark-theme]="isDarkMode()">
 
-  <!-- ── Loading State ── -->
-  @if (isLoading()) {
-    <div class="menu-loading">
-      <div class="menu-loading-spinner"></div>
-      <div style="font-size:14px;color:#A1A1AA;margin-top:16px">Loading menu...</div>
-    </div>
-  }
-
-  <!-- ── Error State ── -->
-  @if (!isLoading() && loadError()) {
-    <div class="menu-error-screen">
-      <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-        <span class="material-symbols-outlined text-[32px] text-zinc-400">search_off</span>
-      </div>
-      <h2 style="font-size:20px;font-weight:700;color:#fff;margin:0 0 8px">Menu Not Found</h2>
-      <p style="font-size:14px;color:#71717A;text-align:center;max-width:300px">{{ loadError() }}</p>
-    </div>
-  }
-
-  <!-- ── Main Menu UI ── -->
-  @if (!isLoading() && !loadError() && restaurant()) {
-    <!-- Restaurant Hero Header -->
-    <div class="menu-hero">
-      @if (restaurant()?.coverImage || restaurant()?.banner || restaurant()?.photo) {
-        <div class="menu-hero-bg">
-          <img [src]="restaurant()?.coverImage || restaurant()?.banner || restaurant()?.photo" [alt]="restaurant()?.name"
-               style="width:100%;height:100%;object-fit:cover;opacity:0.3"/>
-        </div>
-      } @else {
-        <div class="menu-hero-bg-gradient"></div>
-      }
-
-      <div class="menu-hero-content">
-        <!-- Logo -->
-        <div class="menu-hero-logo">
-          @if (restaurant()?.logo || restaurant()?.logoUrl) {
-            <img [src]="restaurant()?.logo || restaurant()?.logoUrl" [alt]="restaurant()?.name" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>
-          } @else {
-            <span class="material-symbols-outlined text-[28px] text-zinc-400">restaurant</span>
-          }
-        </div>
-
-        <!-- Info -->
-        <div class="menu-hero-info">
-          <h1 class="menu-hero-name">{{ restaurant()?.name }}</h1>
-          @if (restaurant()?.tagline) {
-            <p class="menu-hero-tagline">{{ restaurant()?.tagline }}</p>
-          }
-          <div class="menu-hero-meta">
-            @if (restaurant()?.cuisineType) {
-              <span class="menu-meta-pill">
-                <span class="material-symbols-outlined text-[13px]">restaurant_menu</span>
-                <span>{{ restaurant()?.cuisineType }}</span>
-              </span>
-            }
-            @if (restaurant()?.rating) {
-              <span class="menu-meta-pill">
-                <span class="material-symbols-outlined text-[13px] text-amber-400">star</span>
-                <span>{{ restaurant()?.rating }}</span>
-              </span>
-            }
-            @if (restaurant()?.openingHours) {
-              <span class="menu-meta-pill">
-                <span class="material-symbols-outlined text-[13px]">schedule</span>
-                <span>{{ restaurant()?.openingHours }}</span>
-              </span>
-            }
-            <!-- Table badge -->
-            @if (tableNumber() > 0) {
-              <span class="menu-meta-pill menu-table-pill" (click)="startEditTable()">
-                <span class="material-symbols-outlined text-[13px]">table_restaurant</span>
-                <span>Table {{ tableNumber() }}</span>
-                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              </span>
-            }
-          </div>
-        </div>
-
-        <!-- Header actions -->
-        <div class="menu-hero-actions">
-          <button class="menu-icon-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Light mode' : 'Dark mode'">
-            @if (isDarkMode()) {
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z"/></svg>
-            } @else {
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            }
-          </button>
-
-          <!-- Track order -->
-          <button class="menu-icon-btn" (click)="openOrderTracker()" title="Track order">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Table number edit modal -->
-    @if (isEditingTable()) {
-      <div class="epi-overlay animate-fade-in" (click)="cancelTableEdit()">
-        <div class="epi-modal" (click)="$event.stopPropagation()">
-          <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0 0 16px">Change Table Number</h3>
-          <input class="epi-input" type="number" min="1" placeholder="Enter table number"
-                 [value]="tableInputValue()" (input)="tableInputValue.set($any($event.target).value)"
-                 (keydown.enter)="confirmTableEdit()" autofocus />
-          <div style="display:flex;gap:10px;margin-top:16px">
-            <button class="epi-btn epi-btn-primary" style="flex:1" (click)="confirmTableEdit()">Confirm</button>
-            <button class="epi-btn epi-btn-secondary" (click)="cancelTableEdit()">Cancel</button>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- ── Search & Filter Bar ── -->
-    <div class="menu-filter-bar">
-      <!-- Search Input -->
-      <div class="menu-search-wrap">
-        <svg class="menu-search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input class="menu-search-input" placeholder="Search dishes, drinks..."
-               [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
-      </div>
-
-      <!-- Food type filter -->
-      <div style="display:flex;gap:6px">
-        <button class="menu-type-btn" [class.active]="foodTypeFilter() === 'all'" (click)="setFoodFilter('all')">All</button>
-        <button class="menu-type-btn veg-btn" [class.active]="foodTypeFilter() === 'veg'" (click)="setFoodFilter('veg')">
-          <span class="diet-dot veg"></span>
-          <span>Veg</span>
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       MAIN POS MENU 3-COLUMN CONTAINER (Matches Reference Design)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="pos-main-card">
+    
+    <!-- ── COLUMN 1: LEFT SIDEBAR (Category Navigation) ── -->
+    <aside class="pos-sidebar">
+      
+      <!-- Top Brand / Choose Menu Header -->
+      <div class="pos-sidebar-header">
+        <button class="pos-back-btn" (click)="toggleTheme()" [title]="isDarkMode() ? 'Switch to Light' : 'Switch to Dark'">
+          <span class="material-symbols-outlined text-[20px]">
+            {{ isDarkMode() ? 'light_mode' : 'arrow_back' }}
+          </span>
         </button>
-        <button class="menu-type-btn nonveg-btn" [class.active]="foodTypeFilter() === 'non-veg'" (click)="setFoodFilter('non-veg')">
-          <span class="diet-dot nonveg"></span>
-          <span>Non-Veg</span>
-        </button>
+        <h2 class="pos-sidebar-title">Choose Menu</h2>
       </div>
-    </div>
 
-    <!-- ── Category Tabs ── -->
-    <div class="menu-cat-tabs-wrap">
-      <div class="menu-cat-tabs">
-        <button class="menu-cat-tab" [class.active]="activeCategoryTagId() === 'all'" (click)="selectCategory('all')">
-          <span class="material-symbols-outlined text-[15px]">restaurant_menu</span>
-          <span>All</span>
-          <span class="cat-count">{{ menuItems().length }}</span>
+      <!-- Categories List -->
+      <div class="pos-cat-list">
+        
+        <!-- "All Menu" Pill -->
+        <button class="pos-cat-card" [class.active]="activeCategoryTagId() === 'all'" (click)="selectCategory('all')">
+          <div class="pos-cat-name">All Menu</div>
+          <div class="pos-cat-count">{{ totalDishesCount() }} Items</div>
         </button>
+
+        <!-- Dynamic Category Cards -->
         @for (cat of categories(); track cat.id) {
-          <button class="menu-cat-tab" [class.active]="activeCategoryTagId() === cat.id" (click)="selectCategory(cat.id)">
-            {{ cat.name }}
-            @if (categoryItemCount()[cat.id]) {
-              <span class="cat-count">{{ categoryItemCount()[cat.id] }}</span>
+          <button class="pos-cat-card" [class.active]="activeCategoryTagId() === cat.id" (click)="selectCategory(cat.id)">
+            <div class="pos-cat-name">{{ cat.name }}</div>
+            <div class="pos-cat-count">{{ categoryItemCount()[cat.id] || 0 }} Items</div>
+          </button>
+        }
+
+      </div>
+
+      <!-- Bottom Restaurant Meta Pill -->
+      <div class="pos-sidebar-footer">
+        <div class="pos-rest-badge">
+          <span class="material-symbols-outlined text-[18px] text-amber-500">storefront</span>
+          <div class="pos-rest-info">
+            <div class="pos-rest-name">{{ restaurant()?.name || 'Gourmet Bistro' }}</div>
+            <div class="pos-rest-sub">★ {{ restaurant()?.rating || '4.8' }} • Dine In</div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── COLUMN 2: CENTER CANVAS (Search Bar & Dishes Grid) ── -->
+    <main class="pos-center-canvas">
+      
+      <!-- Top Search & Dietary Filter Header -->
+      <div class="pos-top-search-row">
+        
+        <!-- Search Input with right magnifying icon -->
+        <div class="pos-search-box">
+          <input type="text" class="pos-search-input" placeholder="Search a dishes..."
+                 [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+          <span class="material-symbols-outlined pos-search-icon-btn">search</span>
+        </div>
+
+        <!-- Dietary Pills & Order Tracker Shortcut -->
+        <div class="pos-filter-actions">
+          <button class="pos-diet-pill" [class.active]="foodTypeFilter() === 'all'" (click)="setFoodFilter('all')">All</button>
+          <button class="pos-diet-pill veg-pill" [class.active]="foodTypeFilter() === 'veg'" (click)="setFoodFilter('veg')">
+            <span class="diet-dot veg"></span>
+            <span>Veg</span>
+          </button>
+          <button class="pos-diet-pill nonveg-pill" [class.active]="foodTypeFilter() === 'non-veg'" (click)="setFoodFilter('non-veg')">
+            <span class="diet-dot nonveg"></span>
+            <span>Non-Veg</span>
+          </button>
+
+          <!-- Order Status Tracker Icon -->
+          <button class="pos-track-icon-btn" (click)="openOrderTracker()" title="Track Active Order">
+            <span class="material-symbols-outlined text-[20px] text-gray-700">receipt_long</span>
+            @if (activeOrder()) {
+              <span class="pos-track-dot"></span>
             }
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Category Horizontal Scroller (Visible on mobile only) -->
+      <div class="pos-mobile-cat-scroll">
+        <button class="pos-mobile-cat-pill" [class.active]="activeCategoryTagId() === 'all'" (click)="selectCategory('all')">All</button>
+        @for (cat of categories(); track cat.id) {
+          <button class="pos-mobile-cat-pill" [class.active]="activeCategoryTagId() === cat.id" (click)="selectCategory(cat.id)">
+            {{ cat.name }}
           </button>
         }
       </div>
-    </div>
 
-    <!-- ── Offers banner ── -->
-    @if (activeOffers().length > 0) {
-      <div class="menu-offers-scroll">
-        @for (offer of activeOffers(); track offer.id) {
-          <div class="menu-offer-card">
-            <span class="material-symbols-outlined text-[20px] text-amber-400 mb-1">local_offer</span>
-            <div style="font-size:13px;font-weight:700;color:#fff">{{ offer.title }}</div>
-            @if (offer.description) {
-              <div style="font-size:11px;color:#A1A1AA;margin-top:2px">{{ offer.description }}</div>
-            }
+      <!-- Dishes Grid -->
+      <div class="pos-dishes-scroll">
+        
+        @if (isLoading()) {
+          <div class="pos-loading-state">
+            <span class="material-symbols-outlined text-[36px] text-amber-500 animate-spin">refresh</span>
+            <p>Loading culinary menu...</p>
           </div>
-        }
-      </div>
-    }
-
-    <!-- ── Menu Items Grid ── -->
-    <div class="menu-content">
-      @if (filteredDishes().length === 0) {
-        <div class="epi-empty" style="padding:80px 20px">
-          <div class="epi-empty-icon">
-            <span class="material-symbols-outlined text-[36px]">restaurant</span>
-          </div>
-          <div class="epi-empty-title">No dishes found</div>
-          <div class="epi-empty-desc">Try adjusting your search or filter</div>
-        </div>
-      } @else {
-        <div class="menu-dishes-grid">
-          @for (dish of filteredDishes(); track dish.id) {
-            @if (dish.isAvailable) {
-              <div class="menu-dish-card">
-                <!-- Image -->
-                <div class="menu-dish-img-wrap" (click)="addToCart(dish)">
-                  @if (dish.image) {
-                    <img [src]="dish.image" [alt]="dish.name" class="menu-dish-img" />
-                  } @else {
-                    <div class="menu-dish-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--bg-input)">
-                      <span class="material-symbols-outlined text-[32px] text-zinc-500">restaurant</span>
-                    </div>
-                  }
-                  @if (dish.isPopular) {
-                    <div class="menu-dish-popular-badge">
-                      <span class="material-symbols-outlined text-[12px] text-amber-400">local_fire_department</span>
-                      <span>Popular</span>
-                    </div>
-                  }
-                </div>
-
-                <!-- Body -->
-                <div class="menu-dish-body">
-                  <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
-                    <span class="veg-dot" [class.veg]="dish.isVeg" [class.nonveg]="!dish.isVeg" style="margin-top:3px;flex-shrink:0"></span>
-                    <span class="menu-dish-name">{{ dish.name }}</span>
-                  </div>
-                  @if (dish.description) {
-                    <p class="menu-dish-desc">{{ dish.description }}</p>
-                  }
-
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-                    <span class="menu-dish-price">{{ formatPrice(dish.price) }}</span>
-
-                    <!-- Add to cart / qty control -->
-                    @if (getItemQty(dish.id) === 0) {
-                      <button class="menu-add-btn" (click)="addToCart(dish)">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                          <path stroke-linecap="round" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Add
-                      </button>
-                    } @else {
-                      <div class="qty-control">
-                        <button class="qty-btn" (click)="decrementQty(dish.id)">−</button>
-                        <span class="qty-count">{{ getItemQty(dish.id) }}</span>
-                        <button class="qty-btn" style="background:var(--primary);border-color:var(--primary);color:#fff" (click)="addToCart(dish)">+</button>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            }
-          }
-        </div>
-      }
-    </div>
-
-    <!-- ── Sticky Bottom Cart Bar ── -->
-    @if (!cartIsEmpty()) {
-      <div class="menu-cart-bar" (click)="showMobileCart.set(true)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="menu-cart-count-badge">{{ cartCount() }}</div>
-          <span style="font-size:14px;font-weight:600;color:#fff">View Cart</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px;font-weight:800;color:#fff">{{ formatPrice(cartTotal()) }}</span>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
-            <path stroke-linecap="round" d="M9 5l7 7-7 7"/>
-          </svg>
-        </div>
-      </div>
-    }
-
-    <!-- ── Cart Drawer ── -->
-    @if (showMobileCart()) {
-      <div class="menu-cart-overlay" (click)="showMobileCart.set(false)"></div>
-    }
-    <div class="cart-drawer" [class.open]="showMobileCart()">
-      <div class="cart-drawer-header">
-        <h3 style="font-size:17px;font-weight:700;color:#fff;margin:0">
-          Your Cart
-          @if (cartCount() > 0) { <span style="font-size:14px;color:#71717A;font-weight:400">({{ cartCount() }} items)</span> }
-        </h3>
-        <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showMobileCart.set(false)">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="cart-drawer-body">
-        @if (cartIsEmpty()) {
-          <div class="epi-empty" style="padding:40px 16px">
-            <div class="epi-empty-icon">
-              <span class="material-symbols-outlined text-[36px]">shopping_cart</span>
-            </div>
-            <div class="epi-empty-title">Your cart is empty</div>
-            <div class="epi-empty-desc">Add dishes from the menu to get started</div>
+        } @else if (filteredDishes().length === 0) {
+          <div class="pos-empty-state">
+            <span class="material-symbols-outlined text-[48px] text-gray-300">restaurant</span>
+            <h3>No dishes found</h3>
+            <p>Try searching for a different item or category.</p>
           </div>
         } @else {
-          <!-- Cart items -->
-          <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-            @for (cartItem of cartItems(); track cartItem.menuItem.id) {
-              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-card);border-radius:12px">
-                @if (cartItem.menuItem.image) {
-                  <img [src]="cartItem.menuItem.image" [alt]="cartItem.menuItem.name"
-                       style="width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0"/>
-                }
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cartItem.menuItem.name }}</div>
-                  <div style="font-size:13px;font-weight:700;color:#FF6B35;margin-top:2px">{{ formatPrice(cartItem.menuItem.price * cartItem.quantity) }}</div>
+          
+          <div class="pos-dishes-grid">
+            @for (dish of filteredDishes(); track dish.id) {
+              <div class="pos-dish-card">
+                
+                <!-- Food Image & Badges -->
+                <div class="pos-dish-img-wrap">
+                  <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="pos-dish-img"
+                       onerror="this.src='/img/menu-1.jpg'" />
+                  
+                  @if (dish.isPopular) {
+                    <span class="pos-badge-popular">★ Popular</span>
+                  } @else if (dish.price > 18) {
+                    <span class="pos-badge-discount">Disc 10%</span>
+                  }
+
+                  <span class="pos-diet-indicator" [class.veg]="dish.isVeg" [class.nonveg]="!dish.isVeg"></span>
                 </div>
-                <div class="qty-control">
-                  <button class="qty-btn" (click)="decrementQty(cartItem.menuItem.id)">−</button>
-                  <span class="qty-count">{{ cartItem.quantity }}</span>
-                  <button class="qty-btn" style="background:var(--primary);border-color:var(--primary);color:#fff" (click)="addToCart(cartItem.menuItem)">+</button>
+
+                <!-- Content -->
+                <div class="pos-dish-info">
+                  <h3 class="pos-dish-title" [title]="dish.name">{{ dish.name }}</h3>
+                  <p class="pos-dish-desc">{{ dish.description || 'Deliciously prepared with fresh local gourmet ingredients.' }}</p>
+
+                  <!-- Price & Counter Stepper Row -->
+                  <div class="pos-dish-footer">
+                    <div class="pos-dish-price">
+                      <span class="pos-price-currency">$</span>
+                      <span class="pos-price-val">{{ dish.price.toFixed(2) }}</span>
+                    </div>
+
+                    <!-- Circular Stepper (- count +) -->
+                    <div class="pos-stepper">
+                      @if (getItemQty(dish.id) > 0) {
+                        <button class="pos-step-btn btn-minus" (click)="decrementQty(dish.id)">
+                          <span class="material-symbols-outlined text-[16px]">remove</span>
+                        </button>
+                        <span class="pos-step-count">{{ getItemQty(dish.id) }}</span>
+                      }
+                      
+                      <button class="pos-step-btn btn-plus" (click)="addToCart(dish)">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
+
               </div>
             }
           </div>
 
-          <!-- Special instructions -->
-          <div class="epi-form-group" style="margin-bottom:16px">
-            <label class="epi-label">Special Instructions</label>
-            <textarea class="epi-input" rows="2" placeholder="Any special requests?"
-                      [value]="specialInstructions()" (input)="specialInstructions.set($any($event.target).value)"></textarea>
-          </div>
+        }
+
+      </div>
+
+    </main>
+
+    <!-- ── COLUMN 3: RIGHT ORDER DETAIL DRAWER (Live Bill Summary) ── -->
+    <aside class="pos-order-panel">
+      
+      <!-- Top Customer Info Header -->
+      <div class="pos-customer-header">
+        <div class="pos-customer-details">
+          <h3 class="pos-customer-name">{{ customerName() || 'Guest Customer' }}</h3>
+          <p class="pos-order-meta">
+            <span>Order #{{ activeOrder()?.orderNumber?.replace('ORD-', '') || '925' }} / Dine In</span>
+          </p>
+          <p class="pos-date-time">{{ currentFormattedDate() }}</p>
+        </div>
+
+        <!-- Table Badge Pill -->
+        <button class="pos-table-badge" (click)="startEditTable()" title="Change Table">
+          <span>Table {{ tableNumber() > 0 ? (tableNumber() < 10 ? '0' + tableNumber() : tableNumber()) : '01' }}</span>
+          <span class="material-symbols-outlined text-[14px]">edit</span>
+        </button>
+      </div>
+
+      <!-- Order Detail Section Header -->
+      <div class="pos-order-section-title">
+        <span>Order Detail</span>
+        @if (!cartIsEmpty()) {
+          <button class="pos-clear-cart-btn" (click)="clearCart()">Clear</button>
         }
       </div>
 
-      <!-- Cart Footer -->
-      @if (!cartIsEmpty()) {
-        <div class="cart-drawer-footer">
-          <!-- Price breakdown -->
-          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:#A1A1AA">
-              <span>Subtotal</span><span>{{ formatPrice(cartSubtotal()) }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;color:#A1A1AA">
-              <span>Tax (5%)</span><span>{{ formatPrice(cartTax()) }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#fff;padding-top:8px;border-top:1px solid var(--border)">
-              <span>Total</span><span style="color:#FF6B35">{{ formatPrice(cartTotal()) }}</span>
-            </div>
+      <!-- Items List Scroll Area -->
+      <div class="pos-order-items-list">
+        
+        @if (cartIsEmpty()) {
+          <div class="pos-cart-empty">
+            <span class="material-symbols-outlined text-[42px] text-gray-300">shopping_bag</span>
+            <p style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin:8px 0 2px">Your tray is empty</p>
+            <p style="font-size:12px;color:var(--text-secondary)">Click '+' on any dish to begin your order.</p>
           </div>
+        } @else {
+          
+          @for (item of cartItems(); track item.menuItem.id) {
+            <div class="pos-order-item-row">
+              <div class="pos-item-left">
+                <div class="pos-item-header">
+                  <span class="pos-item-name">{{ item.menuItem.name }}</span>
+                  <span class="pos-item-qty">x{{ item.quantity }}</span>
+                </div>
+                
+                <!-- Notes Button -->
+                <div class="pos-item-note-pill">
+                  <span class="material-symbols-outlined text-[13px] text-emerald-600">edit_note</span>
+                  <span>Notes: {{ item.menuItem.isVeg ? 'Vegetarian' : 'Chef Special' }}</span>
+                </div>
+              </div>
 
-          <!-- Customer details -->
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
-            <input class="epi-input" type="tel" placeholder="Mobile Number *"
-                   [value]="customerMobile()" (input)="customerMobile.set($any($event.target).value)" />
-            <input class="epi-input" type="text" placeholder="Your Name (optional)"
+              <!-- Price & Mini Stepper -->
+              <div class="pos-item-right">
+                <span class="pos-item-price">${{ (item.menuItem.price * item.quantity).toFixed(2) }}</span>
+                <div class="pos-item-stepper">
+                  <button class="pos-mini-btn" (click)="decrementQty(item.menuItem.id)">-</button>
+                  <span>{{ item.quantity }}</span>
+                  <button class="pos-mini-btn" (click)="addToCart(item.menuItem)">+</button>
+                </div>
+              </div>
+            </div>
+          }
+
+        }
+
+      </div>
+
+      <!-- Bill Calculation & Golden CTA Footer -->
+      <div class="pos-order-footer">
+        
+        <!-- Summary Lines -->
+        <div class="pos-bill-summary">
+          <div class="pos-bill-row">
+            <span>Items ({{ cartCount() }})</span>
+            <span class="font-bold">${{ cartSubtotal().toFixed(2) }}</span>
+          </div>
+          <div class="pos-bill-row">
+            <span>Tax (5%)</span>
+            <span class="font-bold">${{ cartTax().toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Golden Proceed Order Action Button (Matches Reference) -->
+        <button class="pos-proceed-btn" [disabled]="cartIsEmpty()" (click)="openProceedOrder()">
+          <span class="pos-proceed-total">${{ cartTotal().toFixed(2) }}</span>
+          <span class="pos-proceed-text">
+            <span>Proceed Order</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </span>
+        </button>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       MOBILE STICKY BOTTOM CART BAR (Visible on mobile screens)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (!cartIsEmpty()) {
+    <div class="pos-mobile-floating-cart">
+      <div class="pos-mobile-cart-info">
+        <span class="pos-mobile-badge">{{ cartCount() }}</span>
+        <div>
+          <div style="font-size:14px;font-weight:800">${{ cartTotal().toFixed(2) }}</div>
+          <div style="font-size:11px;opacity:0.8">Includes 5% Tax</div>
+        </div>
+      </div>
+      <button class="pos-mobile-checkout-btn" (click)="openProceedOrder()">
+        <span>View Order & Pay</span>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      </button>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       PROCEED ORDER CONFIRMATION MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showProceedOrderModal()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeProceedOrder()">
+      <div class="pos-modal-card" (click)="$event.stopPropagation()">
+        
+        <div class="pos-modal-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[24px] text-amber-500">restaurant</span>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Confirm Dine-In Order</h3>
+          </div>
+          <button class="pos-modal-close" (click)="closeProceedOrder()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="pos-modal-body">
+          <div class="pos-form-field">
+            <label class="form-label">Your Name</label>
+            <input class="pos-modal-input" placeholder="e.g. Ariel Hikmat"
                    [value]="customerName()" (input)="customerName.set($any($event.target).value)" />
           </div>
 
-          <div style="display:flex;gap:8px">
-            <button class="epi-btn epi-btn-ghost" (click)="clearCart()" style="flex-shrink:0">Clear</button>
-            <button class="epi-btn epi-btn-primary w-full" (click)="placeOrder()" [disabled]="isPlacingOrder()">
-              @if (isPlacingOrder()) {
-                <svg class="animate-spin-slow" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                  <path d="M12 2a10 10 0 0110 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-                Placing order...
-              } @else {
-                Place Order · {{ formatPrice(cartTotal()) }}
-              }
-            </button>
+          <div class="pos-form-field">
+            <label class="form-label">Mobile Number (For Order Status & Receipt)</label>
+            <input class="pos-modal-input" type="tel" placeholder="e.g. +1 555 123 4567"
+                   [value]="customerMobile()" (input)="customerMobile.set($any($event.target).value)" />
+          </div>
+
+          <div class="pos-form-field">
+            <label class="form-label">Special Kitchen Request</label>
+            <input class="pos-modal-input" placeholder="e.g. Extra napkins, sauce on the side..."
+                   [value]="specialInstructions()" (input)="specialInstructions.set($any($event.target).value)" />
+          </div>
+
+          <div class="pos-modal-summary-box">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+              <span>Table Assigned:</span>
+              <strong style="color:var(--text-primary)">Table {{ tableNumber() > 0 ? (tableNumber() < 10 ? '0' + tableNumber() : tableNumber()) : '01' }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:#0b1c30">
+              <span>Total Payable:</span>
+              <span style="color:#047857">${{ cartTotal().toFixed(2) }}</span>
+            </div>
           </div>
         </div>
-      }
-    </div>
 
-    <!-- ── Order Success ── -->
-    @if (orderPlaced()) {
-      <div class="epi-overlay animate-fade-in">
-        <div class="epi-modal animate-slide-up" style="text-align:center">
-          <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.12);color:#10b981;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-            <span class="material-symbols-outlined text-[36px]">check_circle</span>
-          </div>
-          <h3 style="font-size:20px;font-weight:800;color:#fff;margin:0 0 8px">Order Placed!</h3>
-          <p style="font-size:14px;color:#A1A1AA;margin:0 0 8px">Your order has been confirmed</p>
-          <div class="epi-badge epi-badge-success" style="margin:0 auto 20px">Order #{{ orderId() }}</div>
-          <p style="font-size:13px;color:#71717A;margin:0 0 20px">Estimated time: ~{{ estimatedMinutes() }} minutes</p>
-          <button class="epi-btn epi-btn-primary w-full" (click)="closeOrderSuccess()">Track My Order</button>
-        </div>
-      </div>
-    }
-
-    <!-- ── Order Tracker ── -->
-    @if (showOrderTracker() && activeOrder()) {
-      <div class="epi-overlay animate-fade-in">
-        <div class="epi-modal animate-slide-up">
-          <div class="epi-modal-header">
-            <h3 class="epi-modal-title">Order Status</h3>
-            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showOrderTracker.set(false)">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <div style="text-align:center;margin-bottom:20px">
-            <div class="epi-badge epi-badge-primary" style="margin:0 auto 8px">{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
-            <div class="order-status-display"
-                 [class.status-pending]="activeOrder()?.status === 'PENDING'"
-                 [class.status-preparing]="activeOrder()?.status === 'PREPARING'"
-                 [class.status-ready]="activeOrder()?.status === 'READY'"
-                 [class.status-completed]="activeOrder()?.status === 'COMPLETED'">
-              @if (activeOrder()?.status === 'PENDING' || activeOrder()?.status === 'pending') {
-                <span class="material-symbols-outlined text-[16px] align-middle">notifications</span> Order Received
-              }
-              @else if (activeOrder()?.status === 'PREPARING') {
-                <span class="material-symbols-outlined text-[16px] align-middle">skillet</span> Being Prepared
-              }
-              @else if (activeOrder()?.status === 'READY') {
-                <span class="material-symbols-outlined text-[16px] align-middle text-emerald-400">check_circle</span> Ready for Pickup!
-              }
-              @else if (activeOrder()?.status === 'COMPLETED') {
-                <span class="material-symbols-outlined text-[16px] align-middle">done_all</span> Completed
-              }
-              @else { {{ activeOrder()?.status }} }
-            </div>
-          </div>
-
-          <!-- Status steps -->
-          <div class="order-tracker-steps">
-            <div class="tracker-step" [class.done]="true">
-              <div class="tracker-dot done">
-                <span class="material-symbols-outlined text-[12px]">check</span>
-              </div>
-              <div class="tracker-label">Order Placed</div>
-            </div>
-            <div class="tracker-line" [class.done]="activeOrder()?.status !== 'PENDING'"></div>
-            <div class="tracker-step" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-              <div class="tracker-dot" [class.done]="activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-                @if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') {
-                  <span class="material-symbols-outlined text-[12px]">check</span>
-                } @else { 2 }
-              </div>
-              <div class="tracker-label">Preparing</div>
-            </div>
-            <div class="tracker-line" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'"></div>
-            <div class="tracker-step" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-              <div class="tracker-dot" [class.done]="activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED'">
-                @if (activeOrder()?.status === 'READY' || activeOrder()?.status === 'COMPLETED') {
-                  <span class="material-symbols-outlined text-[12px]">check</span>
-                } @else { 3 }
-              </div>
-              <div class="tracker-label">Ready!</div>
-            </div>
-          </div>
-
-          <div style="display:flex;gap:8px;margin-top:20px">
-            <button class="epi-btn epi-btn-secondary epi-btn-sm" (click)="refreshActiveOrderStatus()">Refresh Status</button>
-            <button class="epi-btn epi-btn-ghost epi-btn-sm" (click)="openOrderHistory()">Order History</button>
-          </div>
-        </div>
-      </div>
-    }
-
-    <!-- ── Order Lookup Modal ── -->
-    @if (showTrackLookupModal()) {
-      <div class="epi-overlay animate-fade-in">
-        <div class="epi-modal animate-slide-up">
-          <div class="epi-modal-header">
-            <h3 class="epi-modal-title">Track Your Order</h3>
-            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="showTrackLookupModal.set(false)">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <div class="epi-form-group" style="margin-bottom:16px">
-            <label class="epi-label">Mobile Number or Order ID</label>
-            <input class="epi-input" type="text" placeholder="Enter mobile number or order ID"
-                   [value]="lookupQuery()" (input)="lookupQuery.set($any($event.target).value)"
-                   (keydown.enter)="lookupOrders()" />
-          </div>
-          <button class="epi-btn epi-btn-primary w-full" (click)="lookupOrders()" [disabled]="isTracking()">
-            @if (isTracking()) { Searching... } @else { Find Order }
+        <div class="pos-modal-footer">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeProceedOrder()">Back</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" [disabled]="isPlacingOrder()" (click)="placeOrder()">
+            @if (isPlacingOrder()) {
+              <span>Placing Order...</span>
+            } @else {
+              <span>Send Order to Kitchen</span>
+            }
           </button>
         </div>
-      </div>
-    }
 
-    <!-- ── Order History Modal ── -->
-    @if (showOrderHistoryModal()) {
-      <div class="epi-overlay animate-fade-in">
-        <div class="epi-modal animate-slide-up" style="max-width:500px">
-          <div class="epi-modal-header">
-            <h3 class="epi-modal-title">Order History</h3>
-            <button class="epi-btn epi-btn-ghost epi-btn-icon" (click)="closeOrderHistory()">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ORDER TRACKER MODAL / DRAWER
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showOrderTracker()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeOrderTracker()">
+      <div class="pos-modal-card" (click)="$event.stopPropagation()">
+        
+        <div class="pos-modal-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[24px] text-amber-500">skillet</span>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Kitchen Order Status</h3>
           </div>
-          @if (customerOrderHistory().length === 0) {
-            <div class="epi-empty" style="padding:32px">
-              <div class="epi-empty-icon">
-                <span class="material-symbols-outlined text-[32px]">receipt_long</span>
+          <button class="pos-modal-close" (click)="closeOrderTracker()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="pos-modal-body">
+          @if (activeOrder()) {
+            <div class="pos-tracker-status-box">
+              <div class="pos-tracker-num">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
+              <div class="pos-tracker-pill" [class]="'status-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
+                ● {{ activeOrder()?.status || 'PENDING' }}
               </div>
-              <div class="epi-empty-title">No orders yet</div>
+            </div>
+
+            <!-- Tracker Timeline -->
+            <div class="pos-tracker-timeline">
+              <div class="pos-timeline-step" [class.done]="isStatusPassed('RECEIVED', activeOrder()?.status)">
+                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                <div class="step-meta">
+                  <div class="step-title">Order Received</div>
+                  <div class="step-sub">Confirmed by dining POS</div>
+                </div>
+              </div>
+
+              <div class="pos-timeline-step" [class.done]="isStatusPassed('PREPARING', activeOrder()?.status)">
+                <span class="material-symbols-outlined text-[18px]">skillet</span>
+                <div class="step-meta">
+                  <div class="step-title">Cooking in Kitchen</div>
+                  <div class="step-sub">Chef Antoine preparing ingredients</div>
+                </div>
+              </div>
+
+              <div class="pos-timeline-step" [class.done]="isStatusPassed('READY', activeOrder()?.status)">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                <div class="step-meta">
+                  <div class="step-title">Ready for Pickup / Serving</div>
+                  <div class="step-sub">On its way to Table {{ activeOrder()?.tableNumber || '01' }}</div>
+                </div>
+              </div>
             </div>
           } @else {
-            <div style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto">
-              @for (ord of customerOrderHistory(); track ord.id) {
-                <div style="padding:14px;background:var(--bg-input);border-radius:12px">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                    <span style="font-size:13px;font-weight:600;color:#fff">{{ ord.orderNumber || ord.id }}</span>
-                    <span class="epi-badge"
-                          [class.status-pending]="ord.status === 'PENDING'"
-                          [class.status-preparing]="ord.status === 'PREPARING'"
-                          [class.status-ready]="ord.status === 'READY'"
-                          [class.status-completed]="ord.status === 'COMPLETED'">
-                      {{ ord.status }}
-                    </span>
-                  </div>
-                  <div style="font-size:12px;color:#71717A;margin-bottom:10px">{{ ord.items.length }} items · Table {{ ord.tableNumber }}</div>
-                  <div style="display:flex;gap:8px">
-                    <button class="epi-btn epi-btn-sm epi-btn-secondary" (click)="trackSpecificOrder(ord)">Track</button>
-                    <button class="epi-btn epi-btn-sm" style="background:var(--primary);color:#fff" (click)="reorderItems(ord)">Reorder</button>
-                  </div>
-                </div>
-              }
+            <div style="text-align:center;padding:24px 0">
+              <span class="material-symbols-outlined text-[42px] text-gray-300">receipt_long</span>
+              <p style="font-size:14px;color:var(--text-secondary);margin:8px 0 0">No active kitchen orders currently placed.</p>
             </div>
           }
         </div>
+
+        <div class="pos-modal-footer">
+          <button class="lez-btn lez-btn-primary w-full" (click)="closeOrderTracker()">Close</button>
+        </div>
+
       </div>
-    }
+    </div>
   }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       TABLE EDIT MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (isEditingTable()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="cancelTableEdit()">
+      <div class="pos-modal-card" style="max-width:380px" (click)="$event.stopPropagation()">
+        <h3 style="font-size:17px;font-weight:800;color:var(--text-primary);margin:0 0 16px">Select Your Table</h3>
+        <input class="pos-modal-input" type="number" min="1" max="99" placeholder="e.g. 04"
+               [value]="tableInputValue()" (input)="tableInputValue.set($any($event.target).value)"
+               (keydown.enter)="confirmTableEdit()" autofocus />
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="lez-btn lez-btn-primary" style="flex:1" (click)="confirmTableEdit()">Save Table</button>
+          <button class="lez-btn lez-btn-secondary" (click)="cancelTableEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>

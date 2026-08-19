@@ -61,12 +61,25 @@ export class CustomerMenu implements OnInit, OnDestroy {
   tableInputValue  = signal<string>('');
 
   // ── Order flow & Customer Mobile ─────────────────────────────────────────────
-  customerMobile       = signal<string>('');
-  customerName         = signal<string>('');
-  specialInstructions  = signal<string>('');
-  orderPlaced          = signal<boolean>(false);
-  orderId              = signal<string>('');
-  isPlacingOrder       = signal<boolean>(false);
+  customerMobile        = signal<string>('');
+  customerName          = signal<string>('Guest Customer');
+  specialInstructions   = signal<string>('');
+  orderPlaced           = signal<boolean>(false);
+  orderId               = signal<string>('');
+  isPlacingOrder        = signal<boolean>(false);
+  showProceedOrderModal = signal<boolean>(false);
+
+  openProceedOrder() {
+    if (this.cartIsEmpty()) {
+      this.toastService.show('Please select dishes to proceed with your order', 'warning');
+      return;
+    }
+    this.showProceedOrderModal.set(true);
+  }
+
+  closeProceedOrder() {
+    this.showProceedOrderModal.set(false);
+  }
 
   // ── Order Status Tracking & Customer History ──────────────────────────────────
   activeOrder           = signal<Order | null>(null);
@@ -142,6 +155,14 @@ export class CustomerMenu implements OnInit, OnDestroy {
   cartTotal = computed(() => this.cartSubtotal() + this.cartTax());
 
   cartIsEmpty = computed(() => this.cartItems().length === 0);
+
+  totalDishesCount = computed(() => this.menuItems().length);
+
+  currentFormattedDate = computed(() => {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + 
+           ' • ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  });
 
   categoryItemCount = computed(() => {
     const map: Record<string, number> = {};
@@ -325,6 +346,7 @@ export class CustomerMenu implements OnInit, OnDestroy {
       this.orderId.set(placedOrder.orderNumber || placedOrder.id);
       this.orderPlaced.set(true);
       this.isPlacingOrder.set(false);
+      this.showProceedOrderModal.set(false);
       this.showMobileCart.set(false);
       this.toastService.show('Order placed successfully!', 'success');
     });
@@ -451,9 +473,28 @@ export class CustomerMenu implements OnInit, OnDestroy {
     });
   }
 
+  closeOrderTracker() {
+    this.showOrderTracker.set(false);
+  }
+
+  isStatusPassed(stepName: string, currentStatus?: string): boolean {
+    if (!currentStatus) return stepName === 'RECEIVED';
+    const statusHierarchy: Record<string, number> = {
+      'RECEIVED': 1,
+      'PENDING': 1,
+      'PREPARING': 2,
+      'READY': 3,
+      'DELIVERED': 4,
+      'COMPLETED': 4
+    };
+    const currentWeight = statusHierarchy[currentStatus.toUpperCase()] || 1;
+    const stepWeight = statusHierarchy[stepName.toUpperCase()] || 1;
+    return currentWeight >= stepWeight;
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────────────────
   formatPrice(price: number): string {
-    return '₹' + price.toFixed(2);
+    return '$' + price.toFixed(2);
   }
 
   getCategoryName(categoryId: string): string {
