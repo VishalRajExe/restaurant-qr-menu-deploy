@@ -216,6 +216,15 @@ export class AuthService {
         this.currentUser.set(session);
         this.isLoggedIn.set(true);
         return true;
+      }),
+      catchError((err) => {
+        // If account already exists with this email, attempt immediate login
+        return this.login(info.email, info.password || 'Password123!', 'chef').pipe(
+          catchError(() => {
+            const msg = err?.error?.message || err?.message || 'Chef registration failed. Please verify your Restaurant Invite Code.';
+            throw new Error(msg);
+          })
+        );
       })
     );
   }

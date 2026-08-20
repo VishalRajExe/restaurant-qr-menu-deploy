@@ -162,7 +162,11 @@ export class Signup {
     action$.subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.currentStep.set(4);
+        if (this.activePortal() === 'chef') {
+          this.router.navigate(['/dashboard/chef']);
+        } else {
+          this.currentStep.set(4);
+        }
       },
       error: (err: any) => {
         this.isLoading.set(false);
