@@ -28,7 +28,7 @@ import { CustomerHistoryService, CustomerHistoryData, CustomerSummary } from '..
 
 @Component({
   selector: 'app-owner-dashboard',
-  imports: [CommonModule, FormsModule, NotificationCenter],
+  imports: [CommonModule, FormsModule, NotificationCenter, RouterLink],
   templateUrl: './owner-dashboard.html',
   styleUrls: ['./owner-dashboard.css']
 })

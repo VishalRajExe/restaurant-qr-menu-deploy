@@ -6,9 +6,9 @@
   <!-- ────────────────────── SIDEBAR ────────────────────────── -->
   <aside class="lezato-sidebar" id="lezato-sidebar">
     <!-- Brand Logo -->
-    <div class="lezato-sidebar-brand">
+    <a routerLink="/" class="lezato-sidebar-brand" style="text-decoration:none;cursor:pointer" title="Go to Home">
       <h1 class="lezato-brand-title">RestQR<span class="lezato-brand-dot">.</span></h1>
-    </div>
+    </a>
 
     <!-- Navigation Menu -->
     <nav class="lezato-sidebar-menu">
@@ -228,10 +228,6 @@
           </button>
 
           <app-notification-center></app-notification-center>
-
-          <button class="icon-btn-pill" title="Support & Messages" (click)="openSupportModal()">
-            <span class="material-symbols-outlined text-[18px]">chat_bubble</span>
-          </button>
 
           <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="createNewItem()">
             <span class="material-symbols-outlined text-[16px]">add</span>

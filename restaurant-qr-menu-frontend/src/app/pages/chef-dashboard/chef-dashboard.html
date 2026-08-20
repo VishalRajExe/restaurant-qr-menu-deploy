@@ -62,194 +62,285 @@
     </div>
   </div>
 
-  <!-- Kanban Columns View -->
-  @if (activeFilter() === 'all') {
-    <div class="lez-kanban-board">
+  <!-- Workspace Container: Orders on left, Docked Chat on right -->
+  <div class="lez-chef-workspace" [class.chat-open]="showDirectChatModal()">
+    
+    <!-- Left Orders Canvas -->
+    <main class="lez-chef-main-canvas">
+      @if (activeFilter() === 'all') {
+        <div class="lez-kanban-board" [class.compressed]="showDirectChatModal()">
 
-      <!-- Column 1: PENDING -->
-      <div class="lez-kanban-col">
-        <div class="lez-kanban-col-header" style="border-top:3px solid #F59E0B">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="material-symbols-outlined" style="color:#F59E0B">pending</span>
-            <span style="font-weight:700;font-size:14px">Pending</span>
+          <!-- Column 1: PENDING -->
+          <div class="lez-kanban-col">
+            <div class="lez-kanban-col-header" style="border-top:3px solid #F59E0B">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined" style="color:#F59E0B">pending</span>
+                <span style="font-weight:700;font-size:14px">Pending</span>
+              </div>
+              <span class="lez-badge lez-badge-pending">{{ pendingCount() }}</span>
+            </div>
+            <div class="lez-kanban-col-body">
+              @if (pendingCount() === 0) {
+                <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No pending orders</div>
+              }
+              @for (order of orders(); track order.id) {
+                @if (order.status === 'pending' || order.status === 'PENDING') {
+                  <div class="lez-kitchen-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                      <div>
+                        <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
+                          {{ order.orderNumber || order.id }}
+                        </h4>
+                        <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
+                          Table {{ order.tableNumber }} • {{ timeAgo(order.placedAt) }}
+                        </p>
+                      </div>
+                      <span class="lez-badge lez-badge-pending">Pending</span>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:10px;background:#f8f9ff;border-radius:8px">
+                      @for (item of order.items; track $index) {
+                        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-primary)">
+                          <span>{{ item.qty }}× {{ item.name }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    @if (order.specialRequest) {
+                      <div style="padding:6px 10px;background:#fff4e5;border-radius:6px;font-size:11.5px;color:#e65100;margin-bottom:12px">
+                        ℹ️ {{ order.specialRequest }}
+                      </div>
+                    }
+
+                    <button class="lez-btn lez-btn-primary w-full" (click)="advanceOrder(order.orderNumber || order.id)">
+                      <span class="material-symbols-outlined text-[16px]">skillet</span>
+                      <span>Start Cooking</span>
+                    </button>
+                  </div>
+                }
+              }
+            </div>
           </div>
-          <span class="lez-badge lez-badge-pending">{{ pendingCount() }}</span>
+
+          <!-- Column 2: PREPARING -->
+          <div class="lez-kanban-col">
+            <div class="lez-kanban-col-header" style="border-top:3px solid #0BA7CD">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined" style="color:#0BA7CD">skillet</span>
+                <span style="font-weight:700;font-size:14px">Preparing</span>
+              </div>
+              <span class="lez-badge lez-badge-preparing">{{ preparingCount() }}</span>
+            </div>
+            <div class="lez-kanban-col-body">
+              @if (preparingCount() === 0) {
+                <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No orders in preparation</div>
+              }
+              @for (order of orders(); track order.id) {
+                @if (order.status === 'PREPARING' || order.status === 'ACCEPTED') {
+                  <div class="lez-kitchen-card" style="border-left:3px solid #0BA7CD">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                      <div>
+                        <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
+                          {{ order.orderNumber || order.id }}
+                        </h4>
+                        <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
+                          Table {{ order.tableNumber }}
+                        </p>
+                      </div>
+                      <span class="lez-badge lez-badge-preparing">Cooking</span>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:10px;background:#f8f9ff;border-radius:8px">
+                      @for (item of order.items; track $index) {
+                        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-primary)">
+                          <span>{{ item.qty }}× {{ item.name }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    <button class="lez-btn lez-btn-dark w-full" (click)="advanceOrder(order.orderNumber || order.id)">
+                      <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                      <span>Mark as Ready</span>
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Column 3: READY -->
+          <div class="lez-kanban-col">
+            <div class="lez-kanban-col-header" style="border-top:3px solid #10B981">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined" style="color:#10B981">done_all</span>
+                <span style="font-weight:700;font-size:14px">Ready / Done</span>
+              </div>
+              <span class="lez-badge lez-badge-ready">{{ doneCount() }}</span>
+            </div>
+            <div class="lez-kanban-col-body">
+              @if (doneCount() === 0) {
+                <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No ready orders</div>
+              }
+              @for (order of orders(); track order.id) {
+                @if (order.status === 'READY' || order.status === 'COMPLETED') {
+                  <div class="lez-kitchen-card" style="border-left:3px solid #10B981">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                      <div>
+                        <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
+                          {{ order.orderNumber || order.id }}
+                        </h4>
+                        <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
+                          Table {{ order.tableNumber }}
+                        </p>
+                      </div>
+                      <span class="lez-badge lez-badge-ready">{{ order.status }}</span>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0">
+                      @for (item of order.items; track $index) {
+                        <div style="font-size:12.5px;color:var(--text-secondary)">{{ item.qty }}× {{ item.name }}</div>
+                      }
+                    </div>
+
+                    <div style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:#d1fae5;color:#047857;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:8px">
+                      <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                      <span>{{ order.status === 'READY' ? 'Ready for Pickup / Serving' : 'Order Delivered / Served' }}</span>
+                    </div>
+
+                    @if (order.status === 'READY') {
+                      <button class="lez-btn lez-btn-outline w-full" style="font-size:12px;padding:6px 12px" (click)="advanceOrder(order.orderNumber || order.id, 'COMPLETED')">
+                        <span class="material-symbols-outlined text-[15px]">done_all</span>
+                        <span>Mark as Served</span>
+                      </button>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
         </div>
-        <div class="lez-kanban-col-body">
-          @if (pendingCount() === 0) {
-            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No pending orders</div>
-          }
-          @for (order of orders(); track order.id) {
-            @if (order.status === 'pending' || order.status === 'PENDING') {
+      } @else {
+        <!-- Filtered Flat Grid -->
+        <div style="padding:24px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+            @for (order of filteredOrders(); track order.id) {
               <div class="lez-kitchen-card">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
                   <div>
-                    <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
-                      {{ order.orderNumber || order.id }}
-                    </h4>
-                    <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
-                      Table {{ order.tableNumber }} • {{ timeAgo(order.placedAt) }}
-                    </p>
+                    <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">{{ order.orderNumber || order.id }}</h4>
+                    <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Table {{ order.tableNumber }} • {{ timeAgo(order.placedAt) }}</p>
                   </div>
-                  <span class="lez-badge lez-badge-pending">Pending</span>
+                  <span class="lez-badge"
+                        [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
+                        [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
+                        [class.lez-badge-ready]="order.status === 'READY'"
+                        [class.lez-badge-delivered]="order.status === 'COMPLETED'">
+                    {{ order.status }}
+                  </span>
                 </div>
-
-                <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:10px;background:#f8f9ff;border-radius:8px">
+                <div style="display:flex;flex-direction:column;gap:5px;margin:10px 0">
                   @for (item of order.items; track $index) {
-                    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-primary)">
-                      <span>{{ item.qty }}× {{ item.name }}</span>
-                    </div>
+                    <div style="font-size:12.5px;color:var(--text-primary)">{{ item.qty }}× {{ item.name }}</div>
                   }
                 </div>
-
-                @if (order.specialRequest) {
-                  <div style="padding:6px 10px;background:#fff4e5;border-radius:6px;font-size:11.5px;color:#e65100;margin-bottom:12px">
-                    ℹ️ {{ order.specialRequest }}
-                  </div>
-                }
-
-                <button class="lez-btn lez-btn-primary w-full" (click)="advanceOrder(order.orderNumber || order.id)">
-                  <span class="material-symbols-outlined text-[16px]">skillet</span>
-                  <span>Start Cooking</span>
-                </button>
-              </div>
-            }
-          }
-        </div>
-      </div>
-
-      <!-- Column 2: PREPARING -->
-      <div class="lez-kanban-col">
-        <div class="lez-kanban-col-header" style="border-top:3px solid #0BA7CD">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="material-symbols-outlined" style="color:#0BA7CD">skillet</span>
-            <span style="font-weight:700;font-size:14px">Preparing</span>
-          </div>
-          <span class="lez-badge lez-badge-preparing">{{ preparingCount() }}</span>
-        </div>
-        <div class="lez-kanban-col-body">
-          @if (preparingCount() === 0) {
-            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No orders in preparation</div>
-          }
-          @for (order of orders(); track order.id) {
-            @if (order.status === 'PREPARING' || order.status === 'ACCEPTED') {
-              <div class="lez-kitchen-card" style="border-left:3px solid #0BA7CD">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                  <div>
-                    <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
-                      {{ order.orderNumber || order.id }}
-                    </h4>
-                    <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
-                      Table {{ order.tableNumber }}
-                    </p>
-                  </div>
-                  <span class="lez-badge lez-badge-preparing">Cooking</span>
-                </div>
-
-                <div style="display:flex;flex-direction:column;gap:6px;margin:12px 0;padding:10px;background:#f8f9ff;border-radius:8px">
-                  @for (item of order.items; track $index) {
-                    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-primary)">
-                      <span>{{ item.qty }}× {{ item.name }}</span>
-                    </div>
-                  }
-                </div>
-
-                <button class="lez-btn lez-btn-dark w-full" (click)="advanceOrder(order.orderNumber || order.id)">
-                  <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                  <span>Mark as Ready</span>
-                </button>
-              </div>
-            }
-          }
-        </div>
-      </div>
-
-      <!-- Column 3: READY -->
-      <div class="lez-kanban-col">
-        <div class="lez-kanban-col-header" style="border-top:3px solid #10B981">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="material-symbols-outlined" style="color:#10B981">done_all</span>
-            <span style="font-weight:700;font-size:14px">Ready / Done</span>
-          </div>
-          <span class="lez-badge lez-badge-ready">{{ doneCount() }}</span>
-        </div>
-        <div class="lez-kanban-col-body">
-          @if (doneCount() === 0) {
-            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">No ready orders</div>
-          }
-          @for (order of orders(); track order.id) {
-            @if (order.status === 'READY' || order.status === 'COMPLETED') {
-              <div class="lez-kitchen-card" style="border-left:3px solid #10B981">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-                  <div>
-                    <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">
-                      {{ order.orderNumber || order.id }}
-                    </h4>
-                    <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">
-                      Table {{ order.tableNumber }}
-                    </p>
-                  </div>
-                  <span class="lez-badge lez-badge-ready">{{ order.status }}</span>
-                </div>
-
-                <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0">
-                  @for (item of order.items; track $index) {
-                    <div style="font-size:12.5px;color:var(--text-secondary)">{{ item.qty }}× {{ item.name }}</div>
-                  }
-                </div>
-
-                <div style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:#d1fae5;color:#047857;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:8px">
-                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                  <span>{{ order.status === 'READY' ? 'Ready for Pickup / Serving' : 'Order Delivered / Served' }}</span>
-                </div>
-
-                @if (order.status === 'READY') {
-                  <button class="lez-btn lez-btn-outline w-full" style="font-size:12px;padding:6px 12px" (click)="advanceOrder(order.orderNumber || order.id, 'COMPLETED')">
-                    <span class="material-symbols-outlined text-[15px]">done_all</span>
-                    <span>Mark as Served</span>
+                @if (order.status !== 'COMPLETED' && order.status !== 'READY') {
+                  <button class="lez-btn lez-btn-primary w-full" (click)="advanceOrder(order.orderNumber || order.id)">
+                    {{ advanceLabel(order.status) }}
                   </button>
                 }
               </div>
             }
+          </div>
+        </div>
+      }
+    </main>
+
+    <!-- Right Side Docked Owner Chat Panel -->
+    @if (showDirectChatModal()) {
+      <aside class="chef-right-chat-panel animate-fade-in">
+        
+        <!-- Panel Header -->
+        <div class="chef-chat-panel-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="contact-avatar-wrapper">
+              <div class="contact-avatar-initials" style="background:#ea580c">
+                {{ (activeChatContact()?.name || 'Owner').charAt(0).toUpperCase() }}
+              </div>
+              <span class="online-indicator-dot"></span>
+            </div>
+            <div>
+              <h3 style="font-size:15px;font-weight:800;color:#0f172a;margin:0">{{ activeChatContact()?.name || 'Restaurant Owner' }}</h3>
+              <div style="font-size:11.5px;color:#10b981;display:flex;align-items:center;gap:4px">
+                <span style="display:inline-block;width:6px;height:6px;background:#10b981;border-radius:50%"></span>
+                <span>Management Online</span>
+              </div>
+            </div>
+          </div>
+          <button class="pos-close-btn" (click)="closeDirectChatModal()" type="button" title="Close Chat Panel">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Quick Action Chips Strip -->
+        <div class="chef-chat-quick-strip">
+          <button class="quick-chip-btn" (click)="sendQuickChatMessage('Table 4 order ready for pickup')">Table 4 Ready</button>
+          <button class="quick-chip-btn" (click)="sendQuickChatMessage('Running low on ingredients')">Low Stock</button>
+          <button class="quick-chip-btn" (click)="sendQuickChatMessage('All active orders prepared!')">Kitchen Clear</button>
+        </div>
+
+        <!-- Messages Stream -->
+        <div class="chat-messages-container">
+          @if (isLoadingThread()) {
+            <div class="chat-loading-state">
+              <div class="spinner-sm"></div>
+              <span>Loading message thread...</span>
+            </div>
+          } @else {
+            @for (msg of activeChatThread(); track msg.id) {
+              <div class="chat-bubble-row" [class.is-mine]="msg.senderRole === 'CHEF'">
+                <div class="chat-bubble" [class.is-mine]="msg.senderRole === 'CHEF'">
+                  <div class="chat-bubble-sender">
+                    {{ msg.senderName }} <span class="role-sub">({{ msg.senderRole }})</span>
+                  </div>
+                  <div class="chat-bubble-text">{{ msg.message }}</div>
+                  <div class="chat-bubble-time">
+                    {{ msg.createdAt | date:'shortTime' }}
+                    @if (msg.senderRole === 'CHEF') {
+                      <span class="material-symbols-outlined text-[13px] read-ticks" [class.read]="msg.isRead">done_all</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (activeChatThread().length === 0) {
+              <div class="chat-thread-empty">
+                <span class="material-symbols-outlined text-[32px]">chat</span>
+                <p style="font-weight:700;margin:8px 0 2px;color:#334155">No messages yet</p>
+                <p style="font-size:12px;color:#94a3b8">Send a quick message to coordinate directly with the owner.</p>
+              </div>
+            }
           }
         </div>
-      </div>
 
-    </div>
-  } @else {
-    <!-- Filtered Flat Grid -->
-    <div style="padding:28px">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
-        @for (order of filteredOrders(); track order.id) {
-          <div class="lez-kitchen-card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-              <div>
-                <h4 style="font-size:15px;font-weight:800;color:var(--text-primary);margin:0">{{ order.orderNumber || order.id }}</h4>
-                <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Table {{ order.tableNumber }} • {{ timeAgo(order.placedAt) }}</p>
-              </div>
-              <span class="lez-badge"
-                    [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
-                    [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
-                    [class.lez-badge-ready]="order.status === 'READY'"
-                    [class.lez-badge-delivered]="order.status === 'COMPLETED'">
-                {{ order.status }}
-              </span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:5px;margin:10px 0">
-              @for (item of order.items; track $index) {
-                <div style="font-size:12.5px;color:var(--text-primary)">{{ item.qty }}× {{ item.name }}</div>
-              }
-            </div>
-            @if (order.status !== 'COMPLETED' && order.status !== 'READY') {
-              <button class="lez-btn lez-btn-primary w-full" (click)="advanceOrder(order.orderNumber || order.id)">
-                {{ advanceLabel(order.status) }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  }
+        <!-- Composer -->
+        <div class="chat-composer-bar">
+          <input type="text"
+                 class="chat-input-field"
+                 placeholder="Message Restaurant Owner... (Press Enter)"
+                 [ngModel]="directChatMessageInput()"
+                 (ngModelChange)="directChatMessageInput.set($event)"
+                 (keydown.enter)="sendDirectMessage()" />
+          <button class="chat-send-btn" (click)="sendDirectMessage()" [disabled]="!directChatMessageInput().trim() || isSendingChat()" title="Send">
+            <span class="material-symbols-outlined text-[18px]">send</span>
+          </button>
+        </div>
+
+      </aside>
+    }
+
+  </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════════
        KITCHEN SUPPORT / ISSUE REPORT MODAL
@@ -314,113 +405,6 @@
 
       </div>
     </div>
-  }
-
-  <!-- ══════════════════════════════════════════════════════════════════════════
-       CHEF <-> OWNER DIRECT CHAT MODAL
-       ══════════════════════════════════════════════════════════════════════════ -->
-  @if (showDirectChatModal()) {
-  <div class="pos-modal-overlay animate-fade-in" (click)="closeDirectChatModal()">
-    <div class="pos-modal-card direct-chat-modal" (click)="$event.stopPropagation()">
-      
-      <!-- Modal Header -->
-      <div class="direct-chat-header">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="chat-header-icon-box">
-            <span class="material-symbols-outlined text-[20px]">forum</span>
-          </div>
-          <div>
-            <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin:0">Direct Chat with Restaurant Owner</h3>
-            <div style="font-size:12px;color:#64748b;margin-top:2px">Real-time instant coordination with restaurant management</div>
-          </div>
-        </div>
-        <button class="pos-close-btn" (click)="closeDirectChatModal()" type="button">
-          <span class="material-symbols-outlined text-[18px]">close</span>
-        </button>
-      </div>
-
-      <!-- Chat Body -->
-      <div class="direct-chat-body" style="grid-template-columns:1fr">
-        <div class="chat-thread-pane">
-          @if (activeChatContact(); as contact) {
-            <!-- Active Contact Topbar -->
-            <div class="chat-thread-topbar">
-              <div style="display:flex;align-items:center;gap:10px">
-                <div class="contact-avatar-wrapper">
-                  <div class="contact-avatar-initials" style="background:#ea580c">
-                    {{ contact.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <span class="online-indicator-dot"></span>
-                </div>
-                <div>
-                  <div style="font-size:14px;font-weight:700;color:#0f172a">{{ contact.name }} (Owner)</div>
-                  <div style="font-size:11.5px;color:#10b981;display:flex;align-items:center;gap:4px">
-                    <span style="display:inline-block;width:6px;height:6px;background:#10b981;border-radius:50%"></span>
-                    <span>Management Online</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chat-quick-actions">
-                <button class="quick-chip-btn" (click)="sendQuickChatMessage('Table 4 order ready for pickup')">Table 4 Ready</button>
-                <button class="quick-chip-btn" (click)="sendQuickChatMessage('Running low on tomatoes')">Low Ingredient</button>
-                <button class="quick-chip-btn" (click)="sendQuickChatMessage('All active orders prepared!')">Kitchen Clear</button>
-              </div>
-            </div>
-
-            <!-- Messages Stream -->
-            <div class="chat-messages-container">
-              @if (isLoadingThread()) {
-                <div class="chat-loading-state">
-                  <div class="spinner-sm"></div>
-                  <span>Loading message thread...</span>
-                </div>
-              } @else {
-                @for (msg of activeChatThread(); track msg.id) {
-                  <div class="chat-bubble-row" [class.is-mine]="msg.senderRole === 'CHEF'">
-                    <div class="chat-bubble" [class.is-mine]="msg.senderRole === 'CHEF'">
-                      <div class="chat-bubble-sender">
-                        {{ msg.senderName }} <span class="role-sub">({{ msg.senderRole }})</span>
-                      </div>
-                      <div class="chat-bubble-text">{{ msg.message }}</div>
-                      <div class="chat-bubble-time">
-                        {{ msg.createdAt | date:'shortTime' }}
-                        @if (msg.senderRole === 'CHEF') {
-                          <span class="material-symbols-outlined text-[13px] read-ticks" [class.read]="msg.isRead">done_all</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                }
-
-                @if (activeChatThread().length === 0) {
-                  <div class="chat-thread-empty">
-                    <span class="material-symbols-outlined text-[32px]">chat</span>
-                    <p style="font-weight:700;margin:8px 0 2px;color:#334155">No messages yet</p>
-                    <p style="font-size:12px;color:#94a3b8">Send a quick message to communicate directly with the owner.</p>
-                  </div>
-                }
-              }
-            </div>
-
-            <!-- Composer -->
-            <div class="chat-composer-bar">
-              <input type="text"
-                     class="chat-input-field"
-                     placeholder="Type a message to the Restaurant Owner... (Press Enter to send)"
-                     [ngModel]="directChatMessageInput()"
-                     (ngModelChange)="directChatMessageInput.set($event)"
-                     (keydown.enter)="sendDirectMessage()" />
-              <button class="chat-send-btn" (click)="sendDirectMessage()" [disabled]="!directChatMessageInput().trim() || isSendingChat()">
-                <span class="material-symbols-outlined text-[18px]">send</span>
-              </button>
-            </div>
-          }
-        </div>
-      </div>
-
-    </div>
-  </div>
   }
 
 </div>

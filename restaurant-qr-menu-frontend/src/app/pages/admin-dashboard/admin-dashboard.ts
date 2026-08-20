@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminRestaurantData } from '../../services/admin.service';
 import { TicketService, SupportTicketData, TicketMessageData } from '../../services/ticket.service';
@@ -11,7 +11,7 @@ import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, NotificationCenter],
+  imports: [CommonModule, NotificationCenter, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
