@@ -172,6 +172,27 @@ export class AdminDashboard implements OnInit, OnDestroy {
     }
   }
 
+  openSupportMessagesModal() {
+    this.ticketService.markTicketsAsSeen();
+    this.ticketService.fetchAdminTickets().subscribe(tickets => {
+      const list = tickets && tickets.length > 0 ? tickets : this.tickets();
+      if (list && list.length > 0) {
+        const target = list.find((t: SupportTicketData) => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'open') || list[0];
+        this.openTicketDetails(target);
+      } else {
+        this.activeTab.set('tickets');
+        this.toastService.info('Support Desk', 'No support tickets found yet. Opened Support Desk tab.');
+      }
+    });
+  }
+
+  onSelectChatTicket(ticketId: string) {
+    const t = this.tickets().find(x => x.id === ticketId);
+    if (t) {
+      this.openTicketDetails(t);
+    }
+  }
+
   openTicketDetails(ticket: SupportTicketData) {
     this.ticketService.getTicketDetails(ticket.id).subscribe(res => {
       this.selectedTicketDetails.set(res || { ticket, messages: [] });

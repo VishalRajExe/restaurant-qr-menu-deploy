@@ -100,9 +100,11 @@
 
         <app-notification-center></app-notification-center>
 
-        <button class="adm-icon-btn relative" title="Messages" (click)="toastService.info('Support Messages', 'Opening internal support chat...')">
+        <button class="adm-icon-btn relative" title="Support Messages & Chat" (click)="openSupportMessagesModal()">
           <span class="material-symbols-outlined">chat_bubble</span>
-          <span class="adm-chat-badge">3</span>
+          @if (openTicketsCount() > 0) {
+            <span class="adm-chat-badge">{{ openTicketsCount() }}</span>
+          }
         </button>
 
         <!-- User Profile Pill & Dropdown -->
@@ -704,6 +706,19 @@
           </div>
 
           <div class="chat-header-right">
+            @if (tickets().length > 1) {
+              <div style="margin-right:8px">
+                <select class="lez-input" style="padding:4px 8px;font-size:11.5px;height:32px;border-radius:8px;max-width:220px;background:#ffffff"
+                        [value]="selectedTicketDetails()?.ticket?.id"
+                        (change)="onSelectChatTicket($any($event.target).value)">
+                  @for (t of tickets(); track t.id) {
+                    <option [value]="t.id">
+                      {{ t.ticketNumber || t.id }} • {{ t.restaurantName }} ({{ t.status }})
+                    </option>
+                  }
+                </select>
+              </div>
+            }
             @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
               <button class="lez-btn lez-btn-sm lez-btn-primary" style="padding:6px 12px;font-size:12px;border-radius:20px"
                       (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'RESOLVED')">
