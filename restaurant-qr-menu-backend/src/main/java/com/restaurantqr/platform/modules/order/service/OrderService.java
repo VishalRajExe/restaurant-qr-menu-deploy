@@ -8,6 +8,7 @@ import com.restaurantqr.platform.modules.order.entity.OrderItem;
 import com.restaurantqr.platform.modules.order.repository.OrderRepository;
 import com.restaurantqr.platform.modules.restaurant.entity.Restaurant;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
+import com.restaurantqr.platform.modules.table.service.DiningTableService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final RestaurantService restaurantService;
     private final NotificationService notificationService;
+    private final DiningTableService diningTableService;
 
     @Transactional
     public Order createOrder(OrderRequest request) {
@@ -83,9 +85,16 @@ public class OrderService {
                         "New Kitchen Order Placed",
                         "New order #" + saved.getOrderNumber() + " received for Table " + saved.getTableNumber()
                 );
+                // Automatically link and transition Table status from Available/Reserved to OCCUPIED
+                diningTableService.markTableOccupiedForOrder(
+                        saved.getRestaurant().getId(),
+                        saved.getTableNumber(),
+                        saved.getCustomerName(),
+                        saved.getCustomerMobile()
+                );
             }
         } catch (Exception e) {
-            log.warn("Failed to send new order notification: {}", e.getMessage());
+            log.warn("Failed to send new order notification or update table status: {}", e.getMessage());
         }
 
         return saved;

@@ -22,6 +22,8 @@ import { environment } from '../../environments/environment';
 import { NotificationCenter } from '../../components/notification-center/notification-center';
 import { NotificationService } from '../../services/notification.service';
 
+import { TableService, DiningTableData, TableStatus, TableStatsData } from '../../services/table.service';
+
 @Component({
   selector: 'app-owner-dashboard',
   imports: [CommonModule, FormsModule, NotificationCenter],
@@ -37,6 +39,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   qrService           = inject(QrService);
   analyticsService    = inject(AnalyticsService);
   ticketService       = inject(TicketService);
+  tableService        = inject(TableService);
   uploadService       = inject(UploadService);
   toastService        = inject(ToastService);
   printService        = inject(PrintService);
@@ -77,6 +80,36 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   ticketSubject = signal<string>('');
   ticketDescription = signal<string>('');
 
+  // ── Dining Table Management Signals ──────────────────────────────
+  tablesList = computed(() => this.tableService.tablesList());
+  tableStats = computed(() => this.tableService.tableStats());
+  activeTableFilter = signal<'ALL' | 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'CLEANING'>('ALL');
+  selectedTableDetails = signal<DiningTableData | null>(null);
+  showTableDetailsModal = signal<boolean>(false);
+  showAddTableModal = signal<boolean>(false);
+  showReserveTableModal = signal<boolean>(false);
+  showConfirmAvailableModal = signal<boolean>(false);
+  tableToMakeAvailable = signal<DiningTableData | null>(null);
+
+  // Add/Edit Table Form
+  tableFormNumber = signal<string>('');
+  tableFormCapacity = signal<number>(4);
+  editingTableId = signal<number | null>(null);
+
+  // Reserve Table Form
+  reserveGuestName = signal<string>('');
+  reserveGuestPhone = signal<string>('');
+  reserveTime = signal<string>('');
+  reserveGuestCount = signal<number>(2);
+  reserveNotes = signal<string>('');
+
+  filteredTables = computed(() => {
+    const list = this.tablesList();
+    const f = this.activeTableFilter();
+    if (f === 'ALL') return list;
+    return list.filter(t => t.status === f);
+  });
+
   filteredOwnerTickets = computed(() => {
     const list = this.ownerTickets();
     const f = this.supportFilter();
@@ -88,7 +121,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadInitialData();
-    // Background polling every 2.5s so Chef status changes reflect immediately
+    // Background polling every 2.5s so Chef & Table status changes reflect immediately
     this.pollTimer = setInterval(() => {
       const rId = this.activeRestaurant()?.id || 1;
       this.orderService.fetchOrders(rId).subscribe(orders => {
@@ -102,6 +135,15 @@ export class OwnerDashboard implements OnInit, OnDestroy {
                 this.toastService.show(`Chef Alert: Order #${fresh.orderNumber || fresh.id} (Table ${fresh.tableNumber}) is ready for serving.`, 'success');
               }
             }
+          }
+        }
+      });
+      this.tableService.fetchTables(rId).subscribe(tables => {
+        const curTable = this.selectedTableDetails();
+        if (curTable) {
+          const freshTable = tables.find(t => t.id === curTable.id);
+          if (freshTable) {
+            this.selectedTableDetails.set(freshTable);
           }
         }
       });
@@ -125,6 +167,9 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         this.restaurantService.setRestaurant(rest);
       }
     });
+
+    this.tableService.fetchTables(rId).subscribe();
+    this.tableService.fetchStats(rId).subscribe();
 
     this.categoryService.fetchCategories(rId).subscribe(cats => {
       if (cats && cats.length > 0 && !this.newItemCategoryId()) {
@@ -824,6 +869,229 @@ export class OwnerDashboard implements OnInit, OnDestroy {
       printWin.focus();
       setTimeout(() => printWin.print(), 500);
     }
+  }
+
+  // ── Table Management Operations ─────────────────────────────
+  openTableDetails(table: DiningTableData) {
+    this.selectedTableDetails.set(table);
+    this.showTableDetailsModal.set(true);
+  }
+
+  closeTableDetails() {
+    this.showTableDetailsModal.set(false);
+    this.selectedTableDetails.set(null);
+  }
+
+  openAddTableModal() {
+    this.editingTableId.set(null);
+    const nextNum = this.tablesList().length + 1;
+    this.tableFormNumber.set(`Table ${nextNum < 10 ? '0' + nextNum : nextNum}`);
+    this.tableFormCapacity.set(4);
+    this.showAddTableModal.set(true);
+  }
+
+  openEditTableModal(table: DiningTableData, event?: Event) {
+    if (event) event.stopPropagation();
+    this.editingTableId.set(table.id);
+    this.tableFormNumber.set(table.tableNumber);
+    this.tableFormCapacity.set(table.capacity);
+    this.showAddTableModal.set(true);
+  }
+
+  closeAddTableModal() {
+    this.showAddTableModal.set(false);
+    this.editingTableId.set(null);
+    this.tableFormNumber.set('');
+  }
+
+  saveTable() {
+    if (!this.tableFormNumber().trim()) {
+      this.toastService.show('Please enter a valid table number', 'warning');
+      return;
+    }
+    const rId = this.activeRestaurant()?.id || 1;
+    const isEdit = this.editingTableId() !== null;
+
+    if (isEdit) {
+      this.tableService.updateTable(rId, this.editingTableId()!, {
+        tableNumber: this.tableFormNumber().trim(),
+        capacity: this.tableFormCapacity()
+      }).subscribe({
+        next: (updated) => {
+          this.toastService.success('Table Updated', `${updated.tableNumber} updated successfully.`);
+          this.closeAddTableModal();
+        },
+        error: (err) => this.toastService.show(err?.error?.message || 'Failed to update table', 'error')
+      });
+    } else {
+      this.tableService.createTable(rId, {
+        tableNumber: this.tableFormNumber().trim(),
+        capacity: this.tableFormCapacity(),
+        status: 'AVAILABLE'
+      }).subscribe({
+        next: (created) => {
+          this.toastService.success('Table Created', `${created.tableNumber} and QR code generated.`);
+          this.closeAddTableModal();
+        },
+        error: (err) => this.toastService.show(err?.error?.message || 'Failed to create table', 'error')
+      });
+    }
+  }
+
+  deleteTable(tableId: number, event?: Event) {
+    if (event) event.stopPropagation();
+    this.modalService.confirm({
+      title: 'Delete Table',
+      message: 'Are you sure you want to delete this table? All associated QR data will be removed.',
+      type: 'danger',
+      confirmText: 'Delete Table',
+      onConfirm: () => {
+        const rId = this.activeRestaurant()?.id || 1;
+        this.tableService.deleteTable(rId, tableId).subscribe({
+          next: () => {
+            this.toastService.info('Table Deleted', 'Table removed from floor.');
+            if (this.selectedTableDetails()?.id === tableId) {
+              this.closeTableDetails();
+            }
+          },
+          error: (err) => this.toastService.show(err?.error?.message || 'Failed to delete table', 'error')
+        });
+      }
+    });
+  }
+
+  openReserveModal(table: DiningTableData, event?: Event) {
+    if (event) event.stopPropagation();
+    this.selectedTableDetails.set(table);
+    this.reserveGuestName.set(table.reservationName || '');
+    this.reserveGuestPhone.set(table.reservationPhone || '');
+    this.reserveTime.set(table.reservationTime || '7:30 PM');
+    this.reserveGuestCount.set(table.reservationGuests || table.capacity || 2);
+    this.reserveNotes.set(table.reservationNotes || '');
+    this.showReserveTableModal.set(true);
+  }
+
+  closeReserveModal() {
+    this.showReserveTableModal.set(false);
+  }
+
+  submitReservation() {
+    if (!this.reserveGuestName().trim() || !this.reserveTime().trim()) {
+      this.toastService.show('Please enter guest name and reservation time', 'warning');
+      return;
+    }
+    const table = this.selectedTableDetails();
+    if (!table) return;
+    const rId = this.activeRestaurant()?.id || 1;
+
+    this.tableService.reserveTable(rId, table.id, {
+      guestName: this.reserveGuestName().trim(),
+      guestPhone: this.reserveGuestPhone().trim(),
+      reservationTime: this.reserveTime().trim(),
+      guestCount: this.reserveGuestCount(),
+      notes: this.reserveNotes().trim()
+    }).subscribe({
+      next: (updated) => {
+        this.toastService.success('Reservation Confirmed', `${table.tableNumber} reserved for ${updated.reservationName}`);
+        this.selectedTableDetails.set(updated);
+        this.closeReserveModal();
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to reserve table', 'error')
+    });
+  }
+
+  closeTableSession(tableId: number, event?: Event) {
+    if (event) event.stopPropagation();
+    const rId = this.activeRestaurant()?.id || 1;
+    this.tableService.closeTable(rId, tableId).subscribe({
+      next: (closed) => {
+        this.toastService.info('Table Closed', `${closed.tableNumber} marked for cleaning.`);
+        if (this.selectedTableDetails()?.id === tableId) {
+          this.selectedTableDetails.set(closed);
+        }
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to close table', 'error')
+    });
+  }
+
+  markTableAvailable(table: DiningTableData, event?: Event) {
+    if (event) event.stopPropagation();
+    if (table.status === 'OCCUPIED' || (table.activeOrdersCount && table.activeOrdersCount > 0)) {
+      this.tableToMakeAvailable.set(table);
+      this.showConfirmAvailableModal.set(true);
+    } else {
+      this.executeMakeAvailable(table);
+    }
+  }
+
+  confirmMarkAvailable() {
+    const table = this.tableToMakeAvailable();
+    if (table) {
+      this.executeMakeAvailable(table);
+    }
+    this.showConfirmAvailableModal.set(false);
+    this.tableToMakeAvailable.set(null);
+  }
+
+  private executeMakeAvailable(table: DiningTableData) {
+    const rId = this.activeRestaurant()?.id || 1;
+    this.tableService.updateStatus(rId, table.id, 'AVAILABLE').subscribe({
+      next: (updated) => {
+        this.toastService.success('Table Available', `${updated.tableNumber} is now ready for new guests.`);
+        if (this.selectedTableDetails()?.id === table.id) {
+          this.selectedTableDetails.set(updated);
+        }
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to update table status', 'error')
+    });
+  }
+
+  updateTableDirectStatus(tableId: number, status: TableStatus, event?: Event) {
+    if (event) event.stopPropagation();
+    const rId = this.activeRestaurant()?.id || 1;
+    this.tableService.updateStatus(rId, tableId, status).subscribe({
+      next: (updated) => {
+        this.toastService.success('Status Updated', `${updated.tableNumber} is now ${status}.`);
+        if (this.selectedTableDetails()?.id === tableId) {
+          this.selectedTableDetails.set(updated);
+        }
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to update table status', 'error')
+    });
+  }
+
+  printTableQr(table: DiningTableData, event?: Event) {
+    if (event) event.stopPropagation();
+    const printWin = window.open('', '_blank');
+    if (printWin) {
+      printWin.document.write(`
+        <html>
+          <head><title>Print QR Code - ${table.tableNumber}</title></head>
+          <body style="text-align:center; padding: 40px; font-family: sans-serif;">
+            <h2>${this.activeRestaurant()?.name || 'Gourmet Bistro'}</h2>
+            <h3>${table.tableNumber}</h3>
+            <p style="color:#64748b; font-size:14px;">Capacity: ${table.capacity} Guests • Scan to Order</p>
+            <img src="${table.qrImageUrl || this.activeQrUrl()}" style="width:260px; height:260px; margin: 20px 0;" />
+            <p style="font-weight:bold; font-size:16px;">Scan to view digital menu & place live order</p>
+          </body>
+        </html>
+      `);
+      printWin.document.close();
+      printWin.focus();
+      setTimeout(() => printWin.print(), 500);
+    }
+  }
+
+  downloadTableQr(table: DiningTableData, event?: Event) {
+    if (event) event.stopPropagation();
+    const link = document.createElement('a');
+    link.href = table.qrImageUrl || this.activeQrUrl();
+    link.download = `${table.tableNumber.replace(/\s+/g, '_')}_QR_Code.png`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.toastService.success('Download Triggered', `High-res QR image downloaded for ${table.tableNumber}.`);
   }
 
   logout() {

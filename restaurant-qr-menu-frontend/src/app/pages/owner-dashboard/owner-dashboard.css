@@ -898,4 +898,200 @@ label.form-label,
   cursor: not-allowed;
 }
 
+/* ── Table Management & Floor Operations CSS ──────────────────────── */
+.floor-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.table-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+  color: #64748b;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.table-filter-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.table-filter-pill.active.pill-all {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.table-filter-pill.pill-available {
+  color: #059669;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.table-filter-pill.active.pill-available {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.table-filter-pill.pill-occupied {
+  color: #d97706;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.table-filter-pill.active.pill-occupied {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.table-filter-pill.pill-reserved {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+.table-filter-pill.active.pill-reserved {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.table-filter-pill.pill-cleaning {
+  color: #7c3aed;
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+.table-filter-pill.active.pill-cleaning {
+  background: #8b5cf6;
+  color: #ffffff;
+  border-color: #8b5cf6;
+}
+
+.lez-floor-table-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.lez-floor-table-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.lez-floor-table-card.status-available {
+  border-color: #a7f3d0;
+}
+.lez-floor-table-card.status-available::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: #10b981;
+}
+
+.lez-floor-table-card.status-occupied {
+  border-color: #fed7aa;
+}
+.lez-floor-table-card.status-occupied::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: #f97316;
+}
+
+.lez-floor-table-card.status-reserved {
+  border-color: #bfdbfe;
+}
+.lez-floor-table-card.status-reserved::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: #3b82f6;
+}
+
+.lez-floor-table-card.status-cleaning {
+  border-color: #ddd6fe;
+}
+.lez-floor-table-card.status-cleaning::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: #8b5cf6;
+}
+
+.table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.table-capacity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.table-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.table-orders-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.table-reservation-box {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #1e40af;
+}
+
+.table-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+
 

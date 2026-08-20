@@ -25,8 +25,8 @@ public class QrCode extends BaseEntity {
 
 	// Exposed so the admin dashboard can display which branch a QR belongs to.
 	// Branch.restaurant is itself @JsonIgnore'd, so this can't recurse.
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "branch_id", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "branch_id", nullable = true)
 	private Branch branch;
 
 	// Redundant with the {restaurantId} already in the URL path — keep hidden.

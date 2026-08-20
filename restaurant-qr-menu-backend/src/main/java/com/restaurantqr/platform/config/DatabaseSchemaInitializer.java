@@ -1,10 +1,23 @@
 package com.restaurantqr.platform.config;
 
+import com.restaurantqr.platform.modules.branch.entity.Branch;
+import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
+import com.restaurantqr.platform.modules.qr.entity.QrCode;
+import com.restaurantqr.platform.modules.qr.repository.QrCodeRepository;
+import com.restaurantqr.platform.modules.restaurant.entity.Restaurant;
+import com.restaurantqr.platform.modules.restaurant.repository.RestaurantRepository;
+import com.restaurantqr.platform.modules.table.entity.DiningTable;
+import com.restaurantqr.platform.modules.table.repository.DiningTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -13,8 +26,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DatabaseSchemaInitializer implements CommandLineRunner {
 
-
     private final JdbcTemplate jdbcTemplate;
+    private final DiningTableRepository diningTableRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final BranchRepository branchRepository;
+    private final QrCodeRepository qrCodeRepository;
 
     @Override
     public void run(String... args) {
@@ -78,7 +94,8 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
             "ALTER TABLE support_tickets ADD COLUMN customer_email VARCHAR(150) NULL",
             "ALTER TABLE ticket_messages MODIFY COLUMN sender_user_id BIGINT NULL",
             "ALTER TABLE ticket_messages ADD COLUMN sender_name VARCHAR(100) NULL",
-            "ALTER TABLE ticket_messages ADD COLUMN sender_role VARCHAR(50) NULL"
+            "ALTER TABLE ticket_messages ADD COLUMN sender_role VARCHAR(50) NULL",
+            "ALTER TABLE qr_codes MODIFY COLUMN branch_id BIGINT NULL"
         };
 
         for (String sql : ticketAlters) {
@@ -89,5 +106,86 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
             }
         }
         log.info("Support tickets schema alters migration executed successfully.");
+
+        // ── Seed initial dining tables for restaurants if none exist ────────
+        try {
+            List<Restaurant> restaurants = restaurantRepository.findAll();
+            for (Restaurant r : restaurants) {
+                if (diningTableRepository.countByRestaurantId(r.getId()) == 0) {
+                    log.info("Seeding initial dining tables for restaurant: {} (ID: {})", r.getName(), r.getId());
+                    List<Branch> branches = branchRepository.findByRestaurantId(r.getId());
+                    Branch defaultBranch = branches.isEmpty() ? null : branches.get(0);
+                    if (defaultBranch == null) {
+                        Branch newBranch = Branch.builder()
+                                .restaurant(r)
+                                .name("Main Dining Hall")
+                                .address(r.getAddress() != null ? r.getAddress() : "101 Downtown Blvd")
+                                .phone(r.getPhone() != null ? r.getPhone() : "+1 (555) 019-2834")
+                                .status(Branch.Status.ACTIVE)
+                                .build();
+                        defaultBranch = branchRepository.save(newBranch);
+                    }
+
+                    int[] capacities = {2, 4, 4, 6, 4, 6, 8, 4};
+                    DiningTable.Status[] initialStatuses = {
+                        DiningTable.Status.OCCUPIED,
+                        DiningTable.Status.AVAILABLE,
+                        DiningTable.Status.RESERVED,
+                        DiningTable.Status.AVAILABLE,
+                        DiningTable.Status.AVAILABLE,
+                        DiningTable.Status.CLEANING,
+                        DiningTable.Status.AVAILABLE,
+                        DiningTable.Status.AVAILABLE
+                    };
+
+                    for (int i = 1; i <= 8; i++) {
+                        String tableNum = "Table " + (i < 10 ? "0" + i : i);
+                        String qrToken = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
+                        String slug = r.getSlug() != null ? r.getSlug() : String.valueOf(r.getId());
+                        String tableParam = String.valueOf(i < 10 ? "0" + i : i);
+                        String publicMenuUrl = "http://localhost:4200/menu/" + slug + "?table=" + URLEncoder.encode(tableParam, StandardCharsets.UTF_8);
+                        String qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=H&color=101828&data=" + URLEncoder.encode(publicMenuUrl, StandardCharsets.UTF_8);
+
+                        QrCode qrCode = QrCode.builder()
+                                .restaurant(r)
+                                .branch(defaultBranch)
+                                .tableNumber(tableNum)
+                                .label(tableNum)
+                                .token(qrToken)
+                                .qrImageUrl(qrImageUrl)
+                                .scanCount((long) (Math.random() * 40 + 10))
+                                .status(QrCode.Status.ACTIVE)
+                                .build();
+                        qrCode = qrCodeRepository.save(qrCode);
+
+                        DiningTable.Status st = initialStatuses[i - 1];
+                        DiningTable table = DiningTable.builder()
+                                .restaurant(r)
+                                .branch(defaultBranch)
+                                .tableNumber(tableNum)
+                                .capacity(capacities[i - 1])
+                                .status(st)
+                                .qrCode(qrCode)
+                                .build();
+
+                        if (st == DiningTable.Status.RESERVED) {
+                            table.setReservationName("Emily Watson");
+                            table.setReservationPhone("+1 (555) 234-8899");
+                            table.setReservationTime("7:30 PM");
+                            table.setReservationGuests(2);
+                            table.setReservationNotes("Window table requested for anniversary.");
+                        } else if (st == DiningTable.Status.OCCUPIED) {
+                            table.setActiveSessionId("SES-" + System.currentTimeMillis());
+                            table.setSessionStartTime(java.time.LocalDateTime.now().minusMinutes(25));
+                        }
+
+                        diningTableRepository.save(table);
+                    }
+                    log.info("Successfully seeded 8 dining tables with QR codes for restaurant ID: {}", r.getId());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Initial table seeding notice: {}", e.getMessage());
+        }
     }
 }

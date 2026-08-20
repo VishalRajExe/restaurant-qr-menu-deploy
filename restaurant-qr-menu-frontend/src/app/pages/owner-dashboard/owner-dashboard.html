@@ -21,7 +21,7 @@
         <span class="material-symbols-outlined">receipt_long</span>
         <span>Orders</span>
         @if (pendingOrdersCount() > 0) {
-          <span class="sidebar-pill-badge">{{ pendingOrdersCount() }}</span>
+        <span class="sidebar-pill-badge">{{ pendingOrdersCount() }}</span>
         }
       </button>
 
@@ -49,7 +49,7 @@
         <span class="material-symbols-outlined">support_agent</span>
         <span>Support & Help</span>
         @if (unseenTicketsCount() > 0) {
-          <span class="sidebar-pill-badge">{{ unseenTicketsCount() }}</span>
+        <span class="sidebar-pill-badge">{{ unseenTicketsCount() }}</span>
         }
       </button>
 
@@ -68,10 +68,12 @@
           {{ authService.currentUser()?.name?.charAt(0)?.toUpperCase() || 'L' }}
         </div>
         <div style="min-width:0;flex:1">
-          <p style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          <p
+            style="font-size:13.5px;font-weight:700;color:var(--text-primary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             {{ authService.currentUser()?.name || 'RestQR Admin' }}
           </p>
-          <p style="font-size:11.5px;color:var(--text-secondary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          <p
+            style="font-size:11.5px;color:var(--text-secondary);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             {{ activeRestaurant()?.name || 'Main Branch' }}
           </p>
         </div>
@@ -114,7 +116,7 @@
           <button class="icon-btn-pill" title="Support & Messages" (click)="openSupportModal()">
             <span class="material-symbols-outlined text-[18px]">chat_bubble</span>
           </button>
-          
+
           <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="createNewItem()">
             <span class="material-symbols-outlined text-[16px]">add</span>
             <span>New Item</span>
@@ -130,509 +132,551 @@
            TAB: ORDERS MANAGEMENT (Split 3-Pane View)
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'orders') {
-        <div class="animate-fade-in">
-          
-          <!-- Filters & Header Row -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
-            <div style="display:flex;gap:6px;background:#ffffff;padding:4px;border-radius:14px;border:1px solid var(--border)">
-              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'ALL'" (click)="activeOrderFilter.set('ALL')">All Orders</button>
-              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PENDING'" (click)="activeOrderFilter.set('PENDING')">Pending</button>
-              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PREPARING'" (click)="activeOrderFilter.set('PREPARING')">Preparing</button>
-              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'READY'" (click)="activeOrderFilter.set('READY')">Ready</button>
-              <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'COMPLETED'" (click)="activeOrderFilter.set('COMPLETED')">Delivered</button>
-            </div>
+      <div class="animate-fade-in">
 
-            <div style="display:flex;gap:10px">
-              <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="orderService.fetchOrders(activeRestaurant()?.id || 1).subscribe()">
-                <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
-              </button>
-              <button class="lez-btn lez-btn-secondary lez-btn-sm">
-                <span class="material-symbols-outlined text-[16px]">calendar_today</span> Today
-              </button>
-            </div>
+        <!-- Filters & Header Row -->
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
+          <div
+            style="display:flex;gap:6px;background:#ffffff;padding:4px;border-radius:14px;border:1px solid var(--border)">
+            <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'ALL'"
+              (click)="activeOrderFilter.set('ALL')">All Orders</button>
+            <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PENDING'"
+              (click)="activeOrderFilter.set('PENDING')">Pending</button>
+            <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'PREPARING'"
+              (click)="activeOrderFilter.set('PREPARING')">Preparing</button>
+            <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'READY'"
+              (click)="activeOrderFilter.set('READY')">Ready</button>
+            <button class="lez-filter-pill" [class.active]="activeOrderFilter() === 'COMPLETED'"
+              (click)="activeOrderFilter.set('COMPLETED')">Delivered</button>
           </div>
 
-          <!-- Split Layout: Table on Left + Order Breakdown Drawer on Right -->
-          <div class="lez-orders-layout">
-
-            <!-- Left: Orders Table -->
-            <div class="lez-table-container">
-              @if (filteredOrders().length === 0) {
-                <div style="text-align:center;padding:60px 20px">
-                  <span class="material-symbols-outlined" style="font-size:48px;color:#8c9ba5">receipt_long</span>
-                  <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No orders found</h4>
-                  <p style="font-size:13px;color:var(--text-secondary);margin:0">Customer orders placed via QR menu will appear here in real time.</p>
-                </div>
-              } @else {
-                <table class="lez-table">
-                  <thead>
-                    <tr>
-                      <th style="width:120px">Order ID</th>
-                      <th>Customer</th>
-                      <th>Type / Table</th>
-                      <th style="text-align:center">Items</th>
-                      <th style="text-align:right">Amount</th>
-                      <th style="text-align:center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (order of filteredOrders(); track order.id) {
-                      <tr (click)="selectOrder(order)"
-                          [class.selected]="selectedOrder()?.id === order.id || (!selectedOrder() && $first)">
-                        <td style="font-weight:700;color:var(--text-primary)">
-                          {{ order.orderNumber || order.id }}
-                        </td>
-                        <td>
-                          <div style="font-weight:600;color:var(--text-primary)">{{ order.customerName || 'Guest Customer' }}</div>
-                          <div style="font-size:11.5px;color:var(--text-muted)">{{ order.customerMobile }}</div>
-                        </td>
-                        <td>
-                          <div style="display:flex;align-items:center;gap:6px">
-                            <span class="material-symbols-outlined text-[16px] text-secondary">restaurant</span>
-                            <span>Table {{ order.tableNumber }}</span>
-                          </div>
-                        </td>
-                        <td style="text-align:center;font-weight:600;color:var(--text-secondary)">
-                          {{ order.items.length }}
-                        </td>
-                        <td style="text-align:right;font-weight:700;color:var(--text-primary)">
-                          ${{ order.totalAmount || (order.items.length * 18.5).toFixed(2) }}
-                        </td>
-                        <td style="text-align:center">
-                          <span class="lez-badge"
-                                [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
-                                [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
-                                [class.lez-badge-ready]="order.status === 'READY'"
-                                [class.lez-badge-delivered]="order.status === 'COMPLETED'"
-                                [class.lez-badge-cancelled]="order.status === 'CANCELLED'">
-                            {{ order.status }}
-                          </span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              }
-            </div>
-
-            <!-- Right: Order Breakdown Drawer (Matching Stitch code_1.html!) -->
-            <div class="lez-order-detail-panel">
-              @if (selectedOrder() || (filteredOrders().length > 0 ? filteredOrders()[0] : null); as current) {
-                <!-- Drawer Header -->
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--border)">
-                  <div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-                      <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
-                        Order #{{ current.orderNumber || current.id }}
-                      </h3>
-                      <span class="lez-badge"
-                            [class.lez-badge-pending]="current.status === 'PENDING' || current.status === 'pending'"
-                            [class.lez-badge-preparing]="current.status === 'PREPARING' || current.status === 'ACCEPTED'"
-                            [class.lez-badge-ready]="current.status === 'READY'"
-                            [class.lez-badge-delivered]="current.status === 'COMPLETED'">
-                        {{ current.status }}
-                      </span>
-                    </div>
-                    <p style="font-size:12.5px;color:var(--text-secondary);margin:0">
-                      Table {{ current.tableNumber }} • {{ current.items.length }} items
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Customer Info -->
-                <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)">
-                  <div style="width:40px;height:40px;border-radius:50%;background:#ffdbd0;color:#ab3500;font-weight:800;display:flex;align-items:center;justify-content:center">
-                    {{ current.customerName?.charAt(0) || 'G' }}
-                  </div>
-                  <div>
-                    <div style="font-size:13.5px;font-weight:700;color:var(--text-primary)">
-                      {{ current.customerName || 'Guest Customer' }}
-                    </div>
-                    <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
-                      <span class="material-symbols-outlined text-[14px]">smartphone</span>
-                      <span>{{ current.customerMobile }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Ordered Items -->
-                <div style="padding:16px 0;max-height:280px;overflow-y:auto">
-                  <h4 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);margin:0 0 12px">
-                    Ordered Items ({{ current.items.length }})
-                  </h4>
-                  
-                  <div style="display:flex;flex-direction:column;gap:14px">
-                    @for (item of current.items; track $index) {
-                      <div style="display:flex;gap:12px;align-items:flex-start">
-                        <div style="width:48px;height:48px;border-radius:8px;background:#eff4ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
-                          <span class="material-symbols-outlined text-[22px]">restaurant</span>
-                        </div>
-                        <div style="flex:1;min-width:0">
-                          <div style="display:flex;justify-content:space-between;align-items:baseline">
-                            <span style="font-size:13.5px;font-weight:600;color:var(--text-primary)">{{ item.name }}</span>
-                            <span style="font-size:13.5px;font-weight:700;color:var(--text-primary)">${{ item.subtotal || ((item.price || 14.5) * item.qty).toFixed(2) }}</span>
-                          </div>
-                          <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Qty: {{ item.qty }}</p>
-                          @if (item.note) {
-                            <div style="margin-top:4px;padding:4px 8px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:4px;font-size:11px;color:#e65100;display:flex;align-items:center;gap:4px">
-                              <span class="material-symbols-outlined text-[13px]">info</span>
-                              <span>{{ item.note }}</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  @if (current.specialRequest) {
-                    <div style="margin-top:14px;padding:8px 12px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:6px;font-size:12px;color:#e65100">
-                      <strong>Special Request:</strong> {{ current.specialRequest }}
-                    </div>
-                  }
-                </div>
-
-                <!-- Price Breakdown & Actions -->
-                <div style="padding-top:16px;border-top:1px solid var(--border)">
-                  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
-                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
-                      <span>Subtotal</span>
-                      <span>${{ getOrderSubtotal(current) }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
-                      <span>Tax (8%)</span>
-                      <span>${{ getOrderTax(current) }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
-                      <span>Service Charge</span>
-                      <span>${{ getOrderServiceCharge(current) }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--text-primary);padding-top:8px;border-top:1px solid var(--border)">
-                      <span>Total</span>
-                      <span style="color:#ab3500">${{ getOrderTotal(current) }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    @if (current.status === 'PENDING' || current.status === 'pending' || current.status === 'ACCEPTED') {
-                      <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px"
-                              (click)="updateOrderStatus(current.orderNumber || current.id, 'PREPARING')">
-                        <span class="material-symbols-outlined text-[18px]">skillet</span>
-                        <span>Start Preparing</span>
-                      </button>
-                      <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
-                              (click)="cancelOrder(current.orderNumber || current.id)">
-                        <span class="material-symbols-outlined text-[16px]">cancel</span>
-                        <span>Cancel Order</span>
-                      </button>
-                    } @else if (current.status === 'PREPARING' || current.status === 'preparing') {
-                      <button class="lez-btn lez-btn-dark" style="grid-column:span 2;padding:12px"
-                              (click)="updateOrderStatus(current.orderNumber || current.id, 'READY')">
-                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                        <span>Mark as Ready</span>
-                      </button>
-                      <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
-                              (click)="cancelOrder(current.orderNumber || current.id)">
-                        <span class="material-symbols-outlined text-[16px]">cancel</span>
-                        <span>Cancel Order</span>
-                      </button>
-                    } @else if (current.status === 'READY') {
-                      <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:#10B981"
-                              (click)="updateOrderStatus(current.orderNumber || current.id, 'COMPLETED')">
-                        <span class="material-symbols-outlined text-[18px]">done_all</span>
-                        <span>Mark as Delivered</span>
-                      </button>
-                    } @else if (current.status === 'COMPLETED' || current.status === 'DELIVERED') {
-                      <div style="grid-column:span 2;padding:10px 14px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;color:#065f46;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px">
-                        <span class="material-symbols-outlined text-[18px]">done_all</span>
-                        <span>Order Delivered & Completed</span>
-                      </div>
-                    }
-
-                    <button class="lez-btn lez-btn-secondary" (click)="printKOT(current)">
-                      <span class="material-symbols-outlined text-[16px]">print</span> Print KOT
-                    </button>
-                    <button class="lez-btn lez-btn-secondary" (click)="generateInvoice(current)">
-                      <span class="material-symbols-outlined text-[16px]">receipt</span> Invoice
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
-
+          <div style="display:flex;gap:10px">
+            <button class="lez-btn lez-btn-secondary lez-btn-sm"
+              (click)="orderService.fetchOrders(activeRestaurant()?.id || 1).subscribe()">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+            </button>
+            <button class="lez-btn lez-btn-secondary lez-btn-sm">
+              <span class="material-symbols-outlined text-[16px]">calendar_today</span> Today
+            </button>
           </div>
         </div>
+
+        <!-- Split Layout: Table on Left + Order Breakdown Drawer on Right -->
+        <div class="lez-orders-layout">
+
+          <!-- Left: Orders Table -->
+          <div class="lez-table-container">
+            @if (filteredOrders().length === 0) {
+            <div style="text-align:center;padding:60px 20px">
+              <span class="material-symbols-outlined" style="font-size:48px;color:#8c9ba5">receipt_long</span>
+              <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No orders found
+              </h4>
+              <p style="font-size:13px;color:var(--text-secondary);margin:0">Customer orders placed via QR menu will
+                appear here in real time.</p>
+            </div>
+            } @else {
+            <table class="lez-table">
+              <thead>
+                <tr>
+                  <th style="width:120px">Order ID</th>
+                  <th>Customer</th>
+                  <th>Type / Table</th>
+                  <th style="text-align:center">Items</th>
+                  <th style="text-align:right">Amount</th>
+                  <th style="text-align:center">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of filteredOrders(); track order.id) {
+                <tr (click)="selectOrder(order)"
+                  [class.selected]="selectedOrder()?.id === order.id || (!selectedOrder() && $first)">
+                  <td style="font-weight:700;color:var(--text-primary)">
+                    {{ order.orderNumber || order.id }}
+                  </td>
+                  <td>
+                    <div style="font-weight:600;color:var(--text-primary)">{{ order.customerName || 'Guest Customer' }}
+                    </div>
+                    <div style="font-size:11.5px;color:var(--text-muted)">{{ order.customerMobile }}</div>
+                  </td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <span class="material-symbols-outlined text-[16px] text-secondary">restaurant</span>
+                      <span>Table {{ order.tableNumber }}</span>
+                    </div>
+                  </td>
+                  <td style="text-align:center;font-weight:600;color:var(--text-secondary)">
+                    {{ order.items.length }}
+                  </td>
+                  <td style="text-align:right;font-weight:700;color:var(--text-primary)">
+                    ${{ order.totalAmount || (order.items.length * 18.5).toFixed(2) }}
+                  </td>
+                  <td style="text-align:center">
+                    <span class="lez-badge"
+                      [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
+                      [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
+                      [class.lez-badge-ready]="order.status === 'READY'"
+                      [class.lez-badge-delivered]="order.status === 'COMPLETED'"
+                      [class.lez-badge-cancelled]="order.status === 'CANCELLED'">
+                      {{ order.status }}
+                    </span>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            }
+          </div>
+
+          <!-- Right: Order Breakdown Drawer (Matching Stitch code_1.html!) -->
+          <div class="lez-order-detail-panel">
+            @if (selectedOrder() || (filteredOrders().length > 0 ? filteredOrders()[0] : null); as current) {
+            <!-- Drawer Header -->
+            <div
+              style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--border)">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
+                    Order #{{ current.orderNumber || current.id }}
+                  </h3>
+                  <span class="lez-badge"
+                    [class.lez-badge-pending]="current.status === 'PENDING' || current.status === 'pending'"
+                    [class.lez-badge-preparing]="current.status === 'PREPARING' || current.status === 'ACCEPTED'"
+                    [class.lez-badge-ready]="current.status === 'READY'"
+                    [class.lez-badge-delivered]="current.status === 'COMPLETED'">
+                    {{ current.status }}
+                  </span>
+                </div>
+                <p style="font-size:12.5px;color:var(--text-secondary);margin:0">
+                  Table {{ current.tableNumber }} • {{ current.items.length }} items
+                </p>
+              </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)">
+              <div
+                style="width:40px;height:40px;border-radius:50%;background:#ffdbd0;color:#ab3500;font-weight:800;display:flex;align-items:center;justify-content:center">
+                {{ current.customerName?.charAt(0) || 'G' }}
+              </div>
+              <div>
+                <div style="font-size:13.5px;font-weight:700;color:var(--text-primary)">
+                  {{ current.customerName || 'Guest Customer' }}
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
+                  <span class="material-symbols-outlined text-[14px]">smartphone</span>
+                  <span>{{ current.customerMobile }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ordered Items -->
+            <div style="padding:16px 0;max-height:280px;overflow-y:auto">
+              <h4
+                style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);margin:0 0 12px">
+                Ordered Items ({{ current.items.length }})
+              </h4>
+
+              <div style="display:flex;flex-direction:column;gap:14px">
+                @for (item of current.items; track $index) {
+                <div style="display:flex;gap:12px;align-items:flex-start">
+                  <div
+                    style="width:48px;height:48px;border-radius:8px;background:#eff4ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+                    <span class="material-symbols-outlined text-[22px]">restaurant</span>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline">
+                      <span style="font-size:13.5px;font-weight:600;color:var(--text-primary)">{{ item.name }}</span>
+                      <span style="font-size:13.5px;font-weight:700;color:var(--text-primary)">${{ item.subtotal ||
+                        ((item.price || 14.5) * item.qty).toFixed(2) }}</span>
+                    </div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Qty: {{ item.qty }}</p>
+                    @if (item.note) {
+                    <div
+                      style="margin-top:4px;padding:4px 8px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:4px;font-size:11px;color:#e65100;display:flex;align-items:center;gap:4px">
+                      <span class="material-symbols-outlined text-[13px]">info</span>
+                      <span>{{ item.note }}</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+
+              @if (current.specialRequest) {
+              <div
+                style="margin-top:14px;padding:8px 12px;background:#fff4e5;border:1px solid #ffe0b2;border-radius:6px;font-size:12px;color:#e65100">
+                <strong>Special Request:</strong> {{ current.specialRequest }}
+              </div>
+              }
+            </div>
+
+            <!-- Price Breakdown & Actions -->
+            <div style="padding-top:16px;border-top:1px solid var(--border)">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                  <span>Subtotal</span>
+                  <span>${{ getOrderSubtotal(current) }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                  <span>Tax (8%)</span>
+                  <span>${{ getOrderTax(current) }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary)">
+                  <span>Service Charge</span>
+                  <span>${{ getOrderServiceCharge(current) }}</span>
+                </div>
+                <div
+                  style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--text-primary);padding-top:8px;border-top:1px solid var(--border)">
+                  <span>Total</span>
+                  <span style="color:#ab3500">${{ getOrderTotal(current) }}</span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                @if (current.status === 'PENDING' || current.status === 'pending' || current.status === 'ACCEPTED') {
+                <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px"
+                  (click)="updateOrderStatus(current.orderNumber || current.id, 'PREPARING')">
+                  <span class="material-symbols-outlined text-[18px]">skillet</span>
+                  <span>Start Preparing</span>
+                </button>
+                <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
+                  (click)="cancelOrder(current.orderNumber || current.id)">
+                  <span class="material-symbols-outlined text-[16px]">cancel</span>
+                  <span>Cancel Order</span>
+                </button>
+                } @else if (current.status === 'PREPARING' || current.status === 'preparing') {
+                <button class="lez-btn lez-btn-dark" style="grid-column:span 2;padding:12px"
+                  (click)="updateOrderStatus(current.orderNumber || current.id, 'READY')">
+                  <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                  <span>Mark as Ready</span>
+                </button>
+                <button class="lez-btn lez-btn-danger" style="grid-column:span 2;padding:10px"
+                  (click)="cancelOrder(current.orderNumber || current.id)">
+                  <span class="material-symbols-outlined text-[16px]">cancel</span>
+                  <span>Cancel Order</span>
+                </button>
+                } @else if (current.status === 'READY') {
+                <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:#10B981"
+                  (click)="updateOrderStatus(current.orderNumber || current.id, 'COMPLETED')">
+                  <span class="material-symbols-outlined text-[18px]">done_all</span>
+                  <span>Mark as Delivered</span>
+                </button>
+                } @else if (current.status === 'COMPLETED' || current.status === 'DELIVERED') {
+                <div
+                  style="grid-column:span 2;padding:10px 14px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;color:#065f46;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px">
+                  <span class="material-symbols-outlined text-[18px]">done_all</span>
+                  <span>Order Delivered & Completed</span>
+                </div>
+                }
+
+                <button class="lez-btn lez-btn-secondary" (click)="printKOT(current)">
+                  <span class="material-symbols-outlined text-[16px]">print</span> Print KOT
+                </button>
+                <button class="lez-btn lez-btn-secondary" (click)="generateInvoice(current)">
+                  <span class="material-symbols-outlined text-[16px]">receipt</span> Invoice
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+
+        </div>
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
            TAB: OVERVIEW (Dashboard Analytics & Top Dishes)
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'overview') {
-        <div class="animate-fade-in">
-          
-          <!-- Top KPI Strip -->
-          <div class="lez-kpi-grid">
-            <div class="lez-kpi-card">
-              <div class="kpi-icon" style="background:#ffdbd0;color:#ab3500">
-                <span class="material-symbols-outlined">payments</span>
-              </div>
-              <div class="kpi-value">${{ (ordersList().length * 48.5).toFixed(2) }}</div>
-              <div class="kpi-label">Today's Revenue</div>
-            </div>
+      <div class="animate-fade-in">
 
-            <div class="lez-kpi-card">
-              <div class="kpi-icon" style="background:#e0f2fe;color:#0369a1">
-                <span class="material-symbols-outlined">receipt_long</span>
-              </div>
-              <div class="kpi-value">{{ ordersList().length }}</div>
-              <div class="kpi-label">Total Orders</div>
+        <!-- Top KPI Strip -->
+        <div class="lez-kpi-grid">
+          <div class="lez-kpi-card">
+            <div class="kpi-icon" style="background:#ffdbd0;color:#ab3500">
+              <span class="material-symbols-outlined">payments</span>
             </div>
-
-            <div class="lez-kpi-card">
-              <div class="kpi-icon" style="background:#d1fae5;color:#047857">
-                <span class="material-symbols-outlined">table_restaurant</span>
-              </div>
-              <div class="kpi-value">{{ qrCodesList().length || 12 }}</div>
-              <div class="kpi-label">Active Tables</div>
-            </div>
-
-            <div class="lez-kpi-card">
-              <div class="kpi-icon" style="background:#fef3c7;color:#b45309">
-                <span class="material-symbols-outlined">timer</span>
-              </div>
-              <div class="kpi-value">14 min</div>
-              <div class="kpi-label">Avg. Prep Time</div>
-            </div>
+            <div class="kpi-value">${{ (ordersList().length * 48.5).toFixed(2) }}</div>
+            <div class="kpi-label">Today's Revenue</div>
           </div>
 
-          <!-- 2-Column Overview Content -->
-          <div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:24px;align-items:start">
-            
-            <!-- Recent Orders Table -->
-            <div class="lez-card" style="padding:0;overflow:hidden">
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border)">
-                <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0">Recent Orders</h3>
-                <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="selectTab('orders')">View All</button>
-              </div>
+          <div class="lez-kpi-card">
+            <div class="kpi-icon" style="background:#e0f2fe;color:#0369a1">
+              <span class="material-symbols-outlined">receipt_long</span>
+            </div>
+            <div class="kpi-value">{{ ordersList().length }}</div>
+            <div class="kpi-label">Total Orders</div>
+          </div>
 
-              @if (ordersList().length === 0) {
-                <div style="text-align:center;padding:40px">
-                  <p style="color:var(--text-secondary);font-size:13.5px;margin:0">No incoming orders yet.</p>
+          <div class="lez-kpi-card">
+            <div class="kpi-icon" style="background:#d1fae5;color:#047857">
+              <span class="material-symbols-outlined">table_restaurant</span>
+            </div>
+            <div class="kpi-value">{{ qrCodesList().length || 12 }}</div>
+            <div class="kpi-label">Active Tables</div>
+          </div>
+
+          <div class="lez-kpi-card">
+            <div class="kpi-icon" style="background:#fef3c7;color:#b45309">
+              <span class="material-symbols-outlined">timer</span>
+            </div>
+            <div class="kpi-value">14 min</div>
+            <div class="kpi-label">Avg. Prep Time</div>
+          </div>
+        </div>
+
+        <!-- 2-Column Overview Content -->
+        <div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:24px;align-items:start">
+
+          <!-- Recent Orders Table -->
+          <div class="lez-card" style="padding:0;overflow:hidden">
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border)">
+              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0">Recent Orders</h3>
+              <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="selectTab('orders')">View All</button>
+            </div>
+
+            @if (ordersList().length === 0) {
+            <div style="text-align:center;padding:40px">
+              <p style="color:var(--text-secondary);font-size:13.5px;margin:0">No incoming orders yet.</p>
+            </div>
+            } @else {
+            <table class="lez-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Table</th>
+                  <th>Items</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ord of ordersList().slice(0, 5); track ord.id) {
+                <tr (click)="selectTab('orders'); selectOrder(ord)">
+                  <td style="font-weight:700">{{ ord.orderNumber || ord.id }}</td>
+                  <td>Table {{ ord.tableNumber }}</td>
+                  <td>{{ ord.items.length }} items</td>
+                  <td>
+                    <span class="lez-badge"
+                      [class.lez-badge-pending]="ord.status === 'PENDING' || ord.status === 'pending'"
+                      [class.lez-badge-preparing]="ord.status === 'PREPARING' || ord.status === 'ACCEPTED'"
+                      [class.lez-badge-ready]="ord.status === 'READY'"
+                      [class.lez-badge-delivered]="ord.status === 'COMPLETED'">
+                      {{ ord.status }}
+                    </span>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            }
+          </div>
+
+          <!-- Top Dishes Showcase -->
+          <div class="lez-card" style="padding:24px">
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Top Selling Dishes</h3>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              @for (dish of menuItems().slice(0, 4); track dish.id) {
+              <div style="display:flex;align-items:center;gap:12px">
+                <img [src]="dish.image || '/img/menu-1.jpg'" alt=""
+                  style="width:44px;height:44px;border-radius:8px;object-fit:cover" />
+                <div style="flex:1;min-width:0">
+                  <div
+                    style="font-size:13.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    {{ dish.name }}
+                  </div>
+                  <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
+                    <span [style.color]="dish.isVeg ? '#10b981' : '#ef4444'"
+                      class="material-symbols-outlined text-[14px]">circle</span>
+                    <span>{{ dish.isVeg ? 'Vegetarian' : 'Non-Vegetarian' }}</span>
+                  </div>
                 </div>
-              } @else {
-                <table class="lez-table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Table</th>
-                      <th>Items</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (ord of ordersList().slice(0, 5); track ord.id) {
-                      <tr (click)="selectTab('orders'); selectOrder(ord)">
-                        <td style="font-weight:700">{{ ord.orderNumber || ord.id }}</td>
-                        <td>Table {{ ord.tableNumber }}</td>
-                        <td>{{ ord.items.length }} items</td>
-                        <td>
-                          <span class="lez-badge"
-                                [class.lez-badge-pending]="ord.status === 'PENDING' || ord.status === 'pending'"
-                                [class.lez-badge-preparing]="ord.status === 'PREPARING' || ord.status === 'ACCEPTED'"
-                                [class.lez-badge-ready]="ord.status === 'READY'"
-                                [class.lez-badge-delivered]="ord.status === 'COMPLETED'">
-                            {{ ord.status }}
-                          </span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                <span style="font-size:14px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
+              </div>
               }
             </div>
-
-            <!-- Top Dishes Showcase -->
-            <div class="lez-card" style="padding:24px">
-              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Top Selling Dishes</h3>
-              
-              <div style="display:flex;flex-direction:column;gap:14px">
-                @for (dish of menuItems().slice(0, 4); track dish.id) {
-                  <div style="display:flex;align-items:center;gap:12px">
-                    <img [src]="dish.image || '/img/menu-1.jpg'" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover" />
-                    <div style="flex:1;min-width:0">
-                      <div style="font-size:13.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                        {{ dish.name }}
-                      </div>
-                      <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px">
-                        <span [style.color]="dish.isVeg ? '#10b981' : '#ef4444'" class="material-symbols-outlined text-[14px]">circle</span>
-                        <span>{{ dish.isVeg ? 'Vegetarian' : 'Non-Vegetarian' }}</span>
-                      </div>
-                    </div>
-                    <span style="font-size:14px;font-weight:800;color:#ab3500">${{ dish.price }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-
           </div>
 
         </div>
+
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
            TAB: MENU MANAGEMENT
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'items') {
-        <div class="animate-fade-in">
-          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
-            
-            <!-- Add / Edit Dish Form -->
-            <div class="lez-card" style="padding:24px">
-              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
-                <span class="material-symbols-outlined text-[20px] text-accent">{{ editingItemId() ? 'edit_note' : 'add_circle' }}</span>
-                <span>{{ editingItemId() ? 'Edit Menu Item' : 'Add New Menu Item' }}</span>
-              </h3>
+      <div class="animate-fade-in">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
 
-              <div style="display:flex;flex-direction:column;gap:14px">
-                <div class="form-field">
-                  <label class="form-label">Item Title *</label>
-                  <input class="lez-input" placeholder="e.g. Truffle Mushroom Burger"
-                         [value]="newItemName()" (input)="newItemName.set($any($event.target).value)" />
-                </div>
+          <!-- Add / Edit Dish Form -->
+          <div class="lez-card" style="padding:24px">
+            <h3
+              style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-[20px] text-accent">{{ editingItemId() ? 'edit_note' :
+                'add_circle' }}</span>
+              <span>{{ editingItemId() ? 'Edit Menu Item' : 'Add New Menu Item' }}</span>
+            </h3>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                  <div class="form-field">
-                    <label class="form-label">Price ($) *</label>
-                    <input class="lez-input" type="number" step="0.01" placeholder="0.00" title="Price" aria-label="Price"
-                           [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
-                  </div>
-                  <div class="form-field">
-                    <label class="form-label">Category</label>
-                    <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
-                      @for (cat of categories(); track cat.id) {
-                        <option [value]="cat.id">{{ cat.name }}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label">Description</label>
-                  <textarea class="lez-input" rows="2" placeholder="Brief description..."
-                            [value]="newItemDescription()" (input)="newItemDescription.set($any($event.target).value)"></textarea>
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label">Item Photo</label>
-                  <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Item Photo" aria-label="Item Photo" (change)="onDishImageSelected($event)" />
-                  @if (imageUploadPreview()) {
-                    <img [src]="imageUploadPreview()" alt="Dish Preview" title="Dish Preview" style="width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px" />
-                  }
-                </div>
-
-                <div style="display:flex;gap:14px;align-items:center">
-                  <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer">
-                    <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#ab3500" />
-                    <span>Vegetarian</span>
-                  </label>
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:8px">
-                  <button class="lez-btn lez-btn-primary" style="flex:1" (click)="handleAddItem()">
-                    {{ editingItemId() ? 'Save Dish' : 'Add Item' }}
-                  </button>
-                  @if (editingItemId()) {
-                    <button class="lez-btn lez-btn-secondary" (click)="cancelEditMenuItem()">Cancel</button>
-                  }
-                </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-field">
+                <label class="form-label">Item Title *</label>
+                <input class="lez-input" placeholder="e.g. Truffle Mushroom Burger" [value]="newItemName()"
+                  (input)="newItemName.set($any($event.target).value)" />
               </div>
-            </div>
 
-            <!-- Dishes Grid & Search Section -->
-            <div>
-              <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
-                <div class="lez-search-box" style="flex:1">
-                  <span class="material-symbols-outlined search-icon">search</span>
-                  <input class="lez-input" placeholder="Search dishes by name or ingredients..."
-                         [value]="menuSearchQuery()" (input)="menuSearchQuery.set($any($event.target).value)" />
-                  @if (menuSearchQuery()) {
-                    <button (click)="menuSearchQuery.set('')" class="clear-search-btn">
-                      <span class="material-symbols-outlined">close</span>
-                    </button>
-                  }
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="form-field">
+                  <label class="form-label">Price ($) *</label>
+                  <input class="lez-input" type="number" step="0.01" placeholder="0.00" title="Price" aria-label="Price"
+                    [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
                 </div>
-                <select class="lez-input" style="width:200px" title="Filter Category" aria-label="Filter Category" [value]="selectedFilterCategoryId()"
-                        (change)="selectedFilterCategoryId.set($any($event.target).value)">
-                  <option value="all">All Categories ({{ menuItems().length }})</option>
-                  @for (cat of categories(); track cat.id) {
+                <div class="form-field">
+                  <label class="form-label">Category</label>
+                  <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()"
+                    (change)="newItemCategoryId.set($any($event.target).value)">
+                    @for (cat of categories(); track cat.id) {
                     <option [value]="cat.id">{{ cat.name }}</option>
-                  }
-                </select>
+                    }
+                  </select>
+                </div>
               </div>
 
-              @if (filteredMenuItems().length === 0) {
-                <div class="lez-card" style="text-align:center;padding:48px 24px">
-                  <div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
-                    <span class="material-symbols-outlined text-[28px]">restaurant_menu</span>
-                  </div>
-                  <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 6px">No menu items found</h4>
-                  <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px">
-                    {{ menuSearchQuery() ? 'No dishes matched your search "' + menuSearchQuery() + '".' : 'Add your first menu item on the left panel.' }}
-                  </p>
-                  @if (menuSearchQuery()) {
-                    <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="menuSearchQuery.set('')">Clear Search Filter</button>
-                  }
-                </div>
-              } @else {
-                <div class="lez-dishes-grid">
-                  @for (dish of paginatedMenuItems(); track dish.id) {
-                    <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable" [class.is-editing]="editingItemId() === dish.id">
-                      <div class="dish-card-image-wrap">
-                        <img src="/img/menu-1.jpg" [src]="dish.image || '/img/menu-1.jpg'" alt="Menu Dish" [alt]="dish.name" title="Menu Dish" [title]="dish.name" class="lez-dish-img" />
-                        <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
-                          {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
-                        </span>
-                      </div>
-                      <div class="lez-dish-body">
-                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-                          <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ dish.name }}</span>
-                          <span style="font-size:15px;font-weight:800;color:#ab3500">${{ dish.price.toFixed(2) }}</span>
-                        </div>
-                        <p style="font-size:12px;color:var(--text-secondary);line-height:1.4;margin:0 0 12px;min-height:34px">{{ dish.description }}</p>
-                        
-                        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:10px">
-                          <button class="lez-badge" style="cursor:pointer;border:none"
-                                  [class.lez-badge-ready]="dish.isAvailable"
-                                  [class.lez-badge-delivered]="!dish.isAvailable"
-                                  (click)="toggleItemAvailability(dish.id)">
-                            {{ dish.isAvailable ? 'Available' : 'Hidden' }}
-                          </button>
-                          <div style="display:flex;gap:6px">
-                            <button class="icon-btn-pill edit-btn" title="Edit Menu Item" (click)="startEditMenuItem(dish)">
-                              <span class="material-symbols-outlined text-[16px]">edit</span>
-                            </button>
-                            <button class="icon-btn-pill delete-btn" title="Delete Menu Item" (click)="deleteMenuItem(dish.id)">
-                              <span class="material-symbols-outlined text-[16px]">delete</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
+              <div class="form-field">
+                <label class="form-label">Description</label>
+                <textarea class="lez-input" rows="2" placeholder="Brief description..." [value]="newItemDescription()"
+                  (input)="newItemDescription.set($any($event.target).value)"></textarea>
+              </div>
 
-              @if (totalPages() > 1) {
-                <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">
-                  <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() <= 1" (click)="prevPage()">Prev</button>
-                  <span style="font-size:13px;color:var(--text-secondary);align-self:center">Page {{ currentPage() }} of {{ totalPages() }}</span>
-                  <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() >= totalPages()" (click)="nextPage()">Next</button>
-                </div>
-              }
+              <div class="form-field">
+                <label class="form-label">Item Photo</label>
+                <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Item Photo"
+                  aria-label="Item Photo" (change)="onDishImageSelected($event)" />
+                @if (imageUploadPreview()) {
+                <img [src]="imageUploadPreview()" alt="Dish Preview" title="Dish Preview"
+                  style="width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px" />
+                }
+              </div>
+
+              <div style="display:flex;gap:14px;align-items:center">
+                <label
+                  style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer">
+                  <input type="checkbox" [checked]="newItemIsVeg()"
+                    (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#ab3500" />
+                  <span>Vegetarian</span>
+                </label>
+              </div>
+
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="lez-btn lez-btn-primary" style="flex:1" (click)="handleAddItem()">
+                  {{ editingItemId() ? 'Save Dish' : 'Add Item' }}
+                </button>
+                @if (editingItemId()) {
+                <button class="lez-btn lez-btn-secondary" (click)="cancelEditMenuItem()">Cancel</button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Dishes Grid & Search Section -->
+          <div>
+            <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+              <div class="lez-search-box" style="flex:1">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input class="lez-input" placeholder="Search dishes by name or ingredients..."
+                  [value]="menuSearchQuery()" (input)="menuSearchQuery.set($any($event.target).value)" />
+                @if (menuSearchQuery()) {
+                <button (click)="menuSearchQuery.set('')" class="clear-search-btn">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+                }
+              </div>
+              <select class="lez-input" style="width:200px" title="Filter Category" aria-label="Filter Category"
+                [value]="selectedFilterCategoryId()" (change)="selectedFilterCategoryId.set($any($event.target).value)">
+                <option value="all">All Categories ({{ menuItems().length }})</option>
+                @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
             </div>
 
+            @if (filteredMenuItems().length === 0) {
+            <div class="lez-card" style="text-align:center;padding:48px 24px">
+              <div
+                style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                <span class="material-symbols-outlined text-[28px]">restaurant_menu</span>
+              </div>
+              <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 6px">No menu items found
+              </h4>
+              <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px">
+                {{ menuSearchQuery() ? 'No dishes matched your search "' + menuSearchQuery() + '".' : 'Add your first
+                menu item on the left panel.' }}
+              </p>
+              @if (menuSearchQuery()) {
+              <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="menuSearchQuery.set('')">Clear Search
+                Filter</button>
+              }
+            </div>
+            } @else {
+            <div class="lez-dishes-grid">
+              @for (dish of paginatedMenuItems(); track dish.id) {
+              <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable"
+                [class.is-editing]="editingItemId() === dish.id">
+                <div class="dish-card-image-wrap">
+                  <img src="/img/menu-1.jpg" [src]="dish.image || '/img/menu-1.jpg'" alt="Menu Dish" [alt]="dish.name"
+                    title="Menu Dish" [title]="dish.name" class="lez-dish-img" />
+                  <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
+                    {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
+                  </span>
+                </div>
+                <div class="lez-dish-body">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+                    <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ dish.name }}</span>
+                    <span style="font-size:15px;font-weight:800;color:#ab3500">${{ dish.price.toFixed(2) }}</span>
+                  </div>
+                  <p style="font-size:12px;color:var(--text-secondary);line-height:1.4;margin:0 0 12px;min-height:34px">
+                    {{ dish.description }}</p>
+
+                  <div
+                    style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:10px">
+                    <button class="lez-badge" style="cursor:pointer;border:none"
+                      [class.lez-badge-ready]="dish.isAvailable" [class.lez-badge-delivered]="!dish.isAvailable"
+                      (click)="toggleItemAvailability(dish.id)">
+                      {{ dish.isAvailable ? 'Available' : 'Hidden' }}
+                    </button>
+                    <div style="display:flex;gap:6px">
+                      <button class="icon-btn-pill edit-btn" title="Edit Menu Item" (click)="startEditMenuItem(dish)">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                      </button>
+                      <button class="icon-btn-pill delete-btn" title="Delete Menu Item"
+                        (click)="deleteMenuItem(dish.id)">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+            }
+
+            @if (totalPages() > 1) {
+            <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">
+              <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() <= 1"
+                (click)="prevPage()">Prev</button>
+              <span style="font-size:13px;color:var(--text-secondary);align-self:center">Page {{ currentPage() }} of {{
+                totalPages() }}</span>
+              <button class="lez-btn lez-btn-secondary lez-btn-sm" [disabled]="currentPage() >= totalPages()"
+                (click)="nextPage()">Next</button>
+            </div>
+            }
           </div>
+
         </div>
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
@@ -640,59 +684,174 @@
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'tables') {
         <div class="animate-fade-in">
-          
-          <!-- Floor Status Summary -->
-          <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-            <span class="lez-badge lez-badge-ready" style="font-size:13px;padding:6px 14px">● 8 Tables Available</span>
-            <span class="lez-badge lez-badge-pending" style="font-size:13px;padding:6px 14px">● 3 Tables Occupied</span>
-            <span class="lez-badge lez-badge-preparing" style="font-size:13px;padding:6px 14px">● 2 Tables Reserved</span>
-            <span class="lez-badge lez-badge-delivered" style="font-size:13px;padding:6px 14px">● 1 Table Cleaning</span>
+
+          <!-- Floor Header & Live Status Summary Filter Bar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:14px">
+            <div class="floor-filter-bar" style="margin-bottom:0">
+              <button class="table-filter-pill pill-all" [class.active]="activeTableFilter() === 'ALL'" (click)="activeTableFilter.set('ALL')">
+                <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                <span>All Tables ({{ tableStats().totalTables }})</span>
+              </button>
+              <button class="table-filter-pill pill-available" [class.active]="activeTableFilter() === 'AVAILABLE'" (click)="activeTableFilter.set('AVAILABLE')">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>{{ tableStats().availableTables }} Available</span>
+              </button>
+              <button class="table-filter-pill pill-occupied" [class.active]="activeTableFilter() === 'OCCUPIED'" (click)="activeTableFilter.set('OCCUPIED')">
+                <span class="material-symbols-outlined text-[16px]">person</span>
+                <span>{{ tableStats().occupiedTables }} Occupied</span>
+              </button>
+              <button class="table-filter-pill pill-reserved" [class.active]="activeTableFilter() === 'RESERVED'" (click)="activeTableFilter.set('RESERVED')">
+                <span class="material-symbols-outlined text-[16px]">event_seat</span>
+                <span>{{ tableStats().reservedTables }} Reserved</span>
+              </button>
+              <button class="table-filter-pill pill-cleaning" [class.active]="activeTableFilter() === 'CLEANING'" (click)="activeTableFilter.set('CLEANING')">
+                <span class="material-symbols-outlined text-[16px]">cleaning_services</span>
+                <span>{{ tableStats().cleaningTables }} Cleaning</span>
+              </button>
+            </div>
+
+            <!-- Action: Add New Table -->
+            <button class="lez-btn lez-btn-primary" (click)="openAddTableModal()">
+              <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>Add New Table</span>
+            </button>
           </div>
 
-          <!-- Table Cards Grid -->
-          <div class="lez-table-grid">
-            <div class="lez-floor-table-card occupied" (click)="selectTab('orders')">
-              <span class="material-symbols-outlined text-[32px]" style="color:#ff6b35">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 01</h4>
-              <span class="lez-badge lez-badge-pending">Occupied</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Order #ORD-8821</p>
-            </div>
+          <!-- Dynamic Real-Time Table Grid -->
+          <div class="lez-table-grid" style="grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:20px">
+            @for (table of filteredTables(); track table.id) {
+              <div class="lez-floor-table-card"
+                   [class.status-available]="table.status === 'AVAILABLE'"
+                   [class.status-occupied]="table.status === 'OCCUPIED'"
+                   [class.status-reserved]="table.status === 'RESERVED'"
+                   [class.status-cleaning]="table.status === 'CLEANING'"
+                   style="cursor:pointer"
+                   (click)="openTableDetails(table)">
+                
+                <!-- Card Top: Table Number, Capacity & Status Badge -->
+                <div class="table-card-header">
+                  <div>
+                    <h4 style="font-size:17px;font-weight:800;color:var(--text-primary);margin:0 0 4px;display:flex;align-items:center;gap:6px">
+                      <span class="material-symbols-outlined text-[20px]"
+                            [style.color]="table.status === 'AVAILABLE' ? '#10b981' : (table.status === 'OCCUPIED' ? '#f97316' : (table.status === 'RESERVED' ? '#3b82f6' : '#8b5cf6'))">
+                        table_restaurant
+                      </span>
+                      <span>{{ table.tableNumber }}</span>
+                    </h4>
+                    <span class="table-capacity-tag">
+                      <span class="material-symbols-outlined text-[13px]">groups</span>
+                      <span>{{ table.capacity }} Seats</span>
+                    </span>
+                  </div>
 
-            <div class="lez-floor-table-card available">
-              <span class="material-symbols-outlined text-[32px]" style="color:#10B981">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 02</h4>
-              <span class="lez-badge lez-badge-ready">Available</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">4 Seats</p>
-            </div>
+                  <!-- Status Badge -->
+                  @if (table.status === 'AVAILABLE') {
+                    <span class="lez-badge lez-badge-ready" style="font-size:11.5px;padding:3px 10px">
+                      <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                      <span>Available</span>
+                    </span>
+                  } @else if (table.status === 'OCCUPIED') {
+                    <span class="lez-badge lez-badge-pending" style="font-size:11.5px;padding:3px 10px">
+                      <span class="material-symbols-outlined text-[13px]">person</span>
+                      <span>Occupied</span>
+                    </span>
+                  } @else if (table.status === 'RESERVED') {
+                    <span class="lez-badge lez-badge-preparing" style="font-size:11.5px;padding:3px 10px">
+                      <span class="material-symbols-outlined text-[13px]">event_seat</span>
+                      <span>Reserved</span>
+                    </span>
+                  } @else if (table.status === 'CLEANING') {
+                    <span class="lez-badge lez-badge-delivered" style="font-size:11.5px;padding:3px 10px">
+                      <span class="material-symbols-outlined text-[13px]">cleaning_services</span>
+                      <span>Cleaning</span>
+                    </span>
+                  }
+                </div>
 
-            <div class="lez-floor-table-card reserved">
-              <span class="material-symbols-outlined text-[32px]" style="color:#3B82F6">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 03</h4>
-              <span class="lez-badge lez-badge-preparing">Reserved</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">7:30 PM • 2 Guests</p>
-            </div>
+                <!-- Card Middle: Live Session / Orders / Reservation summary -->
+                <div class="table-card-body">
+                  @if (table.status === 'OCCUPIED') {
+                    <div class="table-orders-badge">
+                      <div style="display:flex;align-items:center;gap:6px">
+                        <span class="material-symbols-outlined text-[16px] text-accent">restaurant</span>
+                        <strong style="color:#9a3412">{{ table.activeOrdersCount || 0 }} Active {{ (table.activeOrdersCount || 0) === 1 ? 'Order' : 'Orders' }}</strong>
+                      </div>
+                      <span style="font-weight:800;color:#c2410c">${{ (table.currentTotalAmount || 0).toFixed(2) }}</span>
+                    </div>
+                  } @else if (table.status === 'RESERVED') {
+                    <div class="table-reservation-box">
+                      <div style="font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:2px">
+                        <span class="material-symbols-outlined text-[14px]">person</span>
+                        <span>{{ table.reservationName || 'Guest' }}</span>
+                      </div>
+                      <div style="font-size:11px;opacity:0.85">
+                        {{ table.reservationTime || 'Tonight' }} • {{ table.reservationGuests || table.capacity }} Guests
+                      </div>
+                    </div>
+                  } @else if (table.status === 'CLEANING') {
+                    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:8px 12px;font-size:12px;color:#6d28d9;display:flex;align-items:center;gap:6px">
+                      <span class="material-symbols-outlined text-[16px]">mop</span>
+                      <span>Being sanitized & reset</span>
+                    </div>
+                  } @else {
+                    <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:8px 12px;font-size:12px;color:#047857;display:flex;align-items:center;gap:6px">
+                      <span class="material-symbols-outlined text-[16px]">qr_code</span>
+                      <span>Ready for walk-in or QR scan</span>
+                    </div>
+                  }
+                </div>
 
-            <div class="lez-floor-table-card occupied" (click)="selectTab('orders')">
-              <span class="material-symbols-outlined text-[32px]" style="color:#ff6b35">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 04</h4>
-              <span class="lez-badge lez-badge-pending">Occupied</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Order #ORD-8822</p>
-            </div>
+                <!-- Card Bottom: Quick Actions -->
+                <div class="table-card-actions" (click)="$event.stopPropagation()">
+                  @if (table.status === 'OCCUPIED') {
+                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="closeTableSession(table.id, $event)">
+                      <span class="material-symbols-outlined text-[14px]">mop</span>
+                      <span>Close Table</span>
+                    </button>
+                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="openTableDetails(table)">
+                      <span class="material-symbols-outlined text-[14px]">visibility</span>
+                      <span>Details</span>
+                    </button>
+                  } @else if (table.status === 'CLEANING') {
+                    <button class="lez-btn lez-btn-primary lez-btn-sm w-full" style="background:#10b981;border-color:#10b981" (click)="markTableAvailable(table, $event)">
+                      <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                      <span>Mark Available</span>
+                    </button>
+                  } @else if (table.status === 'RESERVED') {
+                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="updateTableDirectStatus(table.id, 'OCCUPIED', $event)">
+                      <span class="material-symbols-outlined text-[14px]">person_check</span>
+                      <span>Seat Guest</span>
+                    </button>
+                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="openTableDetails(table)">
+                      <span class="material-symbols-outlined text-[14px]">info</span>
+                      <span>Details</span>
+                    </button>
+                  } @else {
+                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="openReserveModal(table, $event)">
+                      <span class="material-symbols-outlined text-[14px]">event_seat</span>
+                      <span>Reserve</span>
+                    </button>
+                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="openTableDetails(table)">
+                      <span class="material-symbols-outlined text-[14px]">qr_code</span>
+                      <span>View QR</span>
+                    </button>
+                  }
+                </div>
 
-            <div class="lez-floor-table-card available">
-              <span class="material-symbols-outlined text-[32px]" style="color:#10B981">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 05</h4>
-              <span class="lez-badge lez-badge-ready">Available</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">6 Seats</p>
-            </div>
-
-            <div class="lez-floor-table-card cleaning">
-              <span class="material-symbols-outlined text-[32px]" style="color:#F59E0B">table_restaurant</span>
-              <h4 style="font-size:16px;font-weight:800;margin:8px 0 2px">Table 06</h4>
-              <span class="lez-badge lez-badge-delivered">Cleaning</span>
-              <p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0">Being reset</p>
-            </div>
+              </div>
+            } @empty {
+              <div style="grid-column:1/-1;text-align:center;padding:48px 24px;background:#ffffff;border-radius:18px;border:1px dashed var(--border)">
+                <span class="material-symbols-outlined text-[48px] text-accent" style="opacity:0.5;margin-bottom:12px">table_restaurant</span>
+                <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 6px">No Tables Found</h4>
+                <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px">Add dining tables to manage your floor operations and QR codes.</p>
+                <button class="lez-btn lez-btn-primary" (click)="openAddTableModal()">
+                  <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                  <span>Add First Table</span>
+                </button>
+              </div>
+            }
           </div>
+
         </div>
       }
 
@@ -700,300 +859,337 @@
            TAB: CATEGORIES
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'categories') {
-        <div class="animate-fade-in">
-          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
-            <div class="lez-card" style="padding:24px">
-              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Add Category</h3>
-              <div class="form-field" style="margin-bottom:14px">
-                <label class="form-label">Category Name</label>
-                <input class="lez-input" placeholder="e.g. Appetizers, Main Course"
-                       [value]="newCategoryName()" (input)="newCategoryName.set($any($event.target).value)" />
-              </div>
-              <button class="lez-btn lez-btn-primary w-full" (click)="handleAddCategory()">Add Category</button>
+      <div class="animate-fade-in">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+          <div class="lez-card" style="padding:24px">
+            <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px">Add Category</h3>
+            <div class="form-field" style="margin-bottom:14px">
+              <label class="form-label">Category Name</label>
+              <input class="lez-input" placeholder="e.g. Appetizers, Main Course" [value]="newCategoryName()"
+                (input)="newCategoryName.set($any($event.target).value)" />
             </div>
+            <button class="lez-btn lez-btn-primary w-full" (click)="handleAddCategory()">Add Category</button>
+          </div>
 
-            <div style="display:flex;flex-direction:column;gap:10px">
-              @for (cat of categories(); track cat.id) {
-                <div class="lez-card" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
-                  <div style="display:flex;align-items:center;gap:12px">
-                    <span class="material-symbols-outlined" style="color:#ab3500">label</span>
-                    <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ cat.name }}</span>
-                  </div>
-                  <button class="lez-btn lez-btn-danger lez-btn-sm" (click)="deleteCategory(cat.id)">Delete</button>
-                </div>
-              }
+          <div style="display:flex;flex-direction:column;gap:10px">
+            @for (cat of categories(); track cat.id) {
+            <div class="lez-card"
+              style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span class="material-symbols-outlined" style="color:#ab3500">label</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-primary)">{{ cat.name }}</span>
+              </div>
+              <button class="lez-btn lez-btn-danger lez-btn-sm" (click)="deleteCategory(cat.id)">Delete</button>
             </div>
+            }
           </div>
         </div>
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
            TAB: QR CODES
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'qr') {
-        <div class="animate-fade-in">
-          <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
-            
-            <div class="lez-card" style="padding:24px">
-              <h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px;display:flex;align-items:center;gap:8px">
-                <span class="material-symbols-outlined text-[20px] text-accent">qr_code_2</span>
-                <span>Generate Table QR</span>
-              </h3>
-              <div class="form-field" style="margin-bottom:16px">
-                <label class="form-label">Table Number (1 - 99)</label>
-                <div class="table-prefix-input-wrap">
-                  <span class="table-prefix-tag">Table</span>
-                  <input type="number" min="1" max="99" class="table-number-only-input" placeholder="01"
-                         [value]="newTableDigit()" (input)="onTableDigitInput($event)" />
-                </div>
-                <div style="font-size:11.5px;color:var(--text-secondary);margin-top:4px">
-                  Label: <strong style="color:var(--text-primary)">Table {{ newTableDigit() < 10 ? '0' + newTableDigit() : newTableDigit() }}</strong>
-                </div>
+      <div class="animate-fade-in">
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
+
+          <div class="lez-card" style="padding:24px">
+            <h3
+              style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 16px;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-[20px] text-accent">qr_code_2</span>
+              <span>Generate Table QR</span>
+            </h3>
+            <div class="form-field" style="margin-bottom:16px">
+              <label class="form-label">Table Number</label>
+              <div class="table-prefix-input-wrap">
+                <span class="table-prefix-tag">Table</span>
+                <input type="number" min="1" max="99" class="table-number-only-input" placeholder="01"
+                  [value]="newTableDigit()" (input)="onTableDigitInput($event)" />
               </div>
-              <button class="lez-btn lez-btn-primary w-full" (click)="generateTableQr()">Generate QR Code</button>
-
-              @if (selectedQr()) {
-                <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);text-align:center">
-                  <div style="position:relative;display:inline-block;cursor:pointer" (click)="openEnlargedQr(selectedQr()!)" title="Click to view large QR">
-                    <img [src]="activeQrUrl()" alt="QR Code" style="width:160px;height:160px;margin:0 auto 12px;border:1px solid var(--border);border-radius:10px;padding:8px;transition:transform 0.2s" class="hover:scale-105" />
-                    <span style="position:absolute;bottom:18px;right:8px;background:rgba(15,23,42,0.75);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
-                      <span class="material-symbols-outlined text-[14px]">zoom_in</span>
-                    </span>
-                  </div>
-                  <div style="display:flex;gap:8px">
-                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="simulateQrDownload()">
-                      <span class="material-symbols-outlined text-[14px]">download</span>
-                      <span>Download</span>
-                    </button>
-                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="simulateQrPrint()">
-                      <span class="material-symbols-outlined text-[14px]">print</span>
-                      <span>Print</span>
-                    </button>
-                  </div>
-                </div>
-              }
+              <div style="font-size:11.5px;color:var(--text-secondary);margin-top:4px">
+                Label: <strong style="color:var(--text-primary)">Table {{ newTableDigit() < 10 ? '0' + newTableDigit() :
+                    newTableDigit() }}</strong>
+              </div>
             </div>
+            <button class="lez-btn lez-btn-primary w-full" (click)="generateTableQr()">Generate QR Code</button>
 
-            <!-- QR Grid -->
-            <div class="lez-table-grid">
-              @for (qr of qrCodesList(); track qr.id) {
-                <div class="lez-card" style="padding:16px;text-align:center;cursor:pointer;position:relative;transition:all 0.2s ease" class="hover:shadow-md hover:border-accent" (click)="openEnlargedQr(qr)">
-                  <div style="position:relative;display:inline-block">
-                    <img [src]="qr.qrImageUrl || qr.qrCodeUrl" alt="" style="width:120px;height:120px;margin:0 auto 10px;border-radius:8px" />
-                    <span style="position:absolute;bottom:12px;right:2px;background:rgba(15,23,42,0.65);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
-                      <span class="material-symbols-outlined text-[12px]">zoom_in</span>
-                    </span>
-                  </div>
-                  <h4 style="font-size:14px;font-weight:700;margin:0 0 2px">{{ qr.tableNumber }}</h4>
-                  <p style="font-size:12px;color:var(--text-secondary);margin:0 0 10px">{{ qr.scansCount || 0 }} Scans</p>
-                  <button class="lez-btn lez-btn-danger lez-btn-sm w-full" (click)="deleteQr(qr.id); $event.stopPropagation()">
-                    <span class="material-symbols-outlined text-[13px]">delete</span>
-                    <span>Delete</span>
-                  </button>
-                </div>
-              }
+            @if (selectedQr()) {
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);text-align:center">
+              <div style="position:relative;display:inline-block;cursor:pointer" (click)="openEnlargedQr(selectedQr()!)"
+                title="Click to view large QR">
+                <img [src]="activeQrUrl()" alt="QR Code"
+                  style="width:160px;height:160px;margin:0 auto 12px;border:1px solid var(--border);border-radius:10px;padding:8px;transition:transform 0.2s"
+                  class="hover:scale-105" />
+                <span
+                  style="position:absolute;bottom:18px;right:8px;background:rgba(15,23,42,0.75);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+                  <span class="material-symbols-outlined text-[14px]">zoom_in</span>
+                </span>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="simulateQrDownload()">
+                  <span class="material-symbols-outlined text-[14px]">download</span>
+                  <span>Download</span>
+                </button>
+                <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="simulateQrPrint()">
+                  <span class="material-symbols-outlined text-[14px]">print</span>
+                  <span>Print</span>
+                </button>
+              </div>
             </div>
-
+            }
           </div>
+
+          <!-- QR Grid -->
+          <div class="lez-table-grid">
+            @for (qr of qrCodesList(); track qr.id) {
+            <div class="lez-card"
+              style="padding:16px;text-align:center;cursor:pointer;position:relative;transition:all 0.2s ease"
+              class="hover:shadow-md hover:border-accent" (click)="openEnlargedQr(qr)">
+              <div style="position:relative;display:inline-block">
+                <img [src]="qr.qrImageUrl || qr.qrCodeUrl" alt=""
+                  style="width:120px;height:120px;margin:0 auto 10px;border-radius:8px" />
+                <span
+                  style="position:absolute;bottom:12px;right:2px;background:rgba(15,23,42,0.65);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
+                  <span class="material-symbols-outlined text-[12px]">zoom_in</span>
+                </span>
+              </div>
+              <h4 style="font-size:14px;font-weight:700;margin:0 0 2px">{{ qr.tableNumber }}</h4>
+              <p style="font-size:12px;color:var(--text-secondary);margin:0 0 10px">{{ qr.scansCount || 0 }} Scans</p>
+              <button class="lez-btn lez-btn-danger lez-btn-sm w-full"
+                (click)="deleteQr(qr.id); $event.stopPropagation()">
+                <span class="material-symbols-outlined text-[13px]">delete</span>
+                <span>Delete</span>
+              </button>
+            </div>
+            }
+          </div>
+
         </div>
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
            TAB: SETTINGS
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'settings') {
-        <div class="animate-fade-in" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:24px;max-width:960px">
-          
-          <!-- Restaurant Profile Card -->
-          <div class="lez-card" style="padding:28px">
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
-              <span class="material-symbols-outlined text-accent">storefront</span>
-              <span>Restaurant Profile</span>
-            </h3>
+      <div class="animate-fade-in"
+        style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:24px;max-width:960px">
 
-            <div style="display:flex;flex-direction:column;gap:16px">
-              <div class="form-field">
-                <label class="form-label">Restaurant Name</label>
-                <input class="lez-input" placeholder="Restaurant Name" title="Restaurant Name" aria-label="Restaurant Name" [value]="settingName()" (input)="settingName.set($any($event.target).value)" />
+        <!-- Restaurant Profile Card -->
+        <div class="lez-card" style="padding:28px">
+          <h3
+            style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0 0 20px;display:flex;align-items:center;gap:8px">
+            <span class="material-symbols-outlined text-accent">storefront</span>
+            <span>Restaurant Profile</span>
+          </h3>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="form-field">
+              <label class="form-label">Restaurant Name</label>
+              <input class="lez-input" placeholder="Restaurant Name" title="Restaurant Name"
+                aria-label="Restaurant Name" [value]="settingName()"
+                (input)="settingName.set($any($event.target).value)" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Venue Address</label>
+              <input class="lez-input" placeholder="Venue Address" title="Venue Address" aria-label="Venue Address"
+                [value]="settingAddress()" (input)="settingAddress.set($any($event.target).value)" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Phone Number</label>
+              <input class="lez-input" placeholder="Phone Number" title="Phone Number" aria-label="Phone Number"
+                [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
+            </div>
+            <button class="lez-btn lez-btn-primary" style="width:fit-content" (click)="saveRestaurantSettings()">
+              Save Profile Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Chef Registration Code & Public URL Card -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Chef Registration Invite Code -->
+          <div class="lez-card" style="padding:24px;border:2px dashed #ff6b35;background:#fffaf6">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
+              <div>
+                <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Chef Registration Code</h4>
+                <p style="font-size:12px;color:var(--text-secondary);margin:0">Share this code with your kitchen staff
+                  to join your station.</p>
               </div>
-              <div class="form-field">
-                <label class="form-label">Venue Address</label>
-                <input class="lez-input" placeholder="Venue Address" title="Venue Address" aria-label="Venue Address" [value]="settingAddress()" (input)="settingAddress.set($any($event.target).value)" />
+            </div>
+
+            <div
+              style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #fed7aa;border-radius:12px;padding:10px 16px;margin:14px 0">
+              <span
+                style="font-family:monospace;font-size:18px;font-weight:800;letter-spacing:0.1em;color:#ab3500;flex:1">{{
+                chefInviteCode() }}</span>
+              <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="copyChefInviteCode()">
+                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                <span>Copy Code</span>
+              </button>
+            </div>
+            <span style="font-size:11.5px;color:#7c2d12">Chefs will enter this code on the signup page to automatically
+              link to your orders.</span>
+          </div>
+
+          <!-- Public Restaurant URL & Slug -->
+          <div class="lez-card" style="padding:24px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <span class="material-symbols-outlined text-[24px] text-emerald-600">link</span>
+              <div>
+                <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Unique Restaurant URL</h4>
+                <p style="font-size:12px;color:var(--text-secondary);margin:0">Public digital menu link for your diners
+                  and social media.</p>
               </div>
-              <div class="form-field">
-                <label class="form-label">Phone Number</label>
-                <input class="lez-input" placeholder="Phone Number" title="Phone Number" aria-label="Phone Number" [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
-              </div>
-              <button class="lez-btn lez-btn-primary" style="width:fit-content" (click)="saveRestaurantSettings()">
-                Save Profile Settings
+            </div>
+
+            <div
+              style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin:14px 0">
+              <span style="font-size:13px;font-weight:600;color:#0b1c30;flex:1;word-break:break-all">/restaurant/{{
+                restaurantSlug() }}</span>
+              <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="copyPublicMenuUrl()">
+                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                <span>Copy</span>
               </button>
             </div>
           </div>
 
-          <!-- Chef Registration Code & Public URL Card -->
-          <div style="display:flex;flex-direction:column;gap:20px">
-            
-            <!-- Chef Registration Invite Code -->
-            <div class="lez-card" style="padding:24px;border:2px dashed #ff6b35;background:#fffaf6">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
-                <div>
-                  <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Chef Registration Code</h4>
-                  <p style="font-size:12px;color:var(--text-secondary);margin:0">Share this code with your kitchen staff to join your station.</p>
-                </div>
-              </div>
-
-              <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #fed7aa;border-radius:12px;padding:10px 16px;margin:14px 0">
-                <span style="font-family:monospace;font-size:18px;font-weight:800;letter-spacing:0.1em;color:#ab3500;flex:1">{{ chefInviteCode() }}</span>
-                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="copyChefInviteCode()">
-                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                  <span>Copy Code</span>
-                </button>
-              </div>
-              <span style="font-size:11.5px;color:#7c2d12">Chefs will enter this code on the signup page to automatically link to your orders.</span>
-            </div>
-
-            <!-- Public Restaurant URL & Slug -->
-            <div class="lez-card" style="padding:24px">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                <span class="material-symbols-outlined text-[24px] text-emerald-600">link</span>
-                <div>
-                  <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Unique Restaurant URL</h4>
-                  <p style="font-size:12px;color:var(--text-secondary);margin:0">Public digital menu link for your diners and social media.</p>
-                </div>
-              </div>
-
-              <div style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin:14px 0">
-                <span style="font-size:13px;font-weight:600;color:#0b1c30;flex:1;word-break:break-all">/restaurant/{{ restaurantSlug() }}</span>
-                <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="copyPublicMenuUrl()">
-                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                  <span>Copy</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
         </div>
+
+      </div>
       } @else if (activeTab() === 'support') {
-        <!-- ══════════════════════════════════════════════════════════════════════
+      <!-- ══════════════════════════════════════════════════════════════════════
              SUPPORT & REPORTS MANAGEMENT TAB
              ══════════════════════════════════════════════════════════════════════ -->
-        <div style="display:flex;flex-direction:column;gap:20px">
-          
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
-            <div>
-              <h2 style="font-size:22px;font-weight:800;color:var(--text-primary);margin:0">Support & Help Desk</h2>
-              <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0">Create technical, billing, or equipment tickets and track resolution in real time.</p>
-            </div>
-            <button class="lez-btn lez-btn-primary" (click)="openCreateTicketModal()">
-              <span class="material-symbols-outlined text-[18px]">add_circle</span>
-              <span>Create New Ticket</span>
-            </button>
-          </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
 
-          <!-- Filter Pills -->
-          <div class="pos-filter-pill-bar" style="margin:0">
-            <button class="filter-pill-btn" [class.active]="supportFilter() === 'ALL'" (click)="supportFilter.set('ALL')">
-              All Tickets ({{ ownerTickets().length }})
-            </button>
-            <button class="filter-pill-btn" [class.active]="supportFilter() === 'OPEN'" (click)="supportFilter.set('OPEN')">
-              Open
-            </button>
-            <button class="filter-pill-btn" [class.active]="supportFilter() === 'IN_PROGRESS'" (click)="supportFilter.set('IN_PROGRESS')">
-              In Progress
-            </button>
-            <button class="filter-pill-btn" [class.active]="supportFilter() === 'RESOLVED'" (click)="supportFilter.set('RESOLVED')">
-              Resolved
-            </button>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+          <div>
+            <h2 style="font-size:22px;font-weight:800;color:var(--text-primary);margin:0">Support & Help Desk</h2>
+            <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0">Create technical, billing, or equipment
+              tickets and track resolution in real time.</p>
           </div>
-
-          <!-- Tickets Table / List -->
-          <div class="lez-card" style="padding:0;overflow:hidden">
-            @if (filteredOwnerTickets().length === 0) {
-              <div style="text-align:center;padding:48px 24px">
-                <span class="material-symbols-outlined text-[48px] text-gray-300">support_agent</span>
-                <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No support tickets found</h4>
-                <p style="font-size:13px;color:var(--text-secondary);margin:0">Need help? Submit a new ticket to get immediate assistance from our team.</p>
-              </div>
-            } @else {
-              <div style="overflow-x:auto">
-                <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
-                  <thead>
-                    <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;color:#475569;font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700">
-                      <th style="padding:14px 18px">Ticket ID</th>
-                      <th style="padding:14px 18px">Subject & Category</th>
-                      <th style="padding:14px 18px">Priority</th>
-                      <th style="padding:14px 18px">Status</th>
-                      <th style="padding:14px 18px">Created</th>
-                      <th style="padding:14px 18px;text-align:right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (t of filteredOwnerTickets(); track t.id) {
-                      <tr style="border-bottom:1px solid #e2e8f0;transition:background 0.2s" (click)="openTicketDetails(t)" class="cursor-pointer hover:bg-slate-50">
-                        <td style="padding:14px 18px;font-weight:800;color:#0b1c30;font-family:monospace">
-                          <span style="background:#fff1ec;color:#c2410c;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa;font-size:12px">
-                            {{ t.ticketNumber || t.id }}
-                          </span>
-                        </td>
-                        <td style="padding:14px 18px">
-                          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-                            <span style="font-weight:700;color:#0f172a;font-size:13.5px">{{ t.subject }}</span>
-                            @if (t.isChefIssue) {
-                              <span class="badge-chef-issue">
-                                <span class="material-symbols-outlined text-[13px]">restaurant</span>
-                                <span>Chef Incident</span>
-                              </span>
-                            }
-                            @if (t.isEscalated) {
-                              <span class="badge-escalated">
-                                <span class="material-symbols-outlined text-[13px]">bolt</span>
-                                <span>Escalated to Admin</span>
-                              </span>
-                            }
-                          </div>
-                          <div style="font-size:11.5px;color:#64748b;margin-top:2px">
-                            Category: <strong style="color:#334155">{{ t.category }}</strong> • By: <strong>{{ t.createdByName || t.customerName || 'Staff' }}</strong>
-                          </div>
-                        </td>
-                        <td style="padding:14px 18px">
-                          <span class="lez-badge" [class]="'priority-' + t.priority.toLowerCase()">
-                            {{ t.priority }}
-                          </span>
-                        </td>
-                        <td style="padding:14px 18px">
-                          <span class="lez-badge" [class]="'status-' + t.status.toLowerCase()">
-                            ● {{ t.status }}
-                          </span>
-                        </td>
-                        <td style="padding:14px 18px;color:#475569;font-size:12px;font-weight:600">
-                          {{ t.createdAt | date:'short' }}
-                        </td>
-                        <td style="padding:14px 18px;text-align:right" (click)="$event.stopPropagation()">
-                          <div style="display:flex;gap:6px;justify-content:flex-end">
-                            @if (!t.isEscalated && t.status !== 'RESOLVED' && t.status !== 'CLOSED') {
-                              <button class="lez-btn lez-btn-sm" style="background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700;font-size:11.5px"
-                                      (click)="escalateTicketToAdmin(t.id)" title="Escalate to Super Admin">
-                                <span class="material-symbols-outlined text-[14px]">bolt</span>
-                                <span>Send to Admin</span>
-                              </button>
-                            }
-                            <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="openTicketDetails(t)">
-                              <span class="material-symbols-outlined text-[15px]">chat</span>
-                              <span>View & Chat</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          </div>
-
+          <button class="lez-btn lez-btn-primary" (click)="openCreateTicketModal()">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Create New Ticket</span>
+          </button>
         </div>
+
+        <!-- Filter Pills -->
+        <div class="pos-filter-pill-bar" style="margin:0">
+          <button class="filter-pill-btn" [class.active]="supportFilter() === 'ALL'" (click)="supportFilter.set('ALL')">
+            All Tickets ({{ ownerTickets().length }})
+          </button>
+          <button class="filter-pill-btn" [class.active]="supportFilter() === 'OPEN'"
+            (click)="supportFilter.set('OPEN')">
+            Open
+          </button>
+          <button class="filter-pill-btn" [class.active]="supportFilter() === 'IN_PROGRESS'"
+            (click)="supportFilter.set('IN_PROGRESS')">
+            In Progress
+          </button>
+          <button class="filter-pill-btn" [class.active]="supportFilter() === 'RESOLVED'"
+            (click)="supportFilter.set('RESOLVED')">
+            Resolved
+          </button>
+        </div>
+
+        <!-- Tickets Table / List -->
+        <div class="lez-card" style="padding:0;overflow:hidden">
+          @if (filteredOwnerTickets().length === 0) {
+          <div style="text-align:center;padding:48px 24px">
+            <span class="material-symbols-outlined text-[48px] text-gray-300">support_agent</span>
+            <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No support tickets
+              found</h4>
+            <p style="font-size:13px;color:var(--text-secondary);margin:0">Need help? Submit a new ticket to get
+              immediate assistance from our team.</p>
+          </div>
+          } @else {
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
+              <thead>
+                <tr
+                  style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;color:#475569;font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700">
+                  <th style="padding:14px 18px">Ticket ID</th>
+                  <th style="padding:14px 18px">Subject & Category</th>
+                  <th style="padding:14px 18px">Priority</th>
+                  <th style="padding:14px 18px">Status</th>
+                  <th style="padding:14px 18px">Created</th>
+                  <th style="padding:14px 18px;text-align:right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of filteredOwnerTickets(); track t.id) {
+                <tr style="border-bottom:1px solid #e2e8f0;transition:background 0.2s" (click)="openTicketDetails(t)"
+                  class="cursor-pointer hover:bg-slate-50">
+                  <td style="padding:14px 18px;font-weight:800;color:#0b1c30;font-family:monospace">
+                    <span
+                      style="background:#fff1ec;color:#c2410c;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa;font-size:12px">
+                      {{ t.ticketNumber || t.id }}
+                    </span>
+                  </td>
+                  <td style="padding:14px 18px">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      <span style="font-weight:700;color:#0f172a;font-size:13.5px">{{ t.subject }}</span>
+                      @if (t.isChefIssue) {
+                      <span class="badge-chef-issue">
+                        <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                        <span>Chef Incident</span>
+                      </span>
+                      }
+                      @if (t.isEscalated) {
+                      <span class="badge-escalated">
+                        <span class="material-symbols-outlined text-[13px]">bolt</span>
+                        <span>Escalated to Admin</span>
+                      </span>
+                      }
+                    </div>
+                    <div style="font-size:11.5px;color:#64748b;margin-top:2px">
+                      Category: <strong style="color:#334155">{{ t.category }}</strong> • By: <strong>{{ t.createdByName
+                        || t.customerName || 'Staff' }}</strong>
+                    </div>
+                  </td>
+                  <td style="padding:14px 18px">
+                    <span class="lez-badge" [class]="'priority-' + t.priority.toLowerCase()">
+                      {{ t.priority }}
+                    </span>
+                  </td>
+                  <td style="padding:14px 18px">
+                    <span class="lez-badge" [class]="'status-' + t.status.toLowerCase()">
+                      ● {{ t.status }}
+                    </span>
+                  </td>
+                  <td style="padding:14px 18px;color:#475569;font-size:12px;font-weight:600">
+                    {{ t.createdAt | date:'short' }}
+                  </td>
+                  <td style="padding:14px 18px;text-align:right" (click)="$event.stopPropagation()">
+                    <div style="display:flex;gap:6px;justify-content:flex-end">
+                      @if (!t.isEscalated && t.status !== 'RESOLVED' && t.status !== 'CLOSED') {
+                      <button class="lez-btn lez-btn-sm"
+                        style="background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700;font-size:11.5px"
+                        (click)="escalateTicketToAdmin(t.id)" title="Escalate to Super Admin">
+                        <span class="material-symbols-outlined text-[14px]">bolt</span>
+                        <span>Send to Admin</span>
+                      </button>
+                      }
+                      <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="openTicketDetails(t)">
+                        <span class="material-symbols-outlined text-[15px]">chat</span>
+                        <span>View & Chat</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
+        </div>
+
+      </div>
       }
 
     </main>
@@ -1003,66 +1199,70 @@
        CREATE SUPPORT TICKET MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (showCreateTicketModal()) {
-    <div class="lez-overlay animate-fade-in" (click)="showCreateTicketModal.set(false)">
-      <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
-        
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span class="material-symbols-outlined text-[24px] text-accent">support_agent</span>
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Create Support Ticket</h3>
-          </div>
-          <button class="pos-modal-close" (click)="showCreateTicketModal.set(false)">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
+  <div class="lez-overlay animate-fade-in" (click)="showCreateTicketModal.set(false)">
+    <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-symbols-outlined text-[24px] text-accent">support_agent</span>
+          <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Create Support Ticket</h3>
         </div>
-
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="form-field">
-            <label class="form-label">Subject *</label>
-            <input class="lez-input" placeholder="e.g. Printer Offline / KDS Delay / Billing Query"
-                   [value]="ticketSubject()" (input)="ticketSubject.set($any($event.target).value)" />
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="form-field">
-              <label class="form-label">Category</label>
-              <select class="lez-input" title="Category" aria-label="Category" [value]="ticketCategory()" (change)="ticketCategory.set($any($event.target).value)">
-                <option value="TECHNICAL_ISSUE">Technical Issue</option>
-                <option value="KITCHEN_EQUIPMENT">Kitchen / POS Terminal</option>
-                <option value="BILLING">Billing & Invoices</option>
-                <option value="MENU_ISSUE">Menu / Price Query</option>
-                <option value="QR_PROBLEM">QR Code Assistance</option>
-                <option value="GENERAL">General Inquiry</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label class="form-label">Priority Level</label>
-              <select class="lez-input" title="Priority" aria-label="Priority" [value]="ticketPriority()" (change)="ticketPriority.set($any($event.target).value)">
-                <option value="LOW">Low (General)</option>
-                <option value="MEDIUM">Medium (Needs Attention)</option>
-                <option value="HIGH">High (Urgent Issue)</option>
-                <option value="CRITICAL">Critical (System Down)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Detailed Description *</label>
-            <textarea class="lez-input" rows="4" placeholder="Describe the issue in detail, error messages, and table/device affected..."
-                      [value]="ticketDescription()" (input)="ticketDescription.set($any($event.target).value)"></textarea>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="showCreateTicketModal.set(false)">Cancel</button>
-          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitOwnerTicket()">
-            <span class="material-symbols-outlined text-[16px]">send</span>
-            <span>Submit Ticket</span>
-          </button>
-        </div>
-
+        <button class="pos-modal-close" (click)="showCreateTicketModal.set(false)">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
       </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-field">
+          <label class="form-label">Subject *</label>
+          <input class="lez-input" placeholder="e.g. Printer Offline / KDS Delay / Billing Query"
+            [value]="ticketSubject()" (input)="ticketSubject.set($any($event.target).value)" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-field">
+            <label class="form-label">Category</label>
+            <select class="lez-input" title="Category" aria-label="Category" [value]="ticketCategory()"
+              (change)="ticketCategory.set($any($event.target).value)">
+              <option value="TECHNICAL_ISSUE">Technical Issue</option>
+              <option value="KITCHEN_EQUIPMENT">Kitchen / POS Terminal</option>
+              <option value="BILLING">Billing & Invoices</option>
+              <option value="MENU_ISSUE">Menu / Price Query</option>
+              <option value="QR_PROBLEM">QR Code Assistance</option>
+              <option value="GENERAL">General Inquiry</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Priority Level</label>
+            <select class="lez-input" title="Priority" aria-label="Priority" [value]="ticketPriority()"
+              (change)="ticketPriority.set($any($event.target).value)">
+              <option value="LOW">Low (General)</option>
+              <option value="MEDIUM">Medium (Needs Attention)</option>
+              <option value="HIGH">High (Urgent Issue)</option>
+              <option value="CRITICAL">Critical (System Down)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Detailed Description *</label>
+          <textarea class="lez-input" rows="4"
+            placeholder="Describe the issue in detail, error messages, and table/device affected..."
+            [value]="ticketDescription()" (input)="ticketDescription.set($any($event.target).value)"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="lez-btn lez-btn-secondary" style="flex:1"
+          (click)="showCreateTicketModal.set(false)">Cancel</button>
+        <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitOwnerTicket()">
+          <span class="material-symbols-outlined text-[16px]">send</span>
+          <span>Submit Ticket</span>
+        </button>
+      </div>
+
     </div>
+  </div>
   }
 
   <!-- ══════════════════════════════════════════════════════════════════════════
@@ -1072,317 +1272,735 @@
        OWNER MODERN MESSENGER CHATBOT / TICKET CONVERSATION MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (showTicketDetailsModal()) {
-    <div class="pos-modal-overlay animate-fade-in" (click)="showTicketDetailsModal.set(false)">
-      <div class="modern-chat-card" (click)="$event.stopPropagation()">
-        
-        <!-- Modern Messenger Header Bar -->
-        <header class="chat-header-bar">
-          <div class="chat-header-left">
-            <div class="chat-avatar-wrap">
-              <span>{{ (selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff').charAt(0) }}</span>
-              <span class="chat-online-dot"></span>
-            </div>
-            <div class="chat-contact-info">
-              <div class="chat-contact-name-row">
-                <h3 class="chat-contact-name">
-                  {{ selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff Member' }}
-                </h3>
-                <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
-                  {{ selectedTicketDetails()?.ticket?.priority }}
-                </span>
-                <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
-                  ● {{ selectedTicketDetails()?.ticket?.status }}
-                </span>
-              </div>
-              <div class="chat-contact-sub">
-                <span style="font-weight:700;color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName || activeRestaurant()?.name }}</span>
-                <span>•</span>
-                <span style="color:#ff6b35;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'STAFF' }}</span>
-                <span>•</span>
-                <span style="font-family:monospace;font-weight:800;color:#c2410c">{{ selectedTicketDetails()?.ticket?.ticketNumber }}</span>
-              </div>
-            </div>
-          </div>
+  <div class="pos-modal-overlay animate-fade-in" (click)="showTicketDetailsModal.set(false)">
+    <div class="modern-chat-card" (click)="$event.stopPropagation()">
 
-          <div class="chat-header-right">
-            @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
-              <button class="lez-btn lez-btn-sm lez-btn-secondary" style="padding:6px 12px;font-size:12px;border-radius:20px"
-                      (click)="resolveOwnerTicket(selectedTicketDetails()!.ticket.id)">
-                <span class="material-symbols-outlined text-[15px]">check_circle</span>
-                <span>Resolve</span>
-              </button>
-              @if (!selectedTicketDetails()?.ticket?.isEscalated) {
-                <button class="lez-btn lez-btn-sm" style="padding:6px 12px;font-size:12px;border-radius:20px;background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700"
-                        (click)="escalateTicketToAdmin(selectedTicketDetails()!.ticket.id)">
-                  <span class="material-symbols-outlined text-[15px]">bolt</span>
-                  <span>Escalate</span>
-                </button>
-              }
-            }
-            <button class="chat-quick-action-btn" title="Phone Audio Support">
-              <span class="material-symbols-outlined text-[18px]">call</span>
-            </button>
-            <button class="chat-quick-action-btn" title="Video Screen Share">
-              <span class="material-symbols-outlined text-[18px]">videocam</span>
-            </button>
-            <button class="chat-quick-action-btn" title="Close Chat" (click)="showTicketDetailsModal.set(false)">
-              <span class="material-symbols-outlined text-[18px]">close</span>
-            </button>
+      <!-- Modern Messenger Header Bar -->
+      <header class="chat-header-bar">
+        <div class="chat-header-left">
+          <div class="chat-avatar-wrap">
+            <span>{{ (selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName ||
+              'Staff').charAt(0) }}</span>
+            <span class="chat-online-dot"></span>
           </div>
-        </header>
-
-        <!-- Chat Conversation Body -->
-        <div class="chat-conversation-canvas">
-          
-          <!-- Subject Card -->
-          <div class="chat-subject-card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;flex-wrap:wrap">
-              <h4 class="chat-subject-title">{{ selectedTicketDetails()?.ticket?.subject }}</h4>
-              <div style="display:flex;gap:6px;align-items:center">
-                @if (selectedTicketDetails()?.ticket?.isChefIssue) {
-                  <span class="badge-chef-issue">
-                    <span class="material-symbols-outlined text-[13px]">restaurant</span>
-                    <span>Chef Incident</span>
-                  </span>
-                }
-                @if (selectedTicketDetails()?.ticket?.isEscalated) {
-                  <span class="badge-escalated">
-                    <span class="material-symbols-outlined text-[13px]">bolt</span>
-                    <span>Escalated to Admin Desk</span>
-                  </span>
-                }
-              </div>
+          <div class="chat-contact-info">
+            <div class="chat-contact-name-row">
+              <h3 class="chat-contact-name">
+                {{ selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName ||
+                'Staff Member' }}
+              </h3>
+              <span class="lez-badge"
+                [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
+                {{ selectedTicketDetails()?.ticket?.priority }}
+              </span>
+              <span class="lez-badge"
+                [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
+                ● {{ selectedTicketDetails()?.ticket?.status }}
+              </span>
             </div>
-            <p class="chat-subject-desc">
-              <span>Category: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.category }}</strong></span>
+            <div class="chat-contact-sub">
+              <span style="font-weight:700;color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName ||
+                activeRestaurant()?.name }}</span>
               <span>•</span>
-              <span>Opened: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}</strong></span>
-            </p>
-          </div>
-
-          <!-- Date Pill Divider -->
-          <div class="chat-date-divider">
-            <span class="chat-date-pill">{{ selectedTicketDetails()?.ticket?.createdAt | date:'EEEE, MMM d, y' }}</span>
-          </div>
-
-          <!-- Message Thread List -->
-          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
-            
-            <!-- System / Escalation Audit Chip -->
-            @if (msg.message.startsWith('⚡ ESCALATED') || msg.message.startsWith('Audit:')) {
-              <div class="chat-system-chip">
-                <span class="material-symbols-outlined text-[18px] text-amber-600">bolt</span>
-                <span>{{ msg.message }}</span>
-              </div>
-            } @else if (msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF') {
-              <!-- Outgoing Owner/Chef Bubble -->
-              <div class="chat-msg-row outgoing">
-                <div class="chat-bubble-container">
-                  <div class="chat-bubble">
-                    {{ msg.message }}
-                  </div>
-                  <div class="chat-bubble-meta">
-                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
-                    <span class="material-symbols-outlined chat-read-icon">done_all</span>
-                  </div>
-                </div>
-              </div>
-            } @else {
-              <!-- Incoming Reporter Bubble (Admin / Customer / Staff) -->
-              <div class="chat-msg-row incoming">
-                <div class="chat-msg-avatar">
-                  {{ (msg.senderName || 'U').charAt(0) }}
-                </div>
-                <div class="chat-bubble-container">
-                  <div class="chat-bubble-sender">
-                    <span>{{ msg.senderName }}</span>
-                    <span style="color:#c2410c;font-weight:800;font-size:10px;background:#fff1ec;padding:1px 6px;border-radius:4px">
-                      {{ msg.senderRole }}
-                    </span>
-                  </div>
-                  <div class="chat-bubble">
-                    {{ msg.message }}
-                  </div>
-                  <div class="chat-bubble-meta">
-                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
-                  </div>
-                </div>
-              </div>
-            }
-          }
-
-          @if (!selectedTicketDetails()?.messages || selectedTicketDetails()?.messages?.length === 0) {
-            <div style="text-align:center;padding:32px 0;color:#94a3b8">
-              <span class="material-symbols-outlined text-[36px]">forum</span>
-              <p style="font-size:13px;margin:8px 0 0">No messages in this conversation yet. Send a reply below.</p>
+              <span style="color:#ff6b35;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'STAFF'
+                }}</span>
+              <span>•</span>
+              <span style="font-family:monospace;font-weight:800;color:#c2410c">{{
+                selectedTicketDetails()?.ticket?.ticketNumber }}</span>
             </div>
-          }
-
+          </div>
         </div>
 
-        <!-- Modern Bottom Chat Input Bar -->
-        <footer class="chat-footer-bar">
-          @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
-            <div class="chat-input-pill-wrap">
-              <input class="chat-input-field"
-                     placeholder="Type your reply message..."
-                     [value]="newReplyMessage()"
-                     (input)="newReplyMessage.set($any($event.target).value)"
-                     (keyup.enter)="sendTicketReply()" />
-              <div class="chat-input-actions">
-                <button type="button" class="chat-icon-btn" title="Emoji">
-                  <span class="material-symbols-outlined text-[18px]">sentiment_satisfied</span>
-                </button>
-                <button type="button" class="chat-icon-btn" title="Attach file">
-                  <span class="material-symbols-outlined text-[18px]">attach_file</span>
-                </button>
-                <button type="button" class="chat-icon-btn" title="Audio note">
-                  <span class="material-symbols-outlined text-[18px]">mic</span>
-                </button>
-                <button class="chat-send-circle-btn"
-                        [disabled]="isSendingReply() || !newReplyMessage().trim()"
-                        (click)="sendTicketReply()"
-                        title="Send Reply">
-                  <span class="material-symbols-outlined text-[18px]">send</span>
-                </button>
-              </div>
-            </div>
-          } @else {
-            <div style="text-align:center;padding:8px 0;color:#166534;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
-              <span class="material-symbols-outlined text-[18px]">task_alt</span>
-              <span>This ticket has been marked as resolved.</span>
-            </div>
+        <div class="chat-header-right">
+          @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !==
+          'CLOSED') {
+          <button class="lez-btn lez-btn-sm lez-btn-secondary"
+            style="padding:6px 12px;font-size:12px;border-radius:20px"
+            (click)="resolveOwnerTicket(selectedTicketDetails()!.ticket.id)">
+            <span class="material-symbols-outlined text-[15px]">check_circle</span>
+            <span>Resolve</span>
+          </button>
+          @if (!selectedTicketDetails()?.ticket?.isEscalated) {
+          <button class="lez-btn lez-btn-sm"
+            style="padding:6px 12px;font-size:12px;border-radius:20px;background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700"
+            (click)="escalateTicketToAdmin(selectedTicketDetails()!.ticket.id)">
+            <span class="material-symbols-outlined text-[15px]">bolt</span>
+            <span>Escalate</span>
+          </button>
           }
-        </footer>
+          }
+          <button class="chat-quick-action-btn" title="Phone Audio Support">
+            <span class="material-symbols-outlined text-[18px]">call</span>
+          </button>
+          <button class="chat-quick-action-btn" title="Video Screen Share">
+            <span class="material-symbols-outlined text-[18px]">videocam</span>
+          </button>
+          <button class="chat-quick-action-btn" title="Close Chat" (click)="showTicketDetailsModal.set(false)">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Conversation Body -->
+      <div class="chat-conversation-canvas">
+
+        <!-- Subject Card -->
+        <div class="chat-subject-card">
+          <div
+            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;flex-wrap:wrap">
+            <h4 class="chat-subject-title">{{ selectedTicketDetails()?.ticket?.subject }}</h4>
+            <div style="display:flex;gap:6px;align-items:center">
+              @if (selectedTicketDetails()?.ticket?.isChefIssue) {
+              <span class="badge-chef-issue">
+                <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                <span>Chef Incident</span>
+              </span>
+              }
+              @if (selectedTicketDetails()?.ticket?.isEscalated) {
+              <span class="badge-escalated">
+                <span class="material-symbols-outlined text-[13px]">bolt</span>
+                <span>Escalated to Admin Desk</span>
+              </span>
+              }
+            </div>
+          </div>
+          <p class="chat-subject-desc">
+            <span>Category: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.category
+                }}</strong></span>
+            <span>•</span>
+            <span>Opened: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.createdAt | date:'medium'
+                }}</strong></span>
+          </p>
+        </div>
+
+        <!-- Date Pill Divider -->
+        <div class="chat-date-divider">
+          <span class="chat-date-pill">{{ selectedTicketDetails()?.ticket?.createdAt | date:'EEEE, MMM d, y' }}</span>
+        </div>
+
+        <!-- Message Thread List -->
+        @for (msg of selectedTicketDetails()?.messages; track msg.id) {
+
+        <!-- System / Escalation Audit Chip -->
+        @if (msg.message.startsWith('⚡ ESCALATED') || msg.message.startsWith('Audit:')) {
+        <div class="chat-system-chip">
+          <span class="material-symbols-outlined text-[18px] text-amber-600">bolt</span>
+          <span>{{ msg.message }}</span>
+        </div>
+        } @else if (msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF') {
+        <!-- Outgoing Owner/Chef Bubble -->
+        <div class="chat-msg-row outgoing">
+          <div class="chat-bubble-container">
+            <div class="chat-bubble">
+              {{ msg.message }}
+            </div>
+            <div class="chat-bubble-meta">
+              <span>{{ msg.createdAt | date:'shortTime' }}</span>
+              <span class="material-symbols-outlined chat-read-icon">done_all</span>
+            </div>
+          </div>
+        </div>
+        } @else {
+        <!-- Incoming Reporter Bubble (Admin / Customer / Staff) -->
+        <div class="chat-msg-row incoming">
+          <div class="chat-msg-avatar">
+            {{ (msg.senderName || 'U').charAt(0) }}
+          </div>
+          <div class="chat-bubble-container">
+            <div class="chat-bubble-sender">
+              <span>{{ msg.senderName }}</span>
+              <span
+                style="color:#c2410c;font-weight:800;font-size:10px;background:#fff1ec;padding:1px 6px;border-radius:4px">
+                {{ msg.senderRole }}
+              </span>
+            </div>
+            <div class="chat-bubble">
+              {{ msg.message }}
+            </div>
+            <div class="chat-bubble-meta">
+              <span>{{ msg.createdAt | date:'shortTime' }}</span>
+            </div>
+          </div>
+        </div>
+        }
+        }
+
+        @if (!selectedTicketDetails()?.messages || selectedTicketDetails()?.messages?.length === 0) {
+        <div style="text-align:center;padding:32px 0;color:#94a3b8">
+          <span class="material-symbols-outlined text-[36px]">forum</span>
+          <p style="font-size:13px;margin:8px 0 0">No messages in this conversation yet. Send a reply below.</p>
+        </div>
+        }
 
       </div>
+
+      <!-- Modern Bottom Chat Input Bar -->
+      <footer class="chat-footer-bar">
+        @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !==
+        'CLOSED') {
+        <div class="chat-input-pill-wrap">
+          <input class="chat-input-field" placeholder="Type your reply message..." [value]="newReplyMessage()"
+            (input)="newReplyMessage.set($any($event.target).value)" (keyup.enter)="sendTicketReply()" />
+          <div class="chat-input-actions">
+            <button type="button" class="chat-icon-btn" title="Emoji">
+              <span class="material-symbols-outlined text-[18px]">sentiment_satisfied</span>
+            </button>
+            <button type="button" class="chat-icon-btn" title="Attach file">
+              <span class="material-symbols-outlined text-[18px]">attach_file</span>
+            </button>
+            <button type="button" class="chat-icon-btn" title="Audio note">
+              <span class="material-symbols-outlined text-[18px]">mic</span>
+            </button>
+            <button class="chat-send-circle-btn" [disabled]="isSendingReply() || !newReplyMessage().trim()"
+              (click)="sendTicketReply()" title="Send Reply">
+              <span class="material-symbols-outlined text-[18px]">send</span>
+            </button>
+          </div>
+        </div>
+        } @else {
+        <div
+          style="text-align:center;padding:8px 0;color:#166534;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span class="material-symbols-outlined text-[18px]">task_alt</span>
+          <span>This ticket has been marked as resolved.</span>
+        </div>
+        }
+      </footer>
+
     </div>
+  </div>
   }
 
   <!-- ══════════════════════════════════════════════════════════════════════════
        ADD / EDIT MENU ITEM MODAL (Works from any tab)
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (showAddItemModal()) {
-    <div class="lez-overlay animate-fade-in" (click)="closeAddItemModal()">
-      <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
-        
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span class="material-symbols-outlined text-[24px] text-accent">{{ editingItemId() ? 'edit_note' : 'add_circle' }}</span>
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
-              {{ editingItemId() ? 'Edit Culinary Dish' : 'Add New Menu Item' }}
-            </h3>
-          </div>
-          <button class="pos-modal-close" (click)="closeAddItemModal()">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
+  <div class="lez-overlay animate-fade-in" (click)="closeAddItemModal()">
+    <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-symbols-outlined text-[24px] text-accent">{{ editingItemId() ? 'edit_note' :
+            'add_circle' }}</span>
+          <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">
+            {{ editingItemId() ? 'Edit Culinary Dish' : 'Add New Menu Item' }}
+          </h3>
         </div>
-
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="form-field">
-            <label class="form-label">Dish Title *</label>
-            <input class="lez-input" placeholder="e.g. Grilled Salmon with Asparagus"
-                   [value]="newItemName()" (input)="newItemName.set($any($event.target).value)" />
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="form-field">
-              <label class="form-label">Price ($) *</label>
-              <input class="lez-input" type="number" step="0.01" min="0.5" placeholder="0.00" title="Price" aria-label="Price"
-                     [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
-            </div>
-            <div class="form-field">
-              <label class="form-label">Category</label>
-              <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
-                @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.name }}</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Description</label>
-            <textarea class="lez-input" rows="2" placeholder="Describe the ingredients, flavors, culinary notes..."
-                      [value]="newItemDescription()" (input)="newItemDescription.set($any($event.target).value)"></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Dish Image</label>
-            <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Dish Image" aria-label="Dish Image" (change)="onDishImageSelected($event)" />
-            @if (imageUploadPreview() || newItemImage()) {
-              <img [src]="imageUploadPreview() || newItemImage()" alt="Dish Image Preview" title="Dish Image Preview" style="width:100%;height:120px;border-radius:10px;object-fit:cover;margin-top:8px;border:1px solid var(--border)" />
-            }
-          </div>
-
-          <div style="display:flex;gap:16px;align-items:center;padding:4px 0">
-            <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer">
-              <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#10b981;width:18px;height:18px" />
-              <span>Vegetarian Dish</span>
-            </label>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddItemModal()">Cancel</button>
-          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="handleAddItem()">
-            <span class="material-symbols-outlined text-[16px]">{{ editingItemId() ? 'check' : 'add' }}</span>
-            <span>{{ editingItemId() ? 'Update Dish' : 'Add to Menu' }}</span>
-          </button>
-        </div>
-
+        <button class="pos-modal-close" (click)="closeAddItemModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
       </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-field">
+          <label class="form-label">Dish Title *</label>
+          <input class="lez-input" placeholder="e.g. Grilled Salmon with Asparagus" [value]="newItemName()"
+            (input)="newItemName.set($any($event.target).value)" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-field">
+            <label class="form-label">Price ($) *</label>
+            <input class="lez-input" type="number" step="0.01" min="0.5" placeholder="0.00" title="Price"
+              aria-label="Price" [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Category</label>
+            <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()"
+              (change)="newItemCategoryId.set($any($event.target).value)">
+              @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Description</label>
+          <textarea class="lez-input" rows="2" placeholder="Describe the ingredients, flavors, culinary notes..."
+            [value]="newItemDescription()" (input)="newItemDescription.set($any($event.target).value)"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Dish Image</label>
+          <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Dish Image"
+            aria-label="Dish Image" (change)="onDishImageSelected($event)" />
+          @if (imageUploadPreview() || newItemImage()) {
+          <img [src]="imageUploadPreview() || newItemImage()" alt="Dish Image Preview" title="Dish Image Preview"
+            style="width:100%;height:120px;border-radius:10px;object-fit:cover;margin-top:8px;border:1px solid var(--border)" />
+          }
+        </div>
+
+        <div style="display:flex;gap:16px;align-items:center;padding:4px 0">
+          <label
+            style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer">
+            <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)"
+              style="accent-color:#10b981;width:18px;height:18px" />
+            <span>Vegetarian Dish</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddItemModal()">Cancel</button>
+        <button class="lez-btn lez-btn-primary" style="flex:2" (click)="handleAddItem()">
+          <span class="material-symbols-outlined text-[16px]">{{ editingItemId() ? 'check' : 'add' }}</span>
+          <span>{{ editingItemId() ? 'Update Dish' : 'Add to Menu' }}</span>
+        </button>
+      </div>
+
     </div>
+  </div>
   }
 
   <!-- ══════════════════════════════════════════════════════════════════════════
        ENLARGED TABLE QR CODE MODAL (CLEAN LIGHTBOX POPUP)
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (enlargedQrModal()) {
-    <div class="pos-modal-overlay animate-fade-in" (click)="closeEnlargedQr()">
-      <div class="pos-modal-card" style="max-width:440px;text-align:center;padding:28px" (click)="$event.stopPropagation()">
-        
-        <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-          <div style="text-align:left">
-            <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 2px;display:flex;align-items:center;gap:8px">
-              <span class="material-symbols-outlined text-[20px] text-accent">qr_code_2</span>
-              <span>{{ enlargedQrModal()?.tableNumber || 'Table QR' }}</span>
-            </h3>
-            <p style="font-size:12px;color:#64748b;margin:0">
-              {{ activeRestaurant()?.name || 'RestQR Gourmet Bistro' }} • {{ enlargedQrModal()?.scansCount || 0 }} Scans
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeEnlargedQr()">
+    <div class="pos-modal-card" style="max-width:440px;text-align:center;padding:28px"
+      (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div style="text-align:left">
+          <h3
+            style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 2px;display:flex;align-items:center;gap:8px">
+            <span class="material-symbols-outlined text-[20px] text-accent">qr_code_2</span>
+            <span>{{ enlargedQrModal()?.tableNumber || 'Table QR' }}</span>
+          </h3>
+          <p style="font-size:12px;color:#64748b;margin:0">
+            {{ activeRestaurant()?.name || 'RestQR Gourmet Bistro' }} • {{ enlargedQrModal()?.scansCount || 0 }} Scans
+          </p>
+        </div>
+        <button class="pos-modal-close" (click)="closeEnlargedQr()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Crisp Normal Size QR Code Canvas -->
+      <div
+        style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <img [src]="enlargedQrModal()?.qrImageUrl || enlargedQrModal()?.qrCodeUrl || activeQrUrl()"
+          alt="Enlarged QR Code"
+          style="width:260px;height:260px;border-radius:12px;object-fit:contain;background:#ffffff;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)" />
+        <div
+          style="margin-top:14px;font-size:12px;color:#475569;font-weight:600;display:flex;align-items:center;gap:6px">
+          <span class="material-symbols-outlined text-[16px] text-accent">center_focus_strong</span>
+          <span>Scan with phone camera to open digital menu</span>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="lez-btn lez-btn-primary" (click)="simulateQrDownload()">
+          <span class="material-symbols-outlined text-[16px]">download</span>
+          <span>Download</span>
+        </button>
+        <button class="lez-btn lez-btn-secondary" (click)="simulateQrPrint()">
+          <span class="material-symbols-outlined text-[16px]">print</span>
+          <span>Print QR</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       TABLE DETAILS DRAWER / MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showTableDetailsModal() && selectedTableDetails(); as curTable) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeTableDetails()">
+    <div class="pos-modal-card" style="max-width:760px;padding:26px" (click)="$event.stopPropagation()">
+      
+      <!-- Top Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:12px;background:#fff0eb;color:#ff6b35;display:flex;align-items:center;justify-content:center">
+            <span class="material-symbols-outlined text-[26px]">table_restaurant</span>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <h3 style="font-size:20px;font-weight:800;color:#0f172a;margin:0">{{ curTable.tableNumber }}</h3>
+              <span class="table-capacity-tag">
+                <span class="material-symbols-outlined text-[14px]">groups</span>
+                <span>{{ curTable.capacity }} Seats</span>
+              </span>
+            </div>
+            <p style="font-size:12px;color:#64748b;margin:2px 0 0">
+              {{ activeRestaurant()?.name || 'Gourmet Bistro' }} • {{ curTable.branchName || 'Main Floor' }}
             </p>
           </div>
-          <button class="pos-modal-close" (click)="closeEnlargedQr()">
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+          <!-- Status Pill -->
+          @if (curTable.status === 'AVAILABLE') {
+            <span class="lez-badge lez-badge-ready" style="font-size:12px;padding:4px 12px">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span>
+              <span>Available</span>
+            </span>
+          } @else if (curTable.status === 'OCCUPIED') {
+            <span class="lez-badge lez-badge-pending" style="font-size:12px;padding:4px 12px">
+              <span class="material-symbols-outlined text-[14px]">person</span>
+              <span>Occupied</span>
+            </span>
+          } @else if (curTable.status === 'RESERVED') {
+            <span class="lez-badge lez-badge-preparing" style="font-size:12px;padding:4px 12px">
+              <span class="material-symbols-outlined text-[14px]">event_seat</span>
+              <span>Reserved</span>
+            </span>
+          } @else if (curTable.status === 'CLEANING') {
+            <span class="lez-badge lez-badge-delivered" style="font-size:12px;padding:4px 12px">
+              <span class="material-symbols-outlined text-[14px]">cleaning_services</span>
+              <span>Cleaning</span>
+            </span>
+          }
+
+          <button class="pos-modal-close" (click)="closeTableDetails()">
             <span class="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
+      </div>
 
-        <!-- Crisp Normal Size QR Code Canvas -->
-        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <img [src]="enlargedQrModal()?.qrImageUrl || enlargedQrModal()?.qrCodeUrl || activeQrUrl()"
-               alt="Enlarged QR Code"
-               style="width:260px;height:260px;border-radius:12px;object-fit:contain;background:#ffffff;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)" />
-          <div style="margin-top:14px;font-size:12px;color:#475569;font-weight:600;display:flex;align-items:center;gap:6px">
-            <span class="material-symbols-outlined text-[16px] text-accent">center_focus_strong</span>
-            <span>Scan with phone camera to open digital menu</span>
+      <!-- Main 2-Column Content -->
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start">
+        
+        <!-- Left: Table QR Code Preview & Direct Controls -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px;text-align:center">
+            <img [src]="curTable.qrImageUrl || activeQrUrl()" alt="Table QR Code"
+                 style="width:160px;height:160px;margin:0 auto 10px;border-radius:8px;background:#ffffff;padding:8px;border:1px solid #e2e8f0" />
+            <div style="font-size:11.5px;color:#64748b;margin-bottom:12px">
+              Scanned <strong>{{ curTable.scanCount || 0 }} times</strong>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button class="lez-btn lez-btn-primary lez-btn-sm" (click)="downloadTableQr(curTable)">
+                <span class="material-symbols-outlined text-[14px]">download</span>
+                <span>Download</span>
+              </button>
+              <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="printTableQr(curTable)">
+                <span class="material-symbols-outlined text-[14px]">print</span>
+                <span>Print QR</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Status Override -->
+          <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:14px">
+            <h5 style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin:0 0 10px;letter-spacing:0.5px">
+              Status Override
+            </h5>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button class="lez-btn lez-btn-sm" [class.lez-btn-primary]="curTable.status === 'AVAILABLE'" [class.lez-btn-secondary]="curTable.status !== 'AVAILABLE'"
+                      style="font-size:11.5px;padding:6px 8px" (click)="markTableAvailable(curTable)">
+                Available
+              </button>
+              <button class="lez-btn lez-btn-sm" [class.lez-btn-primary]="curTable.status === 'OCCUPIED'" [class.lez-btn-secondary]="curTable.status !== 'OCCUPIED'"
+                      style="font-size:11.5px;padding:6px 8px" (click)="updateTableDirectStatus(curTable.id, 'OCCUPIED')">
+                Occupied
+              </button>
+              <button class="lez-btn lez-btn-sm" [class.lez-btn-primary]="curTable.status === 'RESERVED'" [class.lez-btn-secondary]="curTable.status !== 'RESERVED'"
+                      style="font-size:11.5px;padding:6px 8px" (click)="openReserveModal(curTable)">
+                Reserved
+              </button>
+              <button class="lez-btn lez-btn-sm" [class.lez-btn-primary]="curTable.status === 'CLEANING'" [class.lez-btn-secondary]="curTable.status !== 'CLEANING'"
+                      style="font-size:11.5px;padding:6px 8px" (click)="closeTableSession(curTable.id)">
+                Cleaning
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Actions -->
+          <div style="display:flex;gap:8px">
+            <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="openEditTableModal(curTable)">
+              <span class="material-symbols-outlined text-[14px]">edit</span>
+              <span>Edit</span>
+            </button>
+            <button class="lez-btn lez-btn-danger lez-btn-sm" style="flex:1" (click)="deleteTable(curTable.id)">
+              <span class="material-symbols-outlined text-[14px]">delete</span>
+              <span>Delete</span>
+            </button>
           </div>
         </div>
 
-        <!-- Action Toolbar -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <button class="lez-btn lez-btn-primary" (click)="simulateQrDownload()">
-            <span class="material-symbols-outlined text-[16px]">download</span>
-            <span>Download</span>
-          </button>
-          <button class="lez-btn lez-btn-secondary" (click)="simulateQrPrint()">
-            <span class="material-symbols-outlined text-[16px]">print</span>
-            <span>Print QR</span>
-          </button>
+        <!-- Right: Active Orders / Reservation Breakdown -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- IF OCCUPIED: Active Orders List -->
+          @if (curTable.status === 'OCCUPIED') {
+            <div style="background:#ffffff;border:1px solid #fed7aa;border-radius:14px;padding:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <div>
+                  <h4 style="font-size:15px;font-weight:800;color:#9a3412;margin:0 0 2px;display:flex;align-items:center;gap:6px">
+                    <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    <span>Active Orders ({{ curTable.activeOrders?.length || 0 }})</span>
+                  </h4>
+                  <p style="font-size:11.5px;color:#78350f;margin:0">Multiple orders from this table are aggregated here</p>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:11px;color:#78350f">Table Total</div>
+                  <div style="font-size:18px;font-weight:800;color:#c2410c">${{ (curTable.currentTotalAmount || 0).toFixed(2) }}</div>
+                </div>
+              </div>
+
+              @if (curTable.activeOrders && curTable.activeOrders!.length > 0) {
+                <div style="display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;padding-right:4px">
+                  @for (ord of curTable.activeOrders; track ord.id) {
+                    <div style="background:#fff7ed;border:1px solid #ffedd5;border-radius:10px;padding:10px 14px">
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <strong style="font-size:13px;color:#0f172a">#{{ ord.orderNumber }}</strong>
+                          <span class="lez-badge lez-badge-pending" style="font-size:11px;padding:2px 8px">{{ ord.status }}</span>
+                        </div>
+                        <strong style="font-size:13px;color:#c2410c">${{ ord.totalAmount?.toFixed(2) }}</strong>
+                      </div>
+                      <div style="font-size:11.5px;color:#64748b">
+                        Customer: <strong>{{ ord.customerName || 'Guest' }}</strong> ({{ ord.customerMobile }})
+                      </div>
+                      <div style="font-size:11.5px;color:#475569;margin-top:4px">
+                        Items:
+                        @for (it of ord.items; track it.id; let isLast = $last) {
+                          <span>{{ it.qty }}x {{ it.name }}{{ !isLast ? ', ' : '' }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div style="text-align:center;padding:20px 0;color:#9a3412;font-size:12.5px">
+                  Table is occupied. Waiting for kitchen order to be placed.
+                </div>
+              }
+
+              <!-- Action: Close Table -->
+              <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #fed7aa;display:flex;justify-content:flex-end">
+                <button class="lez-btn lez-btn-primary" (click)="closeTableSession(curTable.id)">
+                  <span class="material-symbols-outlined text-[16px]">mop</span>
+                  <span>Close Table & Send to Cleaning</span>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- IF RESERVED: Reservation Details -->
+          @if (curTable.status === 'RESERVED') {
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:18px">
+              <h4 style="font-size:15px;font-weight:800;color:#1e40af;margin:0 0 12px;display:flex;align-items:center;gap:6px">
+                <span class="material-symbols-outlined text-[18px]">event_seat</span>
+                <span>Reservation Details</span>
+              </h4>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;color:#1e3a8a;margin-bottom:14px">
+                <div>
+                  <div style="font-size:11px;color:#64748b">Guest Name</div>
+                  <strong>{{ curTable.reservationName || 'Guest' }}</strong>
+                </div>
+                <div>
+                  <div style="font-size:11px;color:#64748b">Phone Number</div>
+                  <strong>{{ curTable.reservationPhone || 'Not provided' }}</strong>
+                </div>
+                <div>
+                  <div style="font-size:11px;color:#64748b">Reservation Time</div>
+                  <strong>{{ curTable.reservationTime || '7:30 PM' }}</strong>
+                </div>
+                <div>
+                  <div style="font-size:11px;color:#64748b">Party Size</div>
+                  <strong>{{ curTable.reservationGuests || curTable.capacity }} Guests</strong>
+                </div>
+              </div>
+
+              @if (curTable.reservationNotes) {
+                <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:8px;padding:8px 12px;font-size:12px;color:#334155;margin-bottom:14px">
+                  <span style="font-weight:700">Special Notes:</span> {{ curTable.reservationNotes }}
+                </div>
+              }
+
+              <div style="display:flex;gap:10px">
+                <button class="lez-btn lez-btn-primary" style="flex:1" (click)="updateTableDirectStatus(curTable.id, 'OCCUPIED')">
+                  <span class="material-symbols-outlined text-[16px]">person_check</span>
+                  <span>Seat Guests (Mark Occupied)</span>
+                </button>
+                <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="markTableAvailable(curTable)">
+                  <span class="material-symbols-outlined text-[16px]">cancel</span>
+                  <span>Cancel Reservation</span>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- IF CLEANING: Cleaning Status -->
+          @if (curTable.status === 'CLEANING') {
+            <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;text-align:center">
+              <span class="material-symbols-outlined text-[36px]" style="color:#8b5cf6;margin-bottom:8px">cleaning_services</span>
+              <h4 style="font-size:16px;font-weight:800;color:#5b21b6;margin:0 0 6px">Table Being Reset</h4>
+              <p style="font-size:13px;color:#6d28d9;margin:0 0 16px">Staff is sanitizing the table and resetting tableware.</p>
+              <button class="lez-btn lez-btn-primary" style="background:#10b981;border-color:#10b981" (click)="markTableAvailable(curTable)">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>Mark Available for Guests</span>
+              </button>
+            </div>
+          }
+
+          <!-- IF AVAILABLE: Ready for Guests -->
+          @if (curTable.status === 'AVAILABLE') {
+            <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:14px;padding:20px;text-align:center">
+              <span class="material-symbols-outlined text-[36px]" style="color:#10b981;margin-bottom:8px">check_circle</span>
+              <h4 style="font-size:16px;font-weight:800;color:#065f46;margin:0 0 6px">Table is Ready</h4>
+              <p style="font-size:13px;color:#047857;margin:0 0 16px">Available for walk-in guests or online table reservations.</p>
+              <div style="display:flex;gap:10px;justify-content:center">
+                <button class="lez-btn lez-btn-secondary" (click)="openReserveModal(curTable)">
+                  <span class="material-symbols-outlined text-[16px]">event_seat</span>
+                  <span>Book Reservation</span>
+                </button>
+                <button class="lez-btn lez-btn-primary" (click)="updateTableDirectStatus(curTable.id, 'OCCUPIED')">
+                  <span class="material-symbols-outlined text-[16px]">person</span>
+                  <span>Seat Walk-In Guest</span>
+                </button>
+              </div>
+            </div>
+          }
+
         </div>
 
       </div>
+
     </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADD / EDIT DINING TABLE MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showAddTableModal()) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeAddTableModal()">
+    <div class="pos-modal-card" style="max-width:440px;padding:26px" (click)="$event.stopPropagation()">
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0;display:flex;align-items:center;gap:8px">
+          <span class="material-symbols-outlined text-[22px] text-accent">table_restaurant</span>
+          <span>{{ editingTableId() ? 'Edit Dining Table' : 'Add New Table' }}</span>
+        </h3>
+        <button class="pos-modal-close" (click)="closeAddTableModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-field">
+          <label class="form-label">Table Number / Label *</label>
+          <input class="lez-input" placeholder="e.g. Table 01 or 09" [value]="tableFormNumber()" (input)="tableFormNumber.set($any($event.target).value)" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Seating Capacity (Guests) *</label>
+          <input class="lez-input" type="number" min="1" max="20" placeholder="4" [value]="tableFormCapacity()" (input)="tableFormCapacity.set(+$any($event.target).value)" />
+        </div>
+
+        <p style="font-size:12px;color:#64748b;margin:0">
+          A unique QR code linked to this table and restaurant menu will be generated automatically.
+        </p>
+
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddTableModal()">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="saveTable()">
+            <span class="material-symbols-outlined text-[16px]">{{ editingTableId() ? 'check' : 'add_circle' }}</span>
+            <span>{{ editingTableId() ? 'Update Table' : 'Create Table & QR' }}</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       RESERVE TABLE MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showReserveTableModal() && selectedTableDetails(); as resTable) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeReserveModal()">
+    <div class="pos-modal-card" style="max-width:460px;padding:26px" (click)="$event.stopPropagation()">
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0;display:flex;align-items:center;gap:8px">
+          <span class="material-symbols-outlined text-[22px] text-accent">event_seat</span>
+          <span>Reserve {{ resTable.tableNumber }}</span>
+        </h3>
+        <button class="pos-modal-close" (click)="closeReserveModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-field">
+          <label class="form-label">Guest Name *</label>
+          <input class="lez-input" placeholder="e.g. Emily Watson" [value]="reserveGuestName()" (input)="reserveGuestName.set($any($event.target).value)" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Contact Phone Number</label>
+          <input class="lez-input" placeholder="e.g. +1 (555) 234-8899" [value]="reserveGuestPhone()" (input)="reserveGuestPhone.set($any($event.target).value)" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-field">
+            <label class="form-label">Reservation Time *</label>
+            <input class="lez-input" placeholder="e.g. 7:30 PM" [value]="reserveTime()" (input)="reserveTime.set($any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Guest Count *</label>
+            <input class="lez-input" type="number" min="1" max="20" [value]="reserveGuestCount()" (input)="reserveGuestCount.set(+$any($event.target).value)" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Special Notes / Dietary Requests</label>
+          <textarea class="lez-input" rows="2" placeholder="Window booth, birthday anniversary..." [value]="reserveNotes()" (input)="reserveNotes.set($any($event.target).value)"></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeReserveModal()">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitReservation()">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+            <span>Confirm Reservation</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       CONFIRM MARK AVAILABLE (SAFETY DIALOG)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showConfirmAvailableModal() && tableToMakeAvailable(); as safeTable) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="showConfirmAvailableModal.set(false)">
+    <div class="pos-modal-card" style="max-width:440px;padding:26px;text-align:center" (click)="$event.stopPropagation()">
+      
+      <div style="width:54px;height:54px;border-radius:50%;background:#fee2e2;color:#ef4444;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <span class="material-symbols-outlined text-[32px]">warning</span>
+      </div>
+
+      <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 8px">
+        Mark {{ safeTable.tableNumber }} Available?
+      </h3>
+      
+      <p style="font-size:13px;color:#64748b;margin:0 0 20px;line-height:1.5">
+        This table currently has active dining orders or is marked as Occupied. Marking it Available will clear the active table session. Are you sure?
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="lez-btn lez-btn-secondary" (click)="showConfirmAvailableModal.set(false)">
+          Cancel
+        </button>
+        <button class="lez-btn lez-btn-danger" (click)="confirmMarkAvailable()">
+          Confirm & Make Available
+        </button>
+      </div>
+
+    </div>
+  </div>
   }
 
 </div>
