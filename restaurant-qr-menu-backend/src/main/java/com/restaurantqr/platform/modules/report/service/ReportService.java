@@ -71,7 +71,7 @@ public class ReportService {
         Map<String, String> summary = new LinkedHashMap<>();
         summary.put("Total Scans Today", String.valueOf(scans));
         summary.put("Unique Visitors Today", String.valueOf(visitors));
-        summary.put("Estimated Daily Spend", "₹" + (scans * 250));
+        summary.put("Estimated Daily Spend", "$" + (scans * 250));
 
         List<String> headers = List.of("Metric Name", "Today Count", "Status");
         List<List<String>> rows = List.of(
@@ -123,13 +123,13 @@ public class ReportService {
         BigDecimal estTax = estRev.multiply(new BigDecimal("0.18"));
 
         Map<String, String> summary = new LinkedHashMap<>();
-        summary.put("Estimated Gross Revenue", "₹" + estRev);
-        summary.put("Estimated GST Tax (18%)", "₹" + estTax);
+        summary.put("Estimated Gross Revenue", "$" + estRev);
+        summary.put("Estimated GST Tax (18%)", "$" + estTax);
 
-        List<String> headers = List.of("Revenue Stream", "Amount (INR)", "Tax Portion (18%)");
+        List<String> headers = List.of("Revenue Stream", "Amount (USD)", "Tax Portion (18%)");
         List<List<String>> rows = List.of(
-                List.of("Dine-In Customer Orders", "₹" + estRev, "₹" + estTax),
-                List.of("Takeaway / QR Menu Sessions", "₹" + estRev.multiply(new BigDecimal("0.3")), "₹" + estTax.multiply(new BigDecimal("0.3")))
+                List.of("Dine-In Customer Orders", "$" + estRev, "$" + estTax),
+                List.of("Takeaway / QR Menu Sessions", "$" + estRev.multiply(new BigDecimal("0.3")), "$" + estTax.multiply(new BigDecimal("0.3")))
         );
 
         return ReportData.builder()
@@ -168,9 +168,9 @@ public class ReportService {
     private ReportData generateMenuReport(com.restaurantqr.platform.modules.restaurant.entity.Restaurant restaurant, String dateRange) {
         List<MenuItem> items = menuItemRepository.findActiveByRestaurantId(restaurant.getId());
 
-        List<String> headers = List.of("Item Name", "Category", "Price (INR)", "Food Type", "Available");
+        List<String> headers = List.of("Item Name", "Category", "Price (USD)", "Food Type", "Available");
         List<List<String>> rows = items.stream()
-                .map(i -> List.of(i.getName(), i.getCategory().getName(), "₹" + i.getPrice(), i.getVegNonveg().name(), i.getIsAvailable() ? "YES" : "NO"))
+                .map(i -> List.of(i.getName(), i.getCategory().getName(), "$" + i.getPrice(), i.getVegNonveg().name(), i.getIsAvailable() ? "YES" : "NO"))
                 .toList();
 
         Map<String, String> summary = Map.of(
@@ -221,7 +221,7 @@ public class ReportService {
                         s.getPlan().name(),
                         s.getStartDate().toString(),
                         s.getEndDate().toString(),
-                        "₹" + s.getAmountPaid(),
+                        "$" + s.getAmountPaid(),
                         s.getStatus().name()
                 ))
                 .toList();

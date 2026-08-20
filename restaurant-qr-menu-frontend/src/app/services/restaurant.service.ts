@@ -120,7 +120,7 @@ export class RestaurantService {
       phone: d.phone || '',
       rating: d.rating || 4.8,
       reviewCount: d.reviewCount || 0,
-      currency: d.currency || '₹',
+      currency: d.currency || '$',
       tableCount: d.tableCount || 20,
       isPublished: d.status === 'ACTIVE' || d.isPublished === true,
       verificationStatus: (storedVerification as any) || d.verificationStatus || 'PENDING_VERIFICATION',

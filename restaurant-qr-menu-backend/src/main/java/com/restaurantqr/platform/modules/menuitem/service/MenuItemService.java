@@ -132,7 +132,7 @@ public class MenuItemService {
                 .build();
 
         MenuItem saved = menuItemRepository.save(item);
-        auditLogService.log(restaurantId, "MENU_ITEM_CREATED", "MenuItem", saved.getId(), null, saved.getName() + " (₹" + saved.getPrice() + ")");
+        auditLogService.log(restaurantId, "MENU_ITEM_CREATED", "MenuItem", saved.getId(), null, saved.getName() + " ($" + saved.getPrice() + ")");
         return saved;
     }
 
@@ -180,7 +180,7 @@ public class MenuItemService {
 
         if (oldPrice != null && request.price != null && oldPrice.compareTo(request.price) != 0) {
             auditLogService.log(restaurantId, "ITEM_PRICE_CHANGED", "MenuItem", updated.getId(),
-                    "₹" + oldPrice, "₹" + updated.getPrice());
+                    "$" + oldPrice, "$" + updated.getPrice());
         } else {
             auditLogService.log(restaurantId, "MENU_ITEM_UPDATED", "MenuItem", updated.getId(), oldName, updated.getName());
         }

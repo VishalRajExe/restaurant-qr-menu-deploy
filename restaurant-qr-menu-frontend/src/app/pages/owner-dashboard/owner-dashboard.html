@@ -975,7 +975,7 @@
            TAB: CUSTOMER ORDER HISTORY & TRACKING
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'customers') {
-      <div class="animate-fade-in" style="display:flex;flex-direction:column;gap:22px">
+      <div class="customer-history-view-container animate-fade-in">
         
         <!-- Top Search Card & Recent Customer Pills -->
         <div class="lez-card" style="padding:22px 26px;background:linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);border:1px solid #fed7aa;box-shadow:0 6px 20px -4px rgba(234, 88, 12, 0.08)">
@@ -1003,11 +1003,10 @@
             <div style="flex:1;min-width:280px;position:relative">
               <div style="position:relative;display:flex;align-items:center">
                 <span class="material-symbols-outlined" style="position:absolute;left:14px;color:#94a3b8;font-size:20px">phone</span>
-                <span style="position:absolute;left:42px;font-size:13px;font-weight:700;color:#64748b;border-right:1px solid #cbd5e1;padding-right:8px">+91</span>
                 <input type="tel"
                        maxlength="10"
                        class="lez-input"
-                       style="padding-left:84px;font-size:15px;font-weight:700;letter-spacing:0.05em;border-radius:12px;height:44px"
+                       style="padding-left:44px;font-size:15px;font-weight:700;letter-spacing:0.05em;border-radius:12px;height:44px"
                        placeholder="Enter 10-digit mobile number (e.g. 9876543210)"
                        [ngModel]="customerSearchPhone()"
                        (ngModelChange)="customerSearchPhone.set($event); customerPhoneError.set(null)"
@@ -1088,7 +1087,7 @@
                     <div style="display:flex;align-items:center;gap:12px;margin-top:4px;font-size:12.5px;color:#64748b">
                       <span style="display:flex;align-items:center;gap:4px">
                         <span class="material-symbols-outlined text-[15px] text-accent">call</span>
-                        <strong style="color:#0f172a">+91 {{ profile.customerMobile }}</strong>
+                        <strong style="color:#0f172a">{{ profile.customerMobile }}</strong>
                       </span>
                       <span>•</span>
                       <span>Branch: <strong>{{ profile.restaurantName }}</strong></span>
@@ -1129,7 +1128,7 @@
                     <span class="material-symbols-outlined">payments</span>
                   </div>
                   <div>
-                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '₹' }}{{ profile.totalSpent.toFixed(2) }}</div>
+                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '$' }}{{ profile.totalSpent.toFixed(2) }}</div>
                     <div class="cust-stat-label">Lifetime Spend</div>
                   </div>
                 </div>
@@ -1139,7 +1138,7 @@
                     <span class="material-symbols-outlined">query_stats</span>
                   </div>
                   <div>
-                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '₹' }}{{ profile.averageOrderValue.toFixed(2) }}</div>
+                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '$' }}{{ profile.averageOrderValue.toFixed(2) }}</div>
                     <div class="cust-stat-label">Average Order Value</div>
                   </div>
                 </div>
@@ -1255,7 +1254,7 @@
                             <div class="cust-order-item-pill">
                               <span class="cust-item-qty">{{ item.quantity }}x</span>
                               <span class="cust-item-name">{{ item.itemName }}</span>
-                              <span class="cust-item-price">{{ activeRestaurant()?.currency || '₹' }}{{ (item.price || 0).toFixed(2) }}</span>
+                              <span class="cust-item-price">{{ activeRestaurant()?.currency || '$' }}{{ (item.price || 0).toFixed(2) }}</span>
                             </div>
                           }
                         </div>
@@ -1304,7 +1303,7 @@
                       <!-- Price & Actions Column -->
                       <div class="cust-order-col-actions">
                         <div class="cust-order-total-price">
-                          {{ activeRestaurant()?.currency || '₹' }}{{ (order.totalAmount || 0).toFixed(2) }}
+                          {{ activeRestaurant()?.currency || '$' }}{{ (order.totalAmount || 0).toFixed(2) }}
                         </div>
                         <div style="display:flex;gap:6px">
                           <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="openOrderTrackingModal(order)" title="View Live Status Timeline & Bill Breakdown">
@@ -1327,7 +1326,7 @@
               <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
                 <span class="material-symbols-outlined text-[32px]">person_off</span>
               </div>
-              <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 6px">No Orders for +91 {{ profile.customerMobile }}</h3>
+              <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 6px">No Orders for {{ profile.customerMobile }}</h3>
               <p style="font-size:13.5px;color:#64748b;max-width:480px;margin:0 auto 18px">
                 This mobile number has not placed any orders at <strong>{{ activeRestaurant()?.name || 'this restaurant' }}</strong> yet.
                 Orders placed at other restaurants are kept completely isolated and private.
@@ -2797,7 +2796,7 @@
               </span>
             </div>
             <div style="font-size:12px;color:#64748b;margin-top:2px">
-              Customer: <strong>{{ ord.customerName || 'Guest' }}</strong> (+91 {{ ord.customerMobile }}) • Placed {{ ord.createdAt | date:'medium' }}
+              Customer: <strong>{{ ord.customerName || 'Guest' }}</strong> ({{ ord.customerMobile }}) • Placed {{ ord.createdAt | date:'medium' }}
             </div>
           </div>
         </div>
@@ -2913,10 +2912,10 @@
                       <span class="lez-badge lez-badge-preparing" style="font-size:11px;padding:2px 7px">{{ item.quantity }}</span>
                     </td>
                     <td style="text-align:right;color:#64748b">
-                      {{ activeRestaurant()?.currency || '₹' }}{{ (item.price || 0).toFixed(2) }}
+                      {{ activeRestaurant()?.currency || '$' }}{{ (item.price || 0).toFixed(2) }}
                     </td>
                     <td style="text-align:right;font-weight:800;color:#0f172a">
-                      {{ activeRestaurant()?.currency || '₹' }}{{ ((item.price || 0) * (item.quantity || 1)).toFixed(2) }}
+                      {{ activeRestaurant()?.currency || '$' }}{{ ((item.price || 0) * (item.quantity || 1)).toFixed(2) }}
                     </td>
                   </tr>
                 }
@@ -2943,7 +2942,7 @@
           <div style="text-align:right">
             <div style="font-size:11.5px;color:#64748b">Total Amount:</div>
             <div style="font-size:22px;font-weight:800;color:#0f172a">
-              {{ activeRestaurant()?.currency || '₹' }}{{ (ord.totalAmount || 0).toFixed(2) }}
+              {{ activeRestaurant()?.currency || '$' }}{{ (ord.totalAmount || 0).toFixed(2) }}
             </div>
           </div>
         </div>

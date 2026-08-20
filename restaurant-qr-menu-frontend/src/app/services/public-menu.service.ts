@@ -57,7 +57,7 @@ export class PublicMenuService {
           phone:       rd.phone || '',
           rating:      rd.rating ?? 4.8,
           reviewCount: rd.reviewCount ?? 0,
-          currency:    rd.currency || '₹',
+          currency:    rd.currency || '$',
           tableCount:  rd.tableCount || 20,
           isPublished: rd.status === 'ACTIVE' || rd.isPublished === true
         };

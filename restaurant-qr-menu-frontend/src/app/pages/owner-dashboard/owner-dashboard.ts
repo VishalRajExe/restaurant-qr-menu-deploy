@@ -860,7 +860,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
       address: r?.address || '123 Gourmet Blvd, New York, NY',
       phone: r?.phone || '+1 (555) 345-6789',
       email: r?.email || 'contact@restqr.com',
-      currency: r?.currency || '₹'
+      currency: r?.currency || '$'
     });
   }
 

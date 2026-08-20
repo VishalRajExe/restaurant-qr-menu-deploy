@@ -81,7 +81,7 @@ public class NotificationDispatcherService {
 
     public void dispatchPaymentReceived(User user, Restaurant restaurant, String amount, String invoiceNo) {
         String title = "Payment Received - Invoice #" + invoiceNo;
-        String message = String.format("Payment of ₹%s for %s was successfully processed.", amount, restaurant.getName());
+        String message = String.format("Payment of $%s for %s was successfully processed.", amount, restaurant.getName());
         dispatch(user, restaurant, Notification.EventType.PAYMENT_RECEIVED, title, message, List.of(Notification.Channel.IN_APP, Notification.Channel.EMAIL, Notification.Channel.SMS, Notification.Channel.PUSH));
     }
 }
