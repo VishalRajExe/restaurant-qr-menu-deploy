@@ -80,7 +80,7 @@ public class OrderService {
                 notificationService.notifyRestaurant(
                         saved.getRestaurant().getId(),
                         Notification.EventType.NEW_ORDER,
-                        "🔔 New Kitchen Order Placed",
+                        "New Kitchen Order Placed",
                         "New order #" + saved.getOrderNumber() + " received for Table " + saved.getTableNumber()
                 );
             }
@@ -159,21 +159,21 @@ public class OrderService {
                     notificationService.notifyRestaurant(
                             updated.getRestaurant().getId(),
                             Notification.EventType.ORDER_READY,
-                            "🍳 Kitchen Alert: Order Ready!",
-                            "Chef finished preparing Order #" + updated.getOrderNumber() + " for Table " + updated.getTableNumber() + ". Ready to be served!"
+                            "Kitchen Alert: Order Ready",
+                            "Chef finished preparing Order #" + updated.getOrderNumber() + " for Table " + updated.getTableNumber() + ". Ready to be served."
                     );
                 } else if (status == Order.Status.COMPLETED || status == Order.Status.DELIVERED) {
                     notificationService.notifyRestaurant(
                             updated.getRestaurant().getId(),
                             Notification.EventType.ORDER_STATUS_CHANGED,
-                            "✅ Order Delivered",
+                            "Order Delivered",
                             "Order #" + updated.getOrderNumber() + " (Table " + updated.getTableNumber() + ") marked as delivered to guest."
                     );
                 } else if (status == Order.Status.PREPARING) {
                     notificationService.notifyRestaurant(
                             updated.getRestaurant().getId(),
                             Notification.EventType.ORDER_STATUS_CHANGED,
-                            "👨‍🍳 Cooking in Kitchen",
+                            "Cooking in Kitchen",
                             "Chef started preparing Order #" + updated.getOrderNumber() + " (Table " + updated.getTableNumber() + ")."
                     );
                 }

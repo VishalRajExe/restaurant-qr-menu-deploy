@@ -625,10 +625,16 @@
                             {{ ticket.priority }}
                           </span>
                           @if (ticket.isChefIssue) {
-                            <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+                            <span class="badge-chef-issue">
+                              <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                              <span>Chef Incident</span>
+                            </span>
                           }
                           @if (ticket.isEscalated) {
-                            <span class="badge-escalated">⚡ Escalated by Owner</span>
+                            <span class="badge-escalated">
+                              <span class="material-symbols-outlined text-[13px]">bolt</span>
+                              <span>Escalated by Owner</span>
+                            </span>
                           }
                         </div>
                         <p style="font-size:12px;color:#64748b;margin:6px 0 0">
@@ -662,90 +668,183 @@
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════════
-       ADMIN TICKET CONVERSATION & RESOLUTION MODAL
+       ADMIN MODERN MESSENGER CHATBOT / TICKET CONVERSATION MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (showTicketModal()) {
     <div class="pos-modal-overlay animate-fade-in" (click)="showTicketModal.set(false)">
-      <div class="pos-modal-card" style="max-width:680px" (click)="$event.stopPropagation()">
+      <div class="modern-chat-card" (click)="$event.stopPropagation()">
         
-        <div class="pos-modal-header" style="padding-bottom:14px;border-bottom:1px solid #e2e8f0">
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-family:monospace;font-size:12px;font-weight:800;color:#c2410c;background:#fff1ec;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa">
-                {{ selectedTicketDetails()?.ticket?.ticketNumber }}
-              </span>
-              <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
-                ● {{ selectedTicketDetails()?.ticket?.status }}
-              </span>
-              <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
-                {{ selectedTicketDetails()?.ticket?.priority }}
-              </span>
-              @if (selectedTicketDetails()?.ticket?.isChefIssue) {
-                <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
-              }
-              @if (selectedTicketDetails()?.ticket?.isEscalated) {
-                <span class="badge-escalated">⚡ Escalated by Owner</span>
-              }
+        <!-- Modern Messenger Header Bar -->
+        <header class="chat-header-bar">
+          <div class="chat-header-left">
+            <div class="chat-avatar-wrap">
+              <span>{{ (selectedTicketDetails()?.ticket?.customerName || selectedTicketDetails()?.ticket?.createdByName || 'User').charAt(0) }}</span>
+              <span class="chat-online-dot"></span>
             </div>
-            <h3 class="pos-modal-title" style="margin-top:8px;font-size:17px;font-weight:800;color:#0f172a">
-              {{ selectedTicketDetails()?.ticket?.subject }}
-            </h3>
-            <p style="font-size:12px;color:#64748b;margin:4px 0 0">
-              Restaurant: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName }}</strong> • Reporter: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.customerName || selectedTicketDetails()?.ticket?.createdByName || 'Staff' }}</strong> (Role: <span style="color:#c2410c;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'STAFF' }}</span>) • {{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}
-            </p>
+            <div class="chat-contact-info">
+              <div class="chat-contact-name-row">
+                <h3 class="chat-contact-name">
+                  {{ selectedTicketDetails()?.ticket?.customerName || selectedTicketDetails()?.ticket?.createdByName || 'Restaurant Partner' }}
+                </h3>
+                <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
+                  {{ selectedTicketDetails()?.ticket?.priority }}
+                </span>
+                <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
+                  ● {{ selectedTicketDetails()?.ticket?.status }}
+                </span>
+              </div>
+              <div class="chat-contact-sub">
+                <span style="font-weight:700;color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName }}</span>
+                <span>•</span>
+                <span style="color:#0284c7;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'OWNER' }}</span>
+                <span>•</span>
+                <span style="font-family:monospace;font-weight:800;color:#c2410c">{{ selectedTicketDetails()?.ticket?.ticketNumber }}</span>
+              </div>
+            </div>
           </div>
-          <button class="pos-modal-close" (click)="showTicketModal.set(false)">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </div>
 
-        <div class="pos-modal-body" style="padding:16px;max-height:360px;overflow-y:auto;background:#f8fafc;display:flex;flex-direction:column;gap:12px;border:1px solid #e2e8f0;border-radius:12px;margin:14px 0">
-          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
-            <div style="display:flex;flex-direction:column;gap:4px"
-                 [style.align-items]="msg.senderRole === 'SUPER_ADMIN' ? 'flex-end' : 'flex-start'">
-              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b">
-                <strong style="color:#1e293b">{{ msg.senderName }}</strong>
-                <span>({{ msg.senderRole }})</span>
-                <span>• {{ msg.createdAt | date:'shortTime' }}</span>
-              </div>
-              <div style="padding:10px 14px;border-radius:12px;font-size:13px;max-width:85%;line-height:1.4"
-                   [style.background]="msg.senderRole === 'SUPER_ADMIN' ? '#0b1c30' : '#ffffff'"
-                   [style.color]="msg.senderRole === 'SUPER_ADMIN' ? '#ffffff' : '#0b1c30'"
-                   [style.border]="msg.senderRole === 'SUPER_ADMIN' ? 'none' : '1.5px solid #cbd5e1'">
-                {{ msg.message }}
-              </div>
-            </div>
-          }
-        </div>
-
-        <div class="pos-modal-footer" style="flex-direction:column;gap:12px;align-items:stretch">
-          <div style="display:flex;gap:8px">
-            <input class="lez-input" style="flex:1" placeholder="Type administrative response / instruction..."
-                   [value]="adminReplyMessage()" (input)="adminReplyMessage.set($any($event.target).value)"
-                   (keyup.enter)="sendAdminReply()" />
-            <button class="lez-btn lez-btn-primary" [disabled]="isSendingReply() || !adminReplyMessage().trim()" (click)="sendAdminReply()">
-              <span class="material-symbols-outlined text-[16px]">send</span>
-              <span>Reply</span>
+          <div class="chat-header-right">
+            @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
+              <button class="lez-btn lez-btn-sm lez-btn-primary" style="padding:6px 12px;font-size:12px;border-radius:20px"
+                      (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'RESOLVED')">
+                <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                <span>Resolve</span>
+              </button>
+            } @else {
+              <button class="lez-btn lez-btn-sm lez-btn-secondary" style="padding:6px 12px;font-size:12px;border-radius:20px"
+                      (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'OPEN')">
+                <span class="material-symbols-outlined text-[15px]">refresh</span>
+                <span>Reopen</span>
+              </button>
+            }
+            <button class="chat-quick-action-btn" title="Phone Audio Support">
+              <span class="material-symbols-outlined text-[18px]">call</span>
+            </button>
+            <button class="chat-quick-action-btn" title="Video Screen Share">
+              <span class="material-symbols-outlined text-[18px]">videocam</span>
+            </button>
+            <button class="chat-quick-action-btn" title="Close Chat" (click)="showTicketModal.set(false)">
+              <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
           </div>
+        </header>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #e2e8f0">
-            <div style="display:flex;gap:8px">
-              @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
-                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'RESOLVED')">
-                  <span class="material-symbols-outlined text-[15px]">check_circle</span>
-                  <span>Resolve Ticket</span>
-                </button>
-              } @else {
-                <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'OPEN')">
-                  <span class="material-symbols-outlined text-[15px]">refresh</span>
-                  <span>Reopen Ticket</span>
-                </button>
-              }
+        <!-- Chat Conversation Body -->
+        <div class="chat-conversation-canvas">
+          
+          <!-- Subject Card -->
+          <div class="chat-subject-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;flex-wrap:wrap">
+              <h4 class="chat-subject-title">{{ selectedTicketDetails()?.ticket?.subject }}</h4>
+              <div style="display:flex;gap:6px;align-items:center">
+                @if (selectedTicketDetails()?.ticket?.isChefIssue) {
+                  <span class="badge-chef-issue">
+                    <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                    <span>Chef Incident</span>
+                  </span>
+                }
+                @if (selectedTicketDetails()?.ticket?.isEscalated) {
+                  <span class="badge-escalated">
+                    <span class="material-symbols-outlined text-[13px]">bolt</span>
+                    <span>Escalated by Owner</span>
+                  </span>
+                }
+              </div>
             </div>
-            <button class="lez-btn lez-btn-sm lez-btn-outline" (click)="showTicketModal.set(false)">Close</button>
+            <p class="chat-subject-desc">
+              <span>Category: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.category }}</strong></span>
+              <span>•</span>
+              <span>Opened: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}</strong></span>
+            </p>
           </div>
+
+          <!-- Date Pill Divider -->
+          <div class="chat-date-divider">
+            <span class="chat-date-pill">{{ selectedTicketDetails()?.ticket?.createdAt | date:'EEEE, MMM d, y' }}</span>
+          </div>
+
+          <!-- Message Thread List -->
+          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
+            
+            <!-- System / Escalation Audit Chip -->
+            @if (msg.message.startsWith('⚡ ESCALATED') || msg.message.startsWith('Audit:')) {
+              <div class="chat-system-chip">
+                <span class="material-symbols-outlined text-[18px] text-amber-600">bolt</span>
+                <span>{{ msg.message }}</span>
+              </div>
+            } @else if (msg.senderRole === 'SUPER_ADMIN') {
+              <!-- Outgoing Admin Bubble -->
+              <div class="chat-msg-row outgoing">
+                <div class="chat-bubble-container">
+                  <div class="chat-bubble">
+                    {{ msg.message }}
+                  </div>
+                  <div class="chat-bubble-meta">
+                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
+                    <span class="material-symbols-outlined chat-read-icon">done_all</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <!-- Incoming Reporter Bubble (Chef / Owner / Customer) -->
+              <div class="chat-msg-row incoming">
+                <div class="chat-msg-avatar">
+                  {{ (msg.senderName || 'U').charAt(0) }}
+                </div>
+                <div class="chat-bubble-container">
+                  <div class="chat-bubble-sender">
+                    <span>{{ msg.senderName }}</span>
+                    <span style="color:#c2410c;font-weight:800;font-size:10px;background:#fff1ec;padding:1px 6px;border-radius:4px">
+                      {{ msg.senderRole }}
+                    </span>
+                  </div>
+                  <div class="chat-bubble">
+                    {{ msg.message }}
+                  </div>
+                  <div class="chat-bubble-meta">
+                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+
+          @if (!selectedTicketDetails()?.messages || selectedTicketDetails()?.messages?.length === 0) {
+            <div style="text-align:center;padding:32px 0;color:#94a3b8">
+              <span class="material-symbols-outlined text-[36px]">forum</span>
+              <p style="font-size:13px;margin:8px 0 0">No messages in this conversation yet. Send an administrative response below.</p>
+            </div>
+          }
+
         </div>
+
+        <!-- Modern Bottom Chat Input Bar -->
+        <footer class="chat-footer-bar">
+          <div class="chat-input-pill-wrap">
+            <input class="chat-input-field"
+                   placeholder="Type your message here..."
+                   [value]="adminReplyMessage()"
+                   (input)="adminReplyMessage.set($any($event.target).value)"
+                   (keyup.enter)="sendAdminReply()" />
+            <div class="chat-input-actions">
+              <button type="button" class="chat-icon-btn" title="Emoji">
+                <span class="material-symbols-outlined text-[18px]">sentiment_satisfied</span>
+              </button>
+              <button type="button" class="chat-icon-btn" title="Attach file">
+                <span class="material-symbols-outlined text-[18px]">attach_file</span>
+              </button>
+              <button type="button" class="chat-icon-btn" title="Audio note">
+                <span class="material-symbols-outlined text-[18px]">mic</span>
+              </button>
+              <button class="chat-send-circle-btn"
+                      [disabled]="isSendingReply() || !adminReplyMessage().trim()"
+                      (click)="sendAdminReply()"
+                      title="Send Response">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+              </button>
+            </div>
+          </div>
+        </footer>
 
       </div>
     </div>

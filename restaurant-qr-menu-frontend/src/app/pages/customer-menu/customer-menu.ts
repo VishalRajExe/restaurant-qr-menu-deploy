@@ -485,11 +485,11 @@ export class CustomerMenu implements OnInit, OnDestroy {
 
         if (prevStatus && prevStatus !== nextStatus) {
           if (nextStatus === 'PREPARING') {
-            this.toastService.show('🍳 Kitchen Update: The chef is now preparing your meal!', 'info');
+            this.toastService.show('Kitchen Update: The chef is now preparing your meal.', 'info');
           } else if (nextStatus === 'READY') {
-            this.toastService.show(`🔔 Order Ready: Order #${updatedOrder.orderNumber || updatedOrder.id} is ready for serving!`, 'success');
+            this.toastService.show(`Order Ready: Order #${updatedOrder.orderNumber || updatedOrder.id} is ready for serving.`, 'success');
           } else if (nextStatus === 'COMPLETED' || nextStatus === 'DELIVERED') {
-            this.toastService.show(`🎉 Order delivered. Enjoy your meal!`, 'success');
+            this.toastService.show('Order delivered. Enjoy your meal.', 'success');
           }
         }
 

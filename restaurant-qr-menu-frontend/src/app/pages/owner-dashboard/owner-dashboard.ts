@@ -99,7 +99,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
             if (fresh.status !== cur.status) {
               this.selectedOrder.set(fresh);
               if (fresh.status === 'READY') {
-                this.toastService.show(`🔔 Chef Alert: Order #${fresh.orderNumber || fresh.id} (Table ${fresh.tableNumber}) is READY for serving!`, 'success');
+                this.toastService.show(`Chef Alert: Order #${fresh.orderNumber || fresh.id} (Table ${fresh.tableNumber}) is ready for serving.`, 'success');
               }
             }
           }
@@ -385,6 +385,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   // QR Codes signal selector
   qrCodesList = computed(() => this.qrService.qrCodesList());
   selectedQr  = signal<QrCodeData | null>(null);
+  enlargedQrModal = signal<QrCodeData | null>(null);
 
   // Helper selectors
   categories = computed(() => {
@@ -723,6 +724,15 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   selectQr(q: QrCodeData) {
     this.selectedQr.set(q);
+  }
+
+  openEnlargedQr(q: QrCodeData) {
+    this.selectedQr.set(q);
+    this.enlargedQrModal.set(q);
+  }
+
+  closeEnlargedQr() {
+    this.enlargedQrModal.set(null);
   }
 
   deleteQr(id: string) {

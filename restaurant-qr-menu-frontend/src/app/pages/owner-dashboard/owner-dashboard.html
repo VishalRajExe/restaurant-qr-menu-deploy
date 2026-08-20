@@ -754,10 +754,21 @@
 
               @if (selectedQr()) {
                 <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);text-align:center">
-                  <img [src]="activeQrUrl()" alt="QR Code" style="width:160px;height:160px;margin:0 auto 12px;border:1px solid var(--border);border-radius:10px;padding:8px" />
+                  <div style="position:relative;display:inline-block;cursor:pointer" (click)="openEnlargedQr(selectedQr()!)" title="Click to view large QR">
+                    <img [src]="activeQrUrl()" alt="QR Code" style="width:160px;height:160px;margin:0 auto 12px;border:1px solid var(--border);border-radius:10px;padding:8px;transition:transform 0.2s" class="hover:scale-105" />
+                    <span style="position:absolute;bottom:18px;right:8px;background:rgba(15,23,42,0.75);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+                      <span class="material-symbols-outlined text-[14px]">zoom_in</span>
+                    </span>
+                  </div>
                   <div style="display:flex;gap:8px">
-                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="simulateQrDownload()">Download</button>
-                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="simulateQrPrint()">Print</button>
+                    <button class="lez-btn lez-btn-primary lez-btn-sm" style="flex:1" (click)="simulateQrDownload()">
+                      <span class="material-symbols-outlined text-[14px]">download</span>
+                      <span>Download</span>
+                    </button>
+                    <button class="lez-btn lez-btn-secondary lez-btn-sm" style="flex:1" (click)="simulateQrPrint()">
+                      <span class="material-symbols-outlined text-[14px]">print</span>
+                      <span>Print</span>
+                    </button>
                   </div>
                 </div>
               }
@@ -766,11 +777,19 @@
             <!-- QR Grid -->
             <div class="lez-table-grid">
               @for (qr of qrCodesList(); track qr.id) {
-                <div class="lez-card" style="padding:16px;text-align:center;cursor:pointer" (click)="selectQr(qr)">
-                  <img [src]="qr.qrImageUrl || qr.qrCodeUrl" alt="" style="width:120px;height:120px;margin:0 auto 10px" />
+                <div class="lez-card" style="padding:16px;text-align:center;cursor:pointer;position:relative;transition:all 0.2s ease" class="hover:shadow-md hover:border-accent" (click)="openEnlargedQr(qr)">
+                  <div style="position:relative;display:inline-block">
+                    <img [src]="qr.qrImageUrl || qr.qrCodeUrl" alt="" style="width:120px;height:120px;margin:0 auto 10px;border-radius:8px" />
+                    <span style="position:absolute;bottom:12px;right:2px;background:rgba(15,23,42,0.65);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
+                      <span class="material-symbols-outlined text-[12px]">zoom_in</span>
+                    </span>
+                  </div>
                   <h4 style="font-size:14px;font-weight:700;margin:0 0 2px">{{ qr.tableNumber }}</h4>
                   <p style="font-size:12px;color:var(--text-secondary);margin:0 0 10px">{{ qr.scansCount || 0 }} Scans</p>
-                  <button class="lez-btn lez-btn-danger lez-btn-sm w-full" (click)="deleteQr(qr.id); $event.stopPropagation()">Delete</button>
+                  <button class="lez-btn lez-btn-danger lez-btn-sm w-full" (click)="deleteQr(qr.id); $event.stopPropagation()">
+                    <span class="material-symbols-outlined text-[13px]">delete</span>
+                    <span>Delete</span>
+                  </button>
                 </div>
               }
             </div>
@@ -922,10 +941,16 @@
                           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                             <span style="font-weight:700;color:#0f172a;font-size:13.5px">{{ t.subject }}</span>
                             @if (t.isChefIssue) {
-                              <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+                              <span class="badge-chef-issue">
+                                <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                                <span>Chef Incident</span>
+                              </span>
                             }
                             @if (t.isEscalated) {
-                              <span class="badge-escalated">⚡ Escalated to Admin</span>
+                              <span class="badge-escalated">
+                                <span class="material-symbols-outlined text-[13px]">bolt</span>
+                                <span>Escalated to Admin</span>
+                              </span>
                             }
                           </div>
                           <div style="font-size:11.5px;color:#64748b;margin-top:2px">
@@ -1043,95 +1068,192 @@
   <!-- ══════════════════════════════════════════════════════════════════════════
        TICKET CONVERSATION DETAILS MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       OWNER MODERN MESSENGER CHATBOT / TICKET CONVERSATION MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
   @if (showTicketDetailsModal()) {
-    <div class="lez-overlay animate-fade-in" (click)="showTicketDetailsModal.set(false)">
-      <div class="lez-modal" style="max-width:640px" (click)="$event.stopPropagation()">
+    <div class="pos-modal-overlay animate-fade-in" (click)="showTicketDetailsModal.set(false)">
+      <div class="modern-chat-card" (click)="$event.stopPropagation()">
         
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span style="font-family:monospace;font-size:12px;font-weight:800;color:#c2410c;background:#fff1ec;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa">
-                {{ selectedTicketDetails()?.ticket?.ticketNumber }}
-              </span>
-              <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
-                ● {{ selectedTicketDetails()?.ticket?.status }}
-              </span>
-              <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
-                {{ selectedTicketDetails()?.ticket?.priority }}
-              </span>
-              @if (selectedTicketDetails()?.ticket?.isChefIssue) {
-                <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
-              }
-              @if (selectedTicketDetails()?.ticket?.isEscalated) {
-                <span class="badge-escalated">⚡ Escalated to Admin Desk</span>
-              }
+        <!-- Modern Messenger Header Bar -->
+        <header class="chat-header-bar">
+          <div class="chat-header-left">
+            <div class="chat-avatar-wrap">
+              <span>{{ (selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff').charAt(0) }}</span>
+              <span class="chat-online-dot"></span>
             </div>
-            <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin:8px 0 2px">
-              {{ selectedTicketDetails()?.ticket?.subject }}
-            </h3>
-            <p style="font-size:12px;color:#64748b;margin:0">
-              Category: <strong style="color:#334155">{{ selectedTicketDetails()?.ticket?.category }}</strong> • Reported by: <strong style="color:#334155">{{ selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff' }}</strong> • {{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}
-            </p>
-          </div>
-          <button class="pos-modal-close" (click)="showTicketDetailsModal.set(false)">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </div>
-
-        <!-- Message Thread -->
-        <div style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:14px;background:#f8fafc;border-radius:12px;margin-bottom:16px;border:1px solid #e2e8f0">
-          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
-            <div style="display:flex;flex-direction:column;gap:4px"
-                 [style.align-items]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' ? 'flex-end' : 'flex-start'">
-              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b">
-                <strong style="color:#1e293b">{{ msg.senderName }}</strong>
-                <span>({{ msg.senderRole }})</span>
-                <span>• {{ msg.createdAt | date:'shortTime' }}</span>
+            <div class="chat-contact-info">
+              <div class="chat-contact-name-row">
+                <h3 class="chat-contact-name">
+                  {{ selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff Member' }}
+                </h3>
+                <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
+                  {{ selectedTicketDetails()?.ticket?.priority }}
+                </span>
+                <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
+                  ● {{ selectedTicketDetails()?.ticket?.status }}
+                </span>
               </div>
-              <div style="padding:10px 14px;border-radius:12px;font-size:13px;max-width:85%;line-height:1.4"
-                   [style.background]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' ? '#ff6b35' : (msg.senderRole === 'SUPER_ADMIN' ? '#0b1c30' : '#ffffff')"
-                   [style.color]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' || msg.senderRole === 'SUPER_ADMIN' ? '#ffffff' : '#0b1c30'"
-                   [style.border]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' || msg.senderRole === 'SUPER_ADMIN' ? 'none' : '1.5px solid #cbd5e1'">
-                {{ msg.message }}
+              <div class="chat-contact-sub">
+                <span style="font-weight:700;color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName || activeRestaurant()?.name }}</span>
+                <span>•</span>
+                <span style="color:#ff6b35;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'STAFF' }}</span>
+                <span>•</span>
+                <span style="font-family:monospace;font-weight:800;color:#c2410c">{{ selectedTicketDetails()?.ticket?.ticketNumber }}</span>
               </div>
             </div>
-          }
-        </div>
-
-        <!-- Reply Input -->
-        @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
-          <div style="display:flex;gap:8px">
-            <input class="lez-input" style="flex:1" placeholder="Type your reply message..."
-                   [value]="newReplyMessage()" (input)="newReplyMessage.set($any($event.target).value)"
-                   (keyup.enter)="sendTicketReply()" />
-            <button class="lez-btn lez-btn-primary" [disabled]="isSendingReply() || !newReplyMessage().trim()" (click)="sendTicketReply()">
-              <span class="material-symbols-outlined text-[16px]">send</span>
-              <span>Reply</span>
-            </button>
           </div>
-        }
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:8px">
-          <div style="display:flex;gap:8px;align-items:center">
+          <div class="chat-header-right">
             @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
-              <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="resolveOwnerTicket(selectedTicketDetails()!.ticket.id)">
+              <button class="lez-btn lez-btn-sm lez-btn-secondary" style="padding:6px 12px;font-size:12px;border-radius:20px"
+                      (click)="resolveOwnerTicket(selectedTicketDetails()!.ticket.id)">
                 <span class="material-symbols-outlined text-[15px]">check_circle</span>
-                <span>Mark as Resolved</span>
+                <span>Resolve</span>
               </button>
-
               @if (!selectedTicketDetails()?.ticket?.isEscalated) {
-                <button class="lez-btn lez-btn-sm" style="background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700"
+                <button class="lez-btn lez-btn-sm" style="padding:6px 12px;font-size:12px;border-radius:20px;background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700"
                         (click)="escalateTicketToAdmin(selectedTicketDetails()!.ticket.id)">
                   <span class="material-symbols-outlined text-[15px]">bolt</span>
-                  <span>Escalate to Admin Desk</span>
+                  <span>Escalate</span>
                 </button>
               }
-            } @else {
-              <span style="font-size:12px;color:#166534;font-weight:700">✓ Ticket is marked resolved</span>
             }
+            <button class="chat-quick-action-btn" title="Phone Audio Support">
+              <span class="material-symbols-outlined text-[18px]">call</span>
+            </button>
+            <button class="chat-quick-action-btn" title="Video Screen Share">
+              <span class="material-symbols-outlined text-[18px]">videocam</span>
+            </button>
+            <button class="chat-quick-action-btn" title="Close Chat" (click)="showTicketDetailsModal.set(false)">
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
           </div>
-          <button class="lez-btn lez-btn-sm lez-btn-outline" (click)="showTicketDetailsModal.set(false)">Close</button>
+        </header>
+
+        <!-- Chat Conversation Body -->
+        <div class="chat-conversation-canvas">
+          
+          <!-- Subject Card -->
+          <div class="chat-subject-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;flex-wrap:wrap">
+              <h4 class="chat-subject-title">{{ selectedTicketDetails()?.ticket?.subject }}</h4>
+              <div style="display:flex;gap:6px;align-items:center">
+                @if (selectedTicketDetails()?.ticket?.isChefIssue) {
+                  <span class="badge-chef-issue">
+                    <span class="material-symbols-outlined text-[13px]">restaurant</span>
+                    <span>Chef Incident</span>
+                  </span>
+                }
+                @if (selectedTicketDetails()?.ticket?.isEscalated) {
+                  <span class="badge-escalated">
+                    <span class="material-symbols-outlined text-[13px]">bolt</span>
+                    <span>Escalated to Admin Desk</span>
+                  </span>
+                }
+              </div>
+            </div>
+            <p class="chat-subject-desc">
+              <span>Category: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.category }}</strong></span>
+              <span>•</span>
+              <span>Opened: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}</strong></span>
+            </p>
+          </div>
+
+          <!-- Date Pill Divider -->
+          <div class="chat-date-divider">
+            <span class="chat-date-pill">{{ selectedTicketDetails()?.ticket?.createdAt | date:'EEEE, MMM d, y' }}</span>
+          </div>
+
+          <!-- Message Thread List -->
+          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
+            
+            <!-- System / Escalation Audit Chip -->
+            @if (msg.message.startsWith('⚡ ESCALATED') || msg.message.startsWith('Audit:')) {
+              <div class="chat-system-chip">
+                <span class="material-symbols-outlined text-[18px] text-amber-600">bolt</span>
+                <span>{{ msg.message }}</span>
+              </div>
+            } @else if (msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF') {
+              <!-- Outgoing Owner/Chef Bubble -->
+              <div class="chat-msg-row outgoing">
+                <div class="chat-bubble-container">
+                  <div class="chat-bubble">
+                    {{ msg.message }}
+                  </div>
+                  <div class="chat-bubble-meta">
+                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
+                    <span class="material-symbols-outlined chat-read-icon">done_all</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <!-- Incoming Reporter Bubble (Admin / Customer / Staff) -->
+              <div class="chat-msg-row incoming">
+                <div class="chat-msg-avatar">
+                  {{ (msg.senderName || 'U').charAt(0) }}
+                </div>
+                <div class="chat-bubble-container">
+                  <div class="chat-bubble-sender">
+                    <span>{{ msg.senderName }}</span>
+                    <span style="color:#c2410c;font-weight:800;font-size:10px;background:#fff1ec;padding:1px 6px;border-radius:4px">
+                      {{ msg.senderRole }}
+                    </span>
+                  </div>
+                  <div class="chat-bubble">
+                    {{ msg.message }}
+                  </div>
+                  <div class="chat-bubble-meta">
+                    <span>{{ msg.createdAt | date:'shortTime' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+
+          @if (!selectedTicketDetails()?.messages || selectedTicketDetails()?.messages?.length === 0) {
+            <div style="text-align:center;padding:32px 0;color:#94a3b8">
+              <span class="material-symbols-outlined text-[36px]">forum</span>
+              <p style="font-size:13px;margin:8px 0 0">No messages in this conversation yet. Send a reply below.</p>
+            </div>
+          }
+
         </div>
+
+        <!-- Modern Bottom Chat Input Bar -->
+        <footer class="chat-footer-bar">
+          @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
+            <div class="chat-input-pill-wrap">
+              <input class="chat-input-field"
+                     placeholder="Type your reply message..."
+                     [value]="newReplyMessage()"
+                     (input)="newReplyMessage.set($any($event.target).value)"
+                     (keyup.enter)="sendTicketReply()" />
+              <div class="chat-input-actions">
+                <button type="button" class="chat-icon-btn" title="Emoji">
+                  <span class="material-symbols-outlined text-[18px]">sentiment_satisfied</span>
+                </button>
+                <button type="button" class="chat-icon-btn" title="Attach file">
+                  <span class="material-symbols-outlined text-[18px]">attach_file</span>
+                </button>
+                <button type="button" class="chat-icon-btn" title="Audio note">
+                  <span class="material-symbols-outlined text-[18px]">mic</span>
+                </button>
+                <button class="chat-send-circle-btn"
+                        [disabled]="isSendingReply() || !newReplyMessage().trim()"
+                        (click)="sendTicketReply()"
+                        title="Send Reply">
+                  <span class="material-symbols-outlined text-[18px]">send</span>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div style="text-align:center;padding:8px 0;color:#166534;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
+              <span class="material-symbols-outlined text-[18px]">task_alt</span>
+              <span>This ticket has been marked as resolved.</span>
+            </div>
+          }
+        </footer>
 
       </div>
     </div>
@@ -1206,6 +1328,56 @@
           <button class="lez-btn lez-btn-primary" style="flex:2" (click)="handleAddItem()">
             <span class="material-symbols-outlined text-[16px]">{{ editingItemId() ? 'check' : 'add' }}</span>
             <span>{{ editingItemId() ? 'Update Dish' : 'Add to Menu' }}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ENLARGED TABLE QR CODE MODAL (CLEAN LIGHTBOX POPUP)
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (enlargedQrModal()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeEnlargedQr()">
+      <div class="pos-modal-card" style="max-width:440px;text-align:center;padding:28px" (click)="$event.stopPropagation()">
+        
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="text-align:left">
+            <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 2px;display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-[20px] text-accent">qr_code_2</span>
+              <span>{{ enlargedQrModal()?.tableNumber || 'Table QR' }}</span>
+            </h3>
+            <p style="font-size:12px;color:#64748b;margin:0">
+              {{ activeRestaurant()?.name || 'RestQR Gourmet Bistro' }} • {{ enlargedQrModal()?.scansCount || 0 }} Scans
+            </p>
+          </div>
+          <button class="pos-modal-close" (click)="closeEnlargedQr()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Crisp Normal Size QR Code Canvas -->
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <img [src]="enlargedQrModal()?.qrImageUrl || enlargedQrModal()?.qrCodeUrl || activeQrUrl()"
+               alt="Enlarged QR Code"
+               style="width:260px;height:260px;border-radius:12px;object-fit:contain;background:#ffffff;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)" />
+          <div style="margin-top:14px;font-size:12px;color:#475569;font-weight:600;display:flex;align-items:center;gap:6px">
+            <span class="material-symbols-outlined text-[16px] text-accent">center_focus_strong</span>
+            <span>Scan with phone camera to open digital menu</span>
+          </div>
+        </div>
+
+        <!-- Action Toolbar -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button class="lez-btn lez-btn-primary" (click)="simulateQrDownload()">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Download</span>
+          </button>
+          <button class="lez-btn lez-btn-secondary" (click)="simulateQrPrint()">
+            <span class="material-symbols-outlined text-[16px]">print</span>
+            <span>Print QR</span>
           </button>
         </div>
 
