@@ -365,7 +365,12 @@
         <div class="pos-modal-header">
           <div style="display:flex;align-items:center;gap:10px">
             <span class="material-symbols-outlined text-[24px] text-amber-500">skillet</span>
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Kitchen Order Status</h3>
+            <div>
+              <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Kitchen Order Status</h3>
+              <span class="pos-live-badge">
+                <span class="pos-live-dot"></span> Live Kitchen Updates
+              </span>
+            </div>
           </div>
           <button class="pos-modal-close" (click)="closeOrderTracker()">
             <span class="material-symbols-outlined text-[18px]">close</span>
@@ -374,39 +379,104 @@
 
         <div class="pos-modal-body">
           @if (activeOrder()) {
-            <div class="pos-tracker-status-box">
-              <div class="pos-tracker-num">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
+            
+            <!-- Order Meta Banner -->
+            <div class="pos-tracker-status-box" [class]="'box-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
+              <div>
+                <div class="pos-tracker-num">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
+                <div style="font-size:11.5px;color:var(--text-secondary)">Table {{ activeOrder()?.tableNumber || '01' }} • {{ activeOrder()?.customerName || 'Diner' }}</div>
+              </div>
               <div class="pos-tracker-pill" [class]="'status-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
                 ● {{ activeOrder()?.status || 'PENDING' }}
               </div>
             </div>
 
+            <!-- Dynamic State Alert Callout -->
+            @if (activeOrder()?.status === 'READY') {
+              <div class="pos-order-alert-ready animate-bounce-subtle">
+                <span class="material-symbols-outlined text-[22px]">notifications_active</span>
+                <div>
+                  <strong>Order is Ready!</strong>
+                  <p>Your meal is freshly prepared and ready for serving at Table {{ activeOrder()?.tableNumber || '01' }}.</p>
+                </div>
+              </div>
+            } @else if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'COOKING') {
+              <div class="pos-order-alert-preparing animate-pulse-subtle">
+                <span class="material-symbols-outlined text-[22px]">local_fire_department</span>
+                <div>
+                  <strong>Cooking in Kitchen</strong>
+                  <p>Chef Antoine is preparing your fresh culinary ingredients right now.</p>
+                </div>
+              </div>
+            } @else if (activeOrder()?.status === 'COMPLETED' || activeOrder()?.status === 'DELIVERED') {
+              <div class="pos-order-alert-ready">
+                <span class="material-symbols-outlined text-[22px]">task_alt</span>
+                <div>
+                  <strong>Order Served!</strong>
+                  <p>Your order has been delivered to your table. Bon Appétit!</p>
+                </div>
+              </div>
+            }
+
             <!-- Tracker Timeline -->
             <div class="pos-tracker-timeline">
-              <div class="pos-timeline-step" [class.done]="isStatusPassed('RECEIVED', activeOrder()?.status)">
-                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+              
+              <!-- Step 1: Received -->
+              <div class="pos-timeline-step"
+                   [class.done]="isStatusPassed('RECEIVED', activeOrder()?.status)"
+                   [class.active]="isStatusCurrent('RECEIVED', activeOrder()?.status)">
+                <div class="pos-step-icon-wrap">
+                  <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                </div>
                 <div class="step-meta">
                   <div class="step-title">Order Received</div>
-                  <div class="step-sub">Confirmed by dining POS</div>
+                  <div class="step-sub">Confirmed by dining POS terminal</div>
                 </div>
               </div>
 
-              <div class="pos-timeline-step" [class.done]="isStatusPassed('PREPARING', activeOrder()?.status)">
-                <span class="material-symbols-outlined text-[18px]">skillet</span>
+              <!-- Step 2: Preparing -->
+              <div class="pos-timeline-step"
+                   [class.done]="isStatusPassed('PREPARING', activeOrder()?.status)"
+                   [class.active]="isStatusCurrent('PREPARING', activeOrder()?.status)">
+                <div class="pos-step-icon-wrap">
+                  <span class="material-symbols-outlined text-[18px]">skillet</span>
+                </div>
                 <div class="step-meta">
                   <div class="step-title">Cooking in Kitchen</div>
-                  <div class="step-sub">Chef Antoine preparing ingredients</div>
+                  <div class="step-sub">Chef preparing dishes with fresh ingredients</div>
                 </div>
               </div>
 
-              <div class="pos-timeline-step" [class.done]="isStatusPassed('READY', activeOrder()?.status)">
-                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+              <!-- Step 3: Ready -->
+              <div class="pos-timeline-step"
+                   [class.done]="isStatusPassed('READY', activeOrder()?.status)"
+                   [class.active]="isStatusCurrent('READY', activeOrder()?.status)">
+                <div class="pos-step-icon-wrap">
+                  <span class="material-symbols-outlined text-[18px]">room_service</span>
+                </div>
                 <div class="step-meta">
                   <div class="step-title">Ready for Pickup / Serving</div>
                   <div class="step-sub">On its way to Table {{ activeOrder()?.tableNumber || '01' }}</div>
                 </div>
               </div>
+
             </div>
+
+            <!-- Ordered Dishes Summary -->
+            @if (activeOrder()?.items && (activeOrder()?.items)!.length > 0) {
+              <div class="pos-tracker-items-summary">
+                <div class="pos-summary-heading">Ordered Dishes</div>
+                <div class="pos-summary-items-list">
+                  @for (item of activeOrder()?.items; track $index) {
+                    <div class="pos-summary-item-row">
+                      <span class="item-name">{{ item.qty }}× {{ item.name }}</span>
+                      <span class="item-price">{{ formatPrice(item.subtotal || (item.price || 0) * item.qty) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
           } @else {
             <div style="text-align:center;padding:24px 0">
               <span class="material-symbols-outlined text-[42px] text-gray-300">receipt_long</span>
@@ -415,8 +485,12 @@
           }
         </div>
 
-        <div class="pos-modal-footer">
-          <button class="lez-btn lez-btn-primary w-full" (click)="closeOrderTracker()">Close</button>
+        <div class="pos-modal-footer" style="display:flex;gap:10px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="refreshActiveOrderStatus()">
+            <span class="material-symbols-outlined text-[16px]">sync</span>
+            <span>Refresh</span>
+          </button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="closeOrderTracker()">Close</button>
         </div>
 
       </div>

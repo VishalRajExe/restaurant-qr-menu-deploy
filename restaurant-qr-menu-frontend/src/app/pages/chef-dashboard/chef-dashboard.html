@@ -184,10 +184,17 @@
                   }
                 </div>
 
-                <div style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:#d1fae5;color:#047857;border-radius:6px;font-size:12px;font-weight:700">
+                <div style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:#d1fae5;color:#047857;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:8px">
                   <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                  <span>Ready for Pickup</span>
+                  <span>{{ order.status === 'READY' ? 'Ready for Pickup / Serving' : 'Order Delivered / Served' }}</span>
                 </div>
+
+                @if (order.status === 'READY') {
+                  <button class="lez-btn lez-btn-outline w-full" style="font-size:12px;padding:6px 12px" (click)="advanceOrder(order.orderNumber || order.id, 'COMPLETED')">
+                    <span class="material-symbols-outlined text-[15px]">done_all</span>
+                    <span>Mark as Served</span>
+                  </button>
+                }
               </div>
             }
           }

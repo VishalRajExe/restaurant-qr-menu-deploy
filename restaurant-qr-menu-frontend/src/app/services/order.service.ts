@@ -22,7 +22,7 @@ export interface Order {
   customerMobile: string;
   customerName?: string;
   placedAt: string | Date;
-  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED' | 'pending' | 'preparing' | 'done';
+  status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'COOKING' | 'READY' | 'COMPLETED' | 'DELIVERED' | 'CANCELLED' | 'pending' | 'preparing' | 'done' | string;
   items: OrderItem[];
   totalAmount?: number;
   totalPrice?: number;

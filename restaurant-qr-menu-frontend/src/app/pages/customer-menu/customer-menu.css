@@ -919,18 +919,56 @@
 }
 
 /* Timeline in Tracker */
+.pos-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.pos-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: livePulse 1.6s infinite;
+}
+
+@keyframes livePulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
 .pos-tracker-status-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
   background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+}
+
+.pos-tracker-status-box.box-preparing {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.pos-tracker-status-box.box-ready {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 
 .pos-tracker-num {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 800;
   color: #0b1c30;
 }
@@ -946,23 +984,110 @@
 
 .pos-tracker-pill.status-preparing { background: #e0f2fe; color: #0369a1; }
 .pos-tracker-pill.status-ready { background: #d1fae5; color: #047857; }
+.pos-tracker-pill.status-completed { background: #dcfce7; color: #15803d; }
+.pos-tracker-pill.status-delivered { background: #dcfce7; color: #15803d; }
+
+/* Callout Alerts */
+.pos-order-alert-ready {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #d1fae5;
+  border: 1.5px solid #34d399;
+  border-radius: 14px;
+  color: #065f46;
+  margin-bottom: 16px;
+}
+
+.pos-order-alert-ready strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.pos-order-alert-ready p {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+
+.pos-order-alert-preparing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #e0f2fe;
+  border: 1.5px solid #38bdf8;
+  border-radius: 14px;
+  color: #075985;
+  margin-bottom: 16px;
+}
+
+.pos-order-alert-preparing strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.pos-order-alert-preparing p {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
 
 .pos-tracker-timeline {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
+  padding: 4px 0;
 }
 
 .pos-timeline-step {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  opacity: 0.45;
+  gap: 14px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.pos-step-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
 .pos-timeline-step.done {
   opacity: 1;
-  color: #047857;
+}
+
+.pos-timeline-step.done .pos-step-icon-wrap {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.pos-timeline-step.active .pos-step-icon-wrap {
+  background: #ab3500;
+  color: #ffffff;
+  border-color: #ab3500;
+  box-shadow: 0 0 0 4px rgba(171, 53, 0, 0.2);
+  animation: stepPulse 1.8s infinite;
+}
+
+@keyframes stepPulse {
+  0% { box-shadow: 0 0 0 0 rgba(171, 53, 0, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(171, 53, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(171, 53, 0, 0); }
 }
 
 .step-title {
@@ -978,6 +1103,45 @@
 .step-sub {
   font-size: 11.5px;
   color: #64748b;
+  margin-top: 2px;
+}
+
+/* Ordered Dishes Summary */
+.pos-tracker-items-summary {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+}
+
+.pos-summary-heading {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.pos-summary-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pos-summary-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0b1c30;
+}
+
+.pos-summary-item-row .item-price {
+  font-weight: 700;
+  color: #ab3500;
 }
 
 .pos-mobile-floating-cart {

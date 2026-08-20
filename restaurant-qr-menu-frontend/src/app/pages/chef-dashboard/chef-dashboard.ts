@@ -65,13 +65,22 @@ export class ChefDashboard implements OnInit, OnDestroy {
     }
   }
 
-  advanceOrder(orderId: string) {
+  advanceOrder(orderId: string, specificStatus?: string) {
     const target = this.orders().find(o => o.id === orderId || o.orderNumber === orderId);
     if (!target) return;
-    const currentStatus = String(target.status).toLowerCase();
-    const nextStatus = currentStatus === 'pending' ? 'PREPARING' : 'COMPLETED';
+    const currentStatus = String(target.status).toUpperCase();
+    let nextStatus = specificStatus || 'PREPARING';
+    if (!specificStatus) {
+      if (currentStatus === 'PENDING' || currentStatus === 'RECEIVED') {
+        nextStatus = 'PREPARING';
+      } else if (currentStatus === 'PREPARING' || currentStatus === 'ACCEPTED') {
+        nextStatus = 'READY';
+      } else if (currentStatus === 'READY') {
+        nextStatus = 'COMPLETED';
+      }
+    }
     this.orderService.updateOrderStatus(orderId, nextStatus).subscribe();
-    this.toastService.success('Order Status Updated', `Order ${orderId} status set to ${nextStatus}`);
+    this.toastService.success('Order Status Updated', `Order ${target.orderNumber || orderId} set to ${nextStatus}`);
   }
 
   parseDate(date: string | Date): Date {

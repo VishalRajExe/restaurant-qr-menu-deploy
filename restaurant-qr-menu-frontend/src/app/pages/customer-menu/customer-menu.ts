@@ -229,12 +229,15 @@ export class CustomerMenu implements OnInit, OnDestroy {
 
     this.loadCustomerOrderHistory();
 
-    // Start background status polling timer for active order
+    // Start real-time background status polling timer for active kitchen order
     this.pollTimer = setInterval(() => {
-      if (this.activeOrder() && this.showOrderTracker()) {
-        this.refreshActiveOrderStatus();
+      if (this.activeOrder()) {
+        const status = (this.activeOrder()?.status || '').toUpperCase();
+        if (this.showOrderTracker() || !['COMPLETED', 'DELIVERED', 'CANCELLED'].includes(status)) {
+          this.refreshActiveOrderStatus();
+        }
       }
-    }, 5000);
+    }, 2500);
   }
 
   ngOnDestroy() {
@@ -460,6 +463,19 @@ export class CustomerMenu implements OnInit, OnDestroy {
     this.orderService.trackOrders(searchId).subscribe(orders => {
       if (orders && orders.length > 0) {
         const updatedOrder = orders[0];
+        const prevStatus = (current.status || '').toUpperCase();
+        const nextStatus = (updatedOrder.status || '').toUpperCase();
+
+        if (prevStatus && prevStatus !== nextStatus) {
+          if (nextStatus === 'PREPARING') {
+            this.toastService.show('🍳 Kitchen Update: The chef is now preparing your meal!', 'info');
+          } else if (nextStatus === 'READY') {
+            this.toastService.show(`🔔 Order Ready: Order #${updatedOrder.orderNumber || updatedOrder.id} is ready for serving!`, 'success');
+          } else if (nextStatus === 'COMPLETED' || nextStatus === 'DELIVERED') {
+            this.toastService.show(`🎉 Order delivered. Enjoy your meal!`, 'success');
+          }
+        }
+
         this.activeOrder.set(updatedOrder);
         this.saveOrderToHistory(updatedOrder);
       }
@@ -496,6 +512,8 @@ export class CustomerMenu implements OnInit, OnDestroy {
       'RECEIVED': 1,
       'PENDING': 1,
       'PREPARING': 2,
+      'COOKING': 2,
+      'ACCEPTED': 2,
       'READY': 3,
       'DELIVERED': 4,
       'COMPLETED': 4
@@ -503,6 +521,16 @@ export class CustomerMenu implements OnInit, OnDestroy {
     const currentWeight = statusHierarchy[currentStatus.toUpperCase()] || 1;
     const stepWeight = statusHierarchy[stepName.toUpperCase()] || 1;
     return currentWeight >= stepWeight;
+  }
+
+  isStatusCurrent(stepName: string, currentStatus?: string): boolean {
+    if (!currentStatus) return stepName === 'RECEIVED';
+    const s = currentStatus.toUpperCase();
+    if (stepName === 'RECEIVED') return s === 'PENDING' || s === 'RECEIVED';
+    if (stepName === 'PREPARING') return s === 'PREPARING' || s === 'COOKING' || s === 'ACCEPTED';
+    if (stepName === 'READY') return s === 'READY';
+    if (stepName === 'DELIVERED') return s === 'DELIVERED' || s === 'COMPLETED';
+    return false;
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
