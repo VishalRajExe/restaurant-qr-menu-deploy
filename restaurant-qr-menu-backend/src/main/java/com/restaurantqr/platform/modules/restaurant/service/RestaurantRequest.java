@@ -17,4 +17,5 @@ public class RestaurantRequest {
     public String country;
     public String websiteUrl;
     public String primaryColor;
+    public String chefInviteCode;
 }

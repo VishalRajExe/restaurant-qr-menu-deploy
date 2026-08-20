@@ -123,7 +123,8 @@ export class RestaurantService {
       currency: d.currency || '₹',
       tableCount: d.tableCount || 20,
       isPublished: d.status === 'ACTIVE' || d.isPublished === true,
-      verificationStatus: (storedVerification as any) || d.verificationStatus || 'PENDING_VERIFICATION'
+      verificationStatus: (storedVerification as any) || d.verificationStatus || 'PENDING_VERIFICATION',
+      chefInviteCode: d.chefInviteCode || 'CHEF-REST01'
     };
   }
 
@@ -133,6 +134,15 @@ export class RestaurantService {
     this.restaurantsList.update((list: Restaurant[]) =>
       list.map((r: Restaurant) => (r.id === id || id === '1' || r.id === '1') ? { ...r, verificationStatus: status } : r)
     );
+  }
+
+  updateChefInviteCode(id: string, code: string): Observable<ApiResponse<any>> {
+    const numericId = parseInt(id.replace('r', ''), 10) || 1;
+    const cleanCode = code.trim().toUpperCase();
+    this.restaurantsList.update((list: Restaurant[]) =>
+      list.map((r: Restaurant) => (r.id === id || r.id === String(numericId)) ? { ...r, chefInviteCode: cleanCode } : r)
+    );
+    return this.http.patch<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${numericId}/chef-code`, { chefInviteCode: cleanCode });
   }
 
   updateProfile(id: string, updated: Partial<Restaurant>) {

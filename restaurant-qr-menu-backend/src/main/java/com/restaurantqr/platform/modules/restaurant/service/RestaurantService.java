@@ -109,6 +109,23 @@ public class RestaurantService {
         return repository.save(restaurant);
     }
 
+    @Transactional
+    public Restaurant updateChefInviteCode(Long id, String newCode) {
+        if (newCode == null || newCode.trim().length() < 3) {
+            throw new BadRequestException("Chef registration code must be at least 3 characters long");
+        }
+        String cleanCode = newCode.trim().toUpperCase();
+        var existing = repository.findByChefInviteCodeAndIsDeletedFalse(cleanCode);
+        if (existing.isPresent() && !existing.get().getId().equals(id)) {
+            throw new ConflictException("Chef registration code '" + cleanCode + "' is already assigned to another restaurant");
+        }
+        var restaurant = findById(id);
+        restaurant.setChefInviteCode(cleanCode);
+        Restaurant saved = repository.save(restaurant);
+        log.info("Updated chef invite code for restaurant id={} to {}", id, cleanCode);
+        return saved;
+    }
+
     // ─── Subscription Limit Guards ────────────────────────────────────────────
 
     public void assertBranchLimit(Long restaurantId) {

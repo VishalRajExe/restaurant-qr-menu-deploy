@@ -655,6 +655,49 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     return this.authService.currentUser()?.restaurantSlug || (this.activeRestaurant() as any)?.slug || 'gourmet-bistro';
   });
 
+  // Chef Code Editing States & Actions
+  isEditingChefCode = signal<boolean>(false);
+  editedChefCode    = signal<string>('');
+  isSavingChefCode  = signal<boolean>(false);
+
+  startEditingChefCode() {
+    this.editedChefCode.set(this.chefInviteCode());
+    this.isEditingChefCode.set(true);
+  }
+
+  cancelEditingChefCode() {
+    this.isEditingChefCode.set(false);
+  }
+
+  saveChefCode() {
+    const raw = this.editedChefCode().trim().toUpperCase();
+    if (!raw || raw.length < 3) {
+      this.toastService.show('Chef code must be at least 3 characters long', 'warning');
+      return;
+    }
+    const rId = this.activeRestaurant()?.id || '1';
+    this.isSavingChefCode.set(true);
+
+    this.restaurantService.updateChefInviteCode(rId, raw).subscribe({
+      next: () => {
+        this.isSavingChefCode.set(false);
+        this.isEditingChefCode.set(false);
+        this.toastService.success('Chef Code Updated', `New kitchen registration code is ${raw}`);
+        
+        // Update user session and active restaurant state
+        const curUser = this.authService.currentUser();
+        if (curUser) {
+          this.authService.updateCurrentUserState({ chefInviteCode: raw });
+        }
+      },
+      error: (err) => {
+        this.isSavingChefCode.set(false);
+        const msg = err?.error?.message || 'Failed to update chef code. Code may already be taken.';
+        this.toastService.show(msg, 'error');
+      }
+    });
+  }
+
   copyChefInviteCode() {
     navigator.clipboard.writeText(this.chefInviteCode());
     this.toastService.success('Copied to Clipboard', `Chef registration code ${this.chefInviteCode()} copied.`);

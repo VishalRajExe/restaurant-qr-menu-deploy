@@ -20,6 +20,7 @@ export interface Restaurant {
   tableCount?: number;
   isPublished?: boolean;
   verificationStatus?: 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED';
+  chefInviteCode?: string;
   socialLinks?: {
     instagram?: string;
     facebook?: string;

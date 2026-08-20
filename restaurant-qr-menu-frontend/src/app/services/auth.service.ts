@@ -241,4 +241,13 @@ export class AuthService {
     this.isLoggedIn.set(true);
     return of(true);
   }
+
+  updateCurrentUserState(partial: Partial<UserSession>): void {
+    const curr = this.currentUser();
+    if (curr) {
+      const updated = { ...curr, ...partial };
+      this.currentUser.set(updated);
+      localStorage.setItem('user_session', JSON.stringify(updated));
+    }
+  }
 }

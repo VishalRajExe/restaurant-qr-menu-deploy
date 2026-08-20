@@ -1121,27 +1121,61 @@
 
           <!-- Chef Registration Invite Code -->
           <div class="lez-card" style="padding:24px;border:2px dashed #ff6b35;background:#fffaf6">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-              <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
-              <div>
-                <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Chef Registration Code</h4>
-                <p style="font-size:12px;color:var(--text-secondary);margin:0">Share this code with your kitchen staff
-                  to join your station.</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
+                <div>
+                  <h4 style="font-size:16px;font-weight:800;color:#0b1c30;margin:0">Chef Registration Code</h4>
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0">Share this code with your kitchen staff to join your station.</p>
+                </div>
               </div>
+              @if (!isEditingChefCode()) {
+                <button class="lez-btn lez-btn-sm lez-btn-outline" (click)="startEditingChefCode()" title="Edit chef registration code" style="border-color:#fed7aa;color:#ea580c">
+                  <span class="material-symbols-outlined text-[16px]">edit</span>
+                  <span>Edit Code</span>
+                </button>
+              }
             </div>
 
-            <div
-              style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #fed7aa;border-radius:12px;padding:10px 16px;margin:14px 0">
-              <span
-                style="font-family:monospace;font-size:18px;font-weight:800;letter-spacing:0.1em;color:#ab3500;flex:1">{{
-                chefInviteCode() }}</span>
-              <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="copyChefInviteCode()">
-                <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                <span>Copy Code</span>
-              </button>
-            </div>
-            <span style="font-size:11.5px;color:#7c2d12">Chefs will enter this code on the signup page to automatically
-              link to your orders.</span>
+            <!-- View / Copy Mode -->
+            @if (!isEditingChefCode()) {
+              <div style="display:flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #fed7aa;border-radius:12px;padding:10px 16px;margin:14px 0">
+                <span style="font-family:monospace;font-size:18px;font-weight:800;letter-spacing:0.1em;color:#ab3500;flex:1">{{ chefInviteCode() }}</span>
+                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="copyChefInviteCode()">
+                  <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                  <span>Copy Code</span>
+                </button>
+              </div>
+            } @else {
+              <!-- Edit Mode -->
+              <div style="background:#ffffff;border:1.5px solid #ea580c;border-radius:12px;padding:12px 14px;margin:14px 0;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 12px rgba(234, 88, 12, 0.08)">
+                <div style="display:flex;gap:10px;align-items:center">
+                  <input type="text"
+                         class="lez-input"
+                         style="font-family:monospace;font-size:16px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#ab3500;background:#fffaf6;border-color:#fed7aa;padding:8px 12px"
+                         placeholder="e.g. CHEF-MYREST01"
+                         [ngModel]="editedChefCode()"
+                         (ngModelChange)="editedChefCode.set($event.toUpperCase())"
+                         (keydown.enter)="saveChefCode()" />
+                  <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="saveChefCode()" [disabled]="isSavingChefCode() || !editedChefCode().trim()">
+                    @if (isSavingChefCode()) {
+                      <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                      <span>Saving...</span>
+                    } @else {
+                      <span class="material-symbols-outlined text-[16px]">check</span>
+                      <span>Save</span>
+                    }
+                  </button>
+                  <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="cancelEditingChefCode()" [disabled]="isSavingChefCode()">
+                    <span class="material-symbols-outlined text-[16px]">close</span>
+                    <span>Cancel</span>
+                  </button>
+                </div>
+                <div style="font-size:11px;color:#9a3412">Custom code must be unique and at least 3 characters. Example: <code>CHEF-KITCHEN01</code></div>
+              </div>
+            }
+
+            <span style="font-size:11.5px;color:#7c2d12">Chefs will enter this code on the signup page to automatically link to your orders.</span>
           </div>
 
           <!-- Public Restaurant URL & Slug -->

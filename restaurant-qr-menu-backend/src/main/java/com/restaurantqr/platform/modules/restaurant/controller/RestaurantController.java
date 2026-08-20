@@ -69,6 +69,16 @@ public class RestaurantController {
                 restaurantService.updateVerificationStatus(id, status)));
     }
 
+    @PatchMapping("/{id}/chef-code")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<Restaurant>> updateChefInviteCode(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body) {
+        String code = body.getOrDefault("chefInviteCode", body.get("code"));
+        return ResponseEntity.ok(ApiResponse.success("Chef registration code updated",
+                restaurantService.updateChefInviteCode(id, code)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
