@@ -102,15 +102,124 @@
         </h2>
       </div>
 
-      <div style="display:flex;align-items:center;gap:20px">
-        <!-- Search box -->
-        <div class="lez-search-box" style="width:240px">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input class="lez-input" placeholder="Search orders, dishes..." type="text" />
+      <div style="display:flex;align-items:center;gap:16px">
+        <!-- Search box with App Navigation Tabs & Live Jump Dropdown -->
+        <div class="lez-search-box-container" style="position:relative;width:280px">
+          <div class="lez-search-box" style="width:100%">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input class="lez-input" placeholder="Search tabs, dishes, tables..." type="text"
+                   [ngModel]="topSearchQuery()"
+                   (ngModelChange)="topSearchQuery.set($event)"
+                   (focus)="isSearchFocused.set(true)"
+                   (keydown.escape)="isSearchFocused.set(false)" />
+            @if (topSearchQuery()) {
+              <button class="clear-search-btn" (click)="topSearchQuery.set('')" type="button" style="border:none;background:transparent;cursor:pointer;color:#94a3b8;display:flex;align-items:center">
+                <span class="material-symbols-outlined" style="font-size:16px">close</span>
+              </button>
+            }
+          </div>
+
+          <!-- Dropdown Search Results -->
+          @if (isSearchFocused() && topSearchQuery().trim()) {
+            <div class="lez-search-dropdown" (mousedown)="$event.preventDefault()">
+              <!-- App Navigation Tabs -->
+              @if (filteredSearchTabs().length > 0) {
+                <div class="search-section-header">
+                  <span class="material-symbols-outlined text-[13px]">tab</span>
+                  <span>App Tabs & Shortcuts</span>
+                </div>
+                @for (tab of filteredSearchTabs(); track tab.id) {
+                  <div class="search-item-row tab-row" (click)="navigateFromSearch(tab)">
+                    <div class="search-item-icon">
+                      <span class="material-symbols-outlined text-[16px]">{{ tab.icon }}</span>
+                    </div>
+                    <div class="search-item-info">
+                      <div class="search-item-title">{{ tab.name }}</div>
+                      <div class="search-item-sub">{{ tab.description }}</div>
+                    </div>
+                    <span class="search-jump-badge">Jump ↵</span>
+                  </div>
+                }
+              }
+
+              <!-- Menu Items / Dishes -->
+              @if (filteredSearchDishes().length > 0) {
+                <div class="search-section-header">
+                  <span class="material-symbols-outlined text-[13px]">restaurant_menu</span>
+                  <span>Menu Dishes</span>
+                </div>
+                @for (dish of filteredSearchDishes(); track dish.id) {
+                  <div class="search-item-row" (click)="navigateFromSearch({ type: 'dish', raw: dish })">
+                    <img [src]="dish.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'" class="search-item-thumb" />
+                    <div class="search-item-info">
+                      <div class="search-item-title">{{ dish.name }}</div>
+                      <div class="search-item-sub">${{ dish.price.toFixed(2) }} · {{ dish.isVeg ? 'Veg' : 'Non-Veg' }}</div>
+                    </div>
+                    <span class="search-jump-badge">View</span>
+                  </div>
+                }
+              }
+
+              <!-- Dining Tables -->
+              @if (filteredSearchTables().length > 0) {
+                <div class="search-section-header">
+                  <span class="material-symbols-outlined text-[13px]">table_restaurant</span>
+                  <span>Tables & Floor</span>
+                </div>
+                @for (tbl of filteredSearchTables(); track tbl.id) {
+                  <div class="search-item-row" (click)="navigateFromSearch({ type: 'table', raw: tbl })">
+                    <div class="search-item-icon table-icon">
+                      <span class="material-symbols-outlined text-[16px]">table_restaurant</span>
+                    </div>
+                    <div class="search-item-info">
+                      <div class="search-item-title">{{ tbl.tableNumber }}</div>
+                      <div class="search-item-sub">{{ tbl.capacity }} Seats · Status: {{ tbl.status }}</div>
+                    </div>
+                    <span class="search-jump-badge">Open Table</span>
+                  </div>
+                }
+              }
+
+              <!-- Orders -->
+              @if (filteredSearchOrders().length > 0) {
+                <div class="search-section-header">
+                  <span class="material-symbols-outlined text-[13px]">receipt_long</span>
+                  <span>Live Orders</span>
+                </div>
+                @for (ord of filteredSearchOrders(); track ord.id) {
+                  <div class="search-item-row" (click)="navigateFromSearch({ type: 'order', raw: ord })">
+                    <div class="search-item-icon order-icon">
+                      <span class="material-symbols-outlined text-[16px]">receipt</span>
+                    </div>
+                    <div class="search-item-info">
+                      <div class="search-item-title">Order #{{ ord.orderNumber || ord.id }}</div>
+                      <div class="search-item-sub">{{ ord.customerName || 'Customer' }} · ${{ ord.totalAmount?.toFixed(2) }} · {{ ord.status }}</div>
+                    </div>
+                    <span class="search-jump-badge">Track</span>
+                  </div>
+                }
+              }
+
+              @if (filteredSearchTabs().length === 0 && filteredSearchDishes().length === 0 && filteredSearchTables().length === 0 && filteredSearchOrders().length === 0) {
+                <div class="search-empty-state">
+                  <span class="material-symbols-outlined text-[24px]">search_off</span>
+                  <span>No matching tabs, dishes, or orders for "{{ topSearchQuery() }}"</span>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Action icons -->
         <div style="display:flex;align-items:center;gap:8px">
+          <!-- Kitchen & Chef Direct Chat Button with Unread Badge -->
+          <button class="icon-btn-pill direct-chat-btn" title="Kitchen & Chef Direct Chat" (click)="openDirectChatModal()" style="position:relative">
+            <span class="material-symbols-outlined text-[18px]">forum</span>
+            @if (unreadChatCount() > 0) {
+              <span class="chat-badge-bubble">{{ unreadChatCount() }}</span>
+            }
+          </button>
+
           <app-notification-center></app-notification-center>
 
           <button class="icon-btn-pill" title="Support & Messages" (click)="openSupportModal()">
@@ -2067,6 +2176,172 @@
         <button class="lez-btn lez-btn-danger" (click)="confirmMarkAvailable()">
           Confirm & Make Available
         </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       DIRECT OWNER <-> CHEF KITCHEN CHAT MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showDirectChatModal()) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeDirectChatModal()">
+    <div class="pos-modal-card direct-chat-modal" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="direct-chat-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="chat-header-icon-box">
+            <span class="material-symbols-outlined text-[20px]">forum</span>
+          </div>
+          <div>
+            <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin:0">Kitchen & Chef Direct Station Chat</h3>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">Real-time instant communication between Owner and Kitchen staff</div>
+          </div>
+        </div>
+        <button class="pos-close-btn" (click)="closeDirectChatModal()" type="button">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Chat Dual-Pane Layout -->
+      <div class="direct-chat-body">
+        
+        <!-- Left Pane: Staff / Chefs Contact List -->
+        <div class="chat-contacts-pane">
+          <div class="chat-pane-title">
+            <span class="material-symbols-outlined text-[14px]">group</span>
+            <span>Kitchen Staff ({{ chatContacts().length }})</span>
+          </div>
+
+          <div class="chat-contacts-list">
+            @for (contact of chatContacts(); track contact.userId) {
+              <div class="chat-contact-item"
+                   [class.active]="activeChatContact()?.userId === contact.userId"
+                   (click)="selectChatContact(contact)">
+                <div class="contact-avatar-wrapper">
+                  @if (contact.avatarUrl) {
+                    <img [src]="contact.avatarUrl" class="contact-avatar" />
+                  } @else {
+                    <div class="contact-avatar-initials">
+                      {{ contact.name.charAt(0).toUpperCase() }}
+                    </div>
+                  }
+                  <span class="online-indicator-dot"></span>
+                </div>
+                <div class="contact-meta">
+                  <div class="contact-name-row">
+                    <span class="contact-name">{{ contact.name }}</span>
+                    @if (contact.unreadCount > 0) {
+                      <span class="contact-unread-badge">{{ contact.unreadCount }}</span>
+                    }
+                  </div>
+                  <div class="contact-role-snippet">
+                    <span class="contact-role-tag">{{ contact.role }}</span>
+                    <span class="contact-snippet-text">{{ contact.lastMessage || 'Ready to chat' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (chatContacts().length === 0) {
+              <div class="chat-contacts-empty">
+                <span class="material-symbols-outlined text-[24px]">person_off</span>
+                <span>No kitchen staff registered yet.</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Right Pane: Active Thread & Messenger -->
+        <div class="chat-thread-pane">
+          @if (activeChatContact(); as contact) {
+            <!-- Active Contact Topbar -->
+            <div class="chat-thread-topbar">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="contact-avatar-wrapper">
+                  @if (contact.avatarUrl) {
+                    <img [src]="contact.avatarUrl" class="contact-avatar" />
+                  } @else {
+                    <div class="contact-avatar-initials">
+                      {{ contact.name.charAt(0).toUpperCase() }}
+                    </div>
+                  }
+                  <span class="online-indicator-dot"></span>
+                </div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:#0f172a">{{ contact.name }}</div>
+                  <div style="font-size:11.5px;color:#10b981;display:flex;align-items:center;gap:4px">
+                    <span style="display:inline-block;width:6px;height:6px;background:#10b981;border-radius:50%"></span>
+                    <span>Kitchen Station Online</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-quick-actions">
+                <button class="quick-chip-btn" (click)="sendQuickChatMessage('Order ready?')">Order ready?</button>
+                <button class="quick-chip-btn" (click)="sendQuickChatMessage('Rush table 4 please')">Rush Table 4</button>
+                <button class="quick-chip-btn" (click)="sendQuickChatMessage('Check stock on steak')">Stock check</button>
+              </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="chat-messages-container" #chatScrollContainer>
+              @if (isLoadingThread()) {
+                <div class="chat-loading-state">
+                  <div class="spinner-sm"></div>
+                  <span>Loading message history...</span>
+                </div>
+              } @else {
+                @for (msg of activeChatThread(); track msg.id) {
+                  <div class="chat-bubble-row" [class.is-mine]="msg.senderRole === 'OWNER'">
+                    <div class="chat-bubble" [class.is-mine]="msg.senderRole === 'OWNER'">
+                      <div class="chat-bubble-sender">
+                        {{ msg.senderName }} <span class="role-sub">({{ msg.senderRole }})</span>
+                      </div>
+                      <div class="chat-bubble-text">{{ msg.message }}</div>
+                      <div class="chat-bubble-time">
+                        {{ msg.createdAt | date:'shortTime' }}
+                        @if (msg.senderRole === 'OWNER') {
+                          <span class="material-symbols-outlined text-[13px] read-ticks" [class.read]="msg.isRead">done_all</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                @if (activeChatThread().length === 0) {
+                  <div class="chat-thread-empty">
+                    <span class="material-symbols-outlined text-[32px]">chat</span>
+                    <p style="font-weight:700;margin:8px 0 2px;color:#334155">No messages yet</p>
+                    <p style="font-size:12px;color:#94a3b8">Send a quick message to coordinate kitchen preparation.</p>
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Message Input Composer -->
+            <div class="chat-composer-bar">
+              <input type="text"
+                     class="chat-input-field"
+                     placeholder="Type a message to kitchen staff... (Press Enter to send)"
+                     [ngModel]="directChatMessageInput()"
+                     (ngModelChange)="directChatMessageInput.set($event)"
+                     (keydown.enter)="sendDirectMessage()" />
+              <button class="chat-send-btn" (click)="sendDirectMessage()" [disabled]="!directChatMessageInput().trim() || isSendingChat()">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+              </button>
+            </div>
+          } @else {
+            <div class="chat-thread-unselected">
+              <span class="material-symbols-outlined text-[36px]">chat_bubble_outline</span>
+              <p style="font-weight:700;margin:10px 0 4px">Select a Kitchen Member</p>
+              <p style="font-size:12.5px;color:#94a3b8">Choose a chef from the left pane to begin direct communication.</p>
+            </div>
+          }
+        </div>
+
       </div>
 
     </div>

@@ -1,6 +1,7 @@
 package com.restaurantqr.platform.modules.table.service;
 
 import com.restaurantqr.platform.common.ResourceNotFoundException;
+import com.restaurantqr.platform.common.BadRequestException;
 import com.restaurantqr.platform.modules.branch.entity.Branch;
 import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
 import com.restaurantqr.platform.modules.notification.entity.Notification;
@@ -42,9 +43,9 @@ public class DiningTableService {
         restaurantService.findById(restaurantId);
         List<DiningTable> tables;
         if (branchId != null) {
-            tables = tableRepository.findByRestaurantIdAndBranchIdOrderByTableNumberAsc(restaurantId, branchId);
+            tables = tableRepository.findByRestaurantIdAndBranchIdAndIsDeletedFalseOrderByTableNumberAsc(restaurantId, branchId);
         } else {
-            tables = tableRepository.findByRestaurantIdOrderByTableNumberAsc(restaurantId);
+            tables = tableRepository.findByRestaurantIdAndIsDeletedFalseOrderByTableNumberAsc(restaurantId);
         }
 
         // Fetch active orders for this restaurant to aggregate live session stats per table
@@ -57,11 +58,11 @@ public class DiningTableService {
 
     public TableSummaryStats getStats(Long restaurantId) {
         restaurantService.findById(restaurantId);
-        long total = tableRepository.countByRestaurantId(restaurantId);
-        long available = tableRepository.countByRestaurantIdAndStatus(restaurantId, DiningTable.Status.AVAILABLE);
-        long occupied = tableRepository.countByRestaurantIdAndStatus(restaurantId, DiningTable.Status.OCCUPIED);
-        long reserved = tableRepository.countByRestaurantIdAndStatus(restaurantId, DiningTable.Status.RESERVED);
-        long cleaning = tableRepository.countByRestaurantIdAndStatus(restaurantId, DiningTable.Status.CLEANING);
+        long total = tableRepository.countByRestaurantIdAndIsDeletedFalse(restaurantId);
+        long available = tableRepository.countByRestaurantIdAndStatusAndIsDeletedFalse(restaurantId, DiningTable.Status.AVAILABLE);
+        long occupied = tableRepository.countByRestaurantIdAndStatusAndIsDeletedFalse(restaurantId, DiningTable.Status.OCCUPIED);
+        long reserved = tableRepository.countByRestaurantIdAndStatusAndIsDeletedFalse(restaurantId, DiningTable.Status.RESERVED);
+        long cleaning = tableRepository.countByRestaurantIdAndStatusAndIsDeletedFalse(restaurantId, DiningTable.Status.CLEANING);
 
         return TableSummaryStats.builder()
                 .totalTables(total)
@@ -90,37 +91,36 @@ public class DiningTableService {
 
         Branch branch = null;
         if (request.getBranchId() != null) {
-            branch = branchRepository.findById(request.getBranchId()).orElse(null);
+            branch = branchRepository.findById(request.getBranchId())
+                    .orElse(null);
         }
         if (branch == null) {
             List<Branch> branches = branchRepository.findByRestaurantId(restaurantId);
-            if (!branches.isEmpty()) {
-                branch = branches.get(0);
-            }
+            branch = branches.isEmpty() ? null : branches.get(0);
         }
 
-        String rawNum = request.getTableNumber().trim();
-        String formattedNumber = rawNum.matches("^\\d+$")
-                ? "Table " + (Integer.parseInt(rawNum) < 10 ? "0" + Integer.parseInt(rawNum) : rawNum)
-                : (rawNum.toLowerCase().startsWith("table") ? rawNum : "Table " + rawNum);
-
-        // Check for existing table
-        Optional<DiningTable> existing = tableRepository.findByRestaurantIdAndTableNumber(restaurantId, formattedNumber);
+        // Check duplicate table number
+        Optional<DiningTable> existing = tableRepository.findByRestaurantIdAndTableNumberAndIsDeletedFalse(
+                restaurantId, request.getTableNumber().trim());
         if (existing.isPresent()) {
-            throw new IllegalArgumentException("A table with number '" + formattedNumber + "' already exists in this restaurant.");
+            throw new BadRequestException("Table with number '" + request.getTableNumber() + "' already exists.");
         }
 
-        // Generate unique QR Code token
+        // Generate QR code for this table
         String qrToken = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
-        String tableParam = formattedNumber.replaceFirst("(?i)^Table\\s*", "");
-        String publicMenuUrl = "http://localhost:4200/menu/" + (restaurant.getSlug() != null ? restaurant.getSlug() : restaurantId) + "?table=" + URLEncoder.encode(tableParam, StandardCharsets.UTF_8);
-        String qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=H&color=101828&data=" + URLEncoder.encode(publicMenuUrl, StandardCharsets.UTF_8);
+        String slug = restaurant.getSlug() != null ? restaurant.getSlug() : String.valueOf(restaurant.getId());
+        String tableParam = request.getTableNumber().replaceAll("[^0-9]", "");
+        if (tableParam.isEmpty()) tableParam = request.getTableNumber().trim();
+
+        String publicMenuUrl = "http://localhost:4200/menu/" + slug + "?table=" + URLEncoder.encode(tableParam, StandardCharsets.UTF_8);
+        String qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=H&color=101828&data=" +
+                URLEncoder.encode(publicMenuUrl, StandardCharsets.UTF_8);
 
         QrCode qrCode = QrCode.builder()
                 .restaurant(restaurant)
                 .branch(branch)
-                .tableNumber(formattedNumber)
-                .label(formattedNumber)
+                .tableNumber(request.getTableNumber().trim())
+                .label(request.getTableNumber().trim() + " - " + restaurant.getName())
                 .token(qrToken)
                 .qrImageUrl(qrImageUrl)
                 .scanCount(0L)
@@ -131,16 +131,17 @@ public class DiningTableService {
         DiningTable table = DiningTable.builder()
                 .restaurant(restaurant)
                 .branch(branch)
-                .tableNumber(formattedNumber)
+                .tableNumber(request.getTableNumber().trim())
                 .capacity(request.getCapacity() != null ? request.getCapacity() : 4)
                 .status(request.getStatus() != null ? request.getStatus() : DiningTable.Status.AVAILABLE)
                 .qrCode(qrCode)
                 .build();
 
         DiningTable saved = tableRepository.save(table);
-        log.info("Created dining table id={} number={} for restaurantId={}", saved.getId(), saved.getTableNumber(), restaurantId);
+        log.info("Created dining table id={} number={} with QR token={}", saved.getId(), saved.getTableNumber(), qrToken);
 
-        return mapToDto(saved, Collections.emptyList());
+        List<Order> restaurantOrders = orderRepository.findByRestaurantIdOrdered(restaurantId);
+        return mapToDto(saved, restaurantOrders);
     }
 
     @Transactional
@@ -152,27 +153,31 @@ public class DiningTableService {
             throw new ResourceNotFoundException("Table does not belong to restaurant: " + restaurantId);
         }
 
+        if (request.getTableNumber() != null && !request.getTableNumber().trim().isEmpty()) {
+            String newNumber = request.getTableNumber().trim();
+            if (!newNumber.equalsIgnoreCase(table.getTableNumber())) {
+                Optional<DiningTable> existing = tableRepository.findByRestaurantIdAndTableNumberAndIsDeletedFalse(
+                        restaurantId, newNumber);
+                if (existing.isPresent()) {
+                    throw new BadRequestException("Table with number '" + newNumber + "' already exists.");
+                }
+                table.setTableNumber(newNumber);
+                if (table.getQrCode() != null) {
+                    table.getQrCode().setTableNumber(newNumber);
+                    table.getQrCode().setLabel(newNumber + " - " + table.getRestaurant().getName());
+                    qrCodeRepository.save(table.getQrCode());
+                }
+            }
+        }
+
         if (request.getCapacity() != null) {
             table.setCapacity(request.getCapacity());
         }
-        if (request.getStatus() != null) {
-            table.setStatus(request.getStatus());
-        }
+
         if (request.getBranchId() != null) {
-            branchRepository.findById(request.getBranchId()).ifPresent(table::setBranch);
-        }
-
-        if (request.getTableNumber() != null && !request.getTableNumber().isBlank()) {
-            String rawNum = request.getTableNumber().trim();
-            String formattedNumber = rawNum.matches("^\\d+$")
-                    ? "Table " + (Integer.parseInt(rawNum) < 10 ? "0" + Integer.parseInt(rawNum) : rawNum)
-                    : (rawNum.toLowerCase().startsWith("table") ? rawNum : "Table " + rawNum);
-            table.setTableNumber(formattedNumber);
-
-            if (table.getQrCode() != null) {
-                table.getQrCode().setTableNumber(formattedNumber);
-                table.getQrCode().setLabel(formattedNumber);
-                qrCodeRepository.save(table.getQrCode());
+            Branch branch = branchRepository.findById(request.getBranchId()).orElse(null);
+            if (branch != null && branch.getRestaurant().getId().equals(restaurantId)) {
+                table.setBranch(branch);
             }
         }
 
@@ -190,8 +195,34 @@ public class DiningTableService {
             throw new ResourceNotFoundException("Table does not belong to restaurant: " + restaurantId);
         }
 
-        tableRepository.delete(table);
-        log.info("Deleted dining table id={} for restaurantId={}", tableId, restaurantId);
+        table.softDelete();
+        tableRepository.save(table);
+        if (table.getQrCode() != null) {
+            table.getQrCode().softDelete();
+            qrCodeRepository.save(table.getQrCode());
+        }
+        log.info("Soft-deleted dining table id={} for restaurantId={}", tableId, restaurantId);
+    }
+
+    @Transactional
+    public TableDto restoreTable(Long restaurantId, Long tableId) {
+        DiningTable table = tableRepository.findById(tableId)
+                .orElseThrow(() -> new ResourceNotFoundException("Table not found with id: " + tableId));
+
+        if (!table.getRestaurant().getId().equals(restaurantId)) {
+            throw new ResourceNotFoundException("Table does not belong to restaurant: " + restaurantId);
+        }
+
+        table.restore();
+        if (table.getQrCode() != null) {
+            table.getQrCode().restore();
+            qrCodeRepository.save(table.getQrCode());
+        }
+        DiningTable restored = tableRepository.save(table);
+        log.info("Restored dining table id={} for restaurantId={}", tableId, restaurantId);
+
+        List<Order> restaurantOrders = orderRepository.findByRestaurantIdOrdered(restaurantId);
+        return mapToDto(restored, restaurantOrders);
     }
 
     @Transactional

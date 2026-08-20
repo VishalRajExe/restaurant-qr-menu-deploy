@@ -71,4 +71,11 @@ public class OfferController {
         offerService.delete(id, restaurantId);
         return ResponseEntity.ok(ApiResponse.success("Offer deleted", null));
     }
+
+    @PostMapping("/restaurants/{restaurantId}/offers/{id}/restore")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Offer>> restore(@PathVariable Long restaurantId,
+                                                       @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Offer restored", offerService.restore(id, restaurantId)));
+    }
 }

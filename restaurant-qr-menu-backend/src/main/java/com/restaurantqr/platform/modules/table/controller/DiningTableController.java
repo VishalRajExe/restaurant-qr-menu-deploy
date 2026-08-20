@@ -105,4 +105,13 @@ public class DiningTableController {
         TableDto closed = tableService.closeTable(restaurantId, tableId);
         return ResponseEntity.ok(ApiResponse.success("Table closed and marked for cleaning", closed));
     }
+
+    @PostMapping("/{tableId}/restore")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<TableDto>> restoreTable(
+            @PathVariable Long restaurantId,
+            @PathVariable Long tableId) {
+        TableDto restored = tableService.restoreTable(restaurantId, tableId);
+        return ResponseEntity.ok(ApiResponse.success("Dining table restored", restored));
+    }
 }

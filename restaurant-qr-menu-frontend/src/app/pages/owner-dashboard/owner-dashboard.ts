@@ -21,8 +21,9 @@ import { MenuItem } from '../../models/menu-item.model';
 import { environment } from '../../environments/environment';
 import { NotificationCenter } from '../../components/notification-center/notification-center';
 import { NotificationService } from '../../services/notification.service';
-
 import { TableService, DiningTableData, TableStatus, TableStatsData } from '../../services/table.service';
+import { UndoService } from '../../services/undo.service';
+import { ChatService, ChatContact, ChatMessageItem } from '../../services/chat.service';
 
 @Component({
   selector: 'app-owner-dashboard',
@@ -46,9 +47,11 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   modalService        = inject(ModalService);
   orderService        = inject(OrderService);
   notificationService = inject(NotificationService);
+  undoService         = inject(UndoService);
+  chatService         = inject(ChatService);
   router              = inject(Router);
 
-  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'qr' | 'support' | 'settings'
+  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'tables' | 'qr' | 'support' | 'settings'
   activeTab = signal<string>('overview');
 
   // Active restaurant selection
@@ -65,6 +68,124 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   // Unseen Orders Count for Sidebar Badge (clears to 0 when Orders tab is clicked)
   pendingOrdersCount = computed(() => this.orderService.unseenOrdersCount());
+
+  // ── Smart Topbar Search with Navigation Tabs & Jump to Items ────────
+  topSearchQuery   = signal<string>('');
+  isSearchFocused  = signal<boolean>(false);
+
+  readonly navigationTabs = [
+    { id: 'overview', name: 'Dashboard Overview', category: 'Navigation', icon: 'dashboard', description: 'Metrics & Quick Stats' },
+    { id: 'orders', name: 'Live Orders', category: 'Navigation', icon: 'receipt_long', description: 'Kitchen & Active Orders' },
+    { id: 'items', name: 'Menu Catalog', category: 'Navigation', icon: 'restaurant_menu', description: 'Dishes, Pricing & Availability' },
+    { id: 'tables', name: 'Tables & Floor Plan', category: 'Navigation', icon: 'table_restaurant', description: 'Dining Tables & Live Sessions' },
+    { id: 'categories', name: 'Categories', category: 'Navigation', icon: 'category', description: 'Menu Categories' },
+    { id: 'qr', name: 'QR Codes Generator', category: 'Navigation', icon: 'qr_code_2', description: 'Table QR Codes & Tokens' },
+    { id: 'support', name: 'Support & Help Desk', category: 'Navigation', icon: 'support_agent', description: 'Support Tickets & Help' },
+    { id: 'settings', name: 'Restaurant Settings', category: 'Navigation', icon: 'settings', description: 'Branding & Configuration' },
+  ];
+
+  filteredSearchTabs = computed(() => {
+    const q = this.topSearchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.navigationTabs.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      t.description.toLowerCase().includes(q) ||
+      t.id.toLowerCase().includes(q)
+    );
+  });
+
+  filteredSearchDishes = computed(() => {
+    const q = this.topSearchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.menuItems().filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      (m.description && m.description.toLowerCase().includes(q))
+    ).slice(0, 4);
+  });
+
+  filteredSearchTables = computed(() => {
+    const q = this.topSearchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.tablesList().filter(t =>
+      t.tableNumber.toLowerCase().includes(q) ||
+      t.status.toLowerCase().includes(q)
+    ).slice(0, 4);
+  });
+
+  filteredSearchOrders = computed(() => {
+    const q = this.topSearchQuery().toLowerCase().trim();
+    if (!q) return [];
+    return this.ordersList().filter(o =>
+      (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
+      (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+      (o.tableNumber && String(o.tableNumber).includes(q))
+    ).slice(0, 4);
+  });
+
+  navigateFromSearch(result: any) {
+    this.isSearchFocused.set(false);
+    this.topSearchQuery.set('');
+
+    if (result.category === 'Navigation' || (result.id && typeof result.id === 'string' && !result.type)) {
+      this.selectTab(result.id);
+    } else if (result.type === 'dish') {
+      this.selectTab('items');
+      this.menuSearchQuery.set(result.raw.name);
+    } else if (result.type === 'table') {
+      this.selectTab('tables');
+      this.openTableDetails(result.raw);
+    } else if (result.type === 'order') {
+      this.selectTab('orders');
+      this.selectedOrder.set(result.raw);
+    }
+  }
+
+  // ── Direct Owner <-> Chef Chat Signals ───────────────────────────
+  showDirectChatModal     = signal<boolean>(false);
+  directChatMessageInput  = signal<string>('');
+  unreadChatCount         = computed(() => this.chatService.unreadTotalCount());
+  chatContacts            = computed(() => this.chatService.contacts());
+  activeChatContact       = computed(() => this.chatService.activeContact());
+  activeChatThread        = computed(() => this.chatService.activeThread());
+  isSendingChat           = computed(() => this.chatService.isSending());
+  isLoadingThread         = computed(() => this.chatService.isLoadingThread());
+
+  openDirectChatModal(contact?: ChatContact) {
+    this.showDirectChatModal.set(true);
+    const rId = this.activeRestaurant()?.id || 1;
+    this.chatService.fetchContacts(rId).subscribe(contacts => {
+      if (contact) {
+        this.chatService.loadThread(rId, contact).subscribe();
+      } else if (contacts && contacts.length > 0) {
+        const target = this.chatService.activeContact() || contacts[0];
+        this.chatService.loadThread(rId, target).subscribe();
+      }
+    });
+  }
+
+  closeDirectChatModal() {
+    this.showDirectChatModal.set(false);
+  }
+
+  selectChatContact(contact: ChatContact) {
+    const rId = this.activeRestaurant()?.id || 1;
+    this.chatService.loadThread(rId, contact).subscribe();
+  }
+
+  sendDirectMessage() {
+    const text = this.directChatMessageInput().trim();
+    const contact = this.chatService.activeContact();
+    if (!text || !contact) return;
+
+    const rId = this.activeRestaurant()?.id || 1;
+    this.directChatMessageInput.set('');
+    this.chatService.sendMessage(rId, contact.userId, text).subscribe();
+  }
+
+  sendQuickChatMessage(snippet: string) {
+    this.directChatMessageInput.set(snippet);
+    this.sendDirectMessage();
+  }
 
   // Support Ticket signals & badges
   ownerTickets = computed(() => this.ticketService.ticketsList());
@@ -121,7 +242,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadInitialData();
-    // Background polling every 2.5s so Chef & Table status changes reflect immediately
+    // Background polling every 2.5s so Chef, Chat, & Table status changes reflect immediately
     this.pollTimer = setInterval(() => {
       const rId = this.activeRestaurant()?.id || 1;
       this.orderService.fetchOrders(rId).subscribe(orders => {
@@ -147,6 +268,14 @@ export class OwnerDashboard implements OnInit, OnDestroy {
           }
         }
       });
+      // Poll chat
+      this.chatService.fetchUnreadCount(rId);
+      if (this.showDirectChatModal()) {
+        const activeC = this.chatService.activeContact();
+        if (activeC) {
+          this.chatService.refreshThreadSilently(rId, activeC.userId);
+        }
+      }
       if (this.activeTab() === 'support') {
         this.loadOwnerTickets();
       }
@@ -597,16 +726,11 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   }
 
   deleteCategory(id: string) {
-    this.modalService.confirm({
-      title: 'Delete Category',
-      message: 'Are you sure you want to delete this category?',
-      type: 'danger',
-      confirmText: 'Delete Category',
-      onConfirm: () => {
-        this.categoryService.deleteCategory(id);
-        this.toastService.info('Category Removed', 'Category was deleted.');
-      }
-    });
+    const target = this.categories().find(c => c.id === id);
+    const catName = target?.name || 'Category';
+
+    this.categoryService.deleteCategory(id);
+    this.undoService.showUndo(`Category "${catName}" deleted`, () => this.categoryService.restoreCategory(id, target), 7);
   }
 
   // Image Upload Handling
@@ -740,16 +864,11 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   }
 
   deleteItem(id: string) {
-    this.modalService.confirm({
-      title: 'Delete Food Item',
-      message: 'Are you sure you want to delete this food item from your menu?',
-      type: 'danger',
-      confirmText: 'Delete Dish',
-      onConfirm: () => {
-        this.menuService.deleteMenuItem(id);
-        this.toastService.info('Dish Deleted', 'Menu item removed.');
-      }
-    });
+    const target = this.menuItems().find(i => i.id === id);
+    const dishName = target?.name || 'Dish';
+
+    this.menuService.deleteMenuItem(id);
+    this.undoService.showUndo(`Dish "${dishName}" deleted`, () => this.menuService.restoreMenuItem(id, target), 7);
   }
 
   // QR Regeneration & Management
@@ -1005,23 +1124,18 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   deleteTable(tableId: number, event?: Event) {
     if (event) event.stopPropagation();
-    this.modalService.confirm({
-      title: 'Delete Table',
-      message: 'Are you sure you want to delete this table? All associated QR data will be removed.',
-      type: 'danger',
-      confirmText: 'Delete Table',
-      onConfirm: () => {
-        const rId = this.activeRestaurant()?.id || 1;
-        this.tableService.deleteTable(rId, tableId).subscribe({
-          next: () => {
-            this.toastService.info('Table Deleted', 'Table removed from floor.');
-            if (this.selectedTableDetails()?.id === tableId) {
-              this.closeTableDetails();
-            }
-          },
-          error: (err) => this.toastService.show(err?.error?.message || 'Failed to delete table', 'error')
-        });
-      }
+    const rId = this.activeRestaurant()?.id || 1;
+    const target = this.tablesList().find(t => t.id === tableId);
+    const tableNum = target?.tableNumber || `Table ${tableId}`;
+
+    this.tableService.deleteTable(rId, tableId).subscribe({
+      next: () => {
+        if (this.selectedTableDetails()?.id === tableId) {
+          this.closeTableDetails();
+        }
+        this.undoService.showUndo(`${tableNum} deleted`, () => this.tableService.restoreTable(rId, tableId), 7);
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to delete table', 'error')
     });
   }
 
@@ -1068,12 +1182,16 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   closeTableSession(tableId: number, event?: Event) {
     if (event) event.stopPropagation();
     const rId = this.activeRestaurant()?.id || 1;
+    const target = this.tablesList().find(t => t.id === tableId);
+    const prevStatus = target?.status || 'OCCUPIED';
+    const tableNum = target?.tableNumber || `Table ${tableId}`;
+
     this.tableService.closeTable(rId, tableId).subscribe({
       next: (closed) => {
-        this.toastService.info('Table Closed', `${closed.tableNumber} marked for cleaning.`);
         if (this.selectedTableDetails()?.id === tableId) {
           this.selectedTableDetails.set(closed);
         }
+        this.undoService.showUndo(`${tableNum} closed & marked for cleaning`, () => this.tableService.updateStatus(rId, tableId, prevStatus), 7);
       },
       error: (err) => this.toastService.show(err?.error?.message || 'Failed to close table', 'error')
     });

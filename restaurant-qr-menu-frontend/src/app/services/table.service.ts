@@ -169,6 +169,16 @@ export class TableService {
     );
   }
 
+  restoreTable(restaurantId: number | string, tableId: number | string): Observable<DiningTableData> {
+    return this.http.post<{ success: boolean; data: DiningTableData }>(`${this.apiUrl}/${restaurantId}/tables/${tableId}/restore`, {}).pipe(
+      map(res => res.data),
+      tap(restored => {
+        this.tablesList.update(list => [...list.filter(t => t.id !== restored.id), restored].sort((a, b) => a.tableNumber.localeCompare(b.tableNumber)));
+        this.calculateLocalStats(this.tablesList());
+      })
+    );
+  }
+
   private calculateLocalStats(tables: DiningTableData[]) {
     const total = tables.length;
     const available = tables.filter(t => t.status === 'AVAILABLE').length;

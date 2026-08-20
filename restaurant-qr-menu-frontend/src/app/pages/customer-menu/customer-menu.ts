@@ -17,7 +17,7 @@ import { ModalService } from '../../services/modal.service';
 import { OrderService, Order } from '../../services/order.service';
 import { PrintService } from '../../services/print.service';
 import { BackButton } from '../../components/back-button/back-button';
-
+import { UndoService } from '../../services/undo.service';
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
 
 export interface CartItem {
@@ -44,6 +44,7 @@ export class CustomerMenu implements OnInit, OnDestroy {
   orderService      = inject(OrderService);
   ticketService     = inject(TicketService);
   printService      = inject(PrintService);
+  undoService       = inject(UndoService);
 
   // ── Restaurant data ──────────────────────────────────────────────────────────
   restaurant = signal<Restaurant | undefined>(undefined);
@@ -330,11 +331,23 @@ export class CustomerMenu implements OnInit, OnDestroy {
   }
 
   removeFromCart(itemId: string) {
+    const item = this.cartItems().find(c => c.menuItem.id === itemId);
+    if (!item) return;
+
     this.cartItems.update((cart: CartItem[]) => cart.filter((c: CartItem) => c.menuItem.id !== itemId));
+    this.undoService.showUndo(`"${item.menuItem.name}" removed from cart`, () => {
+      this.cartItems.update(cart => [...cart, item]);
+    }, 7);
   }
 
   clearCart() {
+    const previous = [...this.cartItems()];
+    if (previous.length === 0) return;
+
     this.cartItems.set([]);
+    this.undoService.showUndo('Cart cleared', () => {
+      this.cartItems.set(previous);
+    }, 7);
   }
 
   // ── Place order ──────────────────────────────────────────────────────────────

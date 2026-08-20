@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
@@ -7,14 +8,15 @@ import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 import { OrderService, Order } from '../../services/order.service';
 import { BackButton } from '../../components/back-button/back-button';
-
 import { NotificationCenter } from '../../components/notification-center/notification-center';
 import { NotificationService } from '../../services/notification.service';
 import { TicketService, SupportTicketData, TicketMessageData } from '../../services/ticket.service';
+import { ChatService, ChatContact, ChatMessageItem } from '../../services/chat.service';
+import { UndoService } from '../../services/undo.service';
 
 @Component({
   selector: 'app-chef-dashboard',
-  imports: [CommonModule, NotificationCenter],
+  imports: [CommonModule, FormsModule, NotificationCenter],
   templateUrl: './chef-dashboard.html',
   styleUrls: ['./chef-dashboard.css'],
 })
@@ -25,6 +27,8 @@ export class ChefDashboard implements OnInit, OnDestroy {
   orderService        = inject(OrderService);
   ticketService       = inject(TicketService);
   notificationService = inject(NotificationService);
+  chatService         = inject(ChatService);
+  undoService         = inject(UndoService);
   http                = inject(HttpClient);
   router              = inject(Router);
 
@@ -51,6 +55,49 @@ export class ChefDashboard implements OnInit, OnDestroy {
   preparingCount = computed(() => this.orders().filter(o => ['preparing', 'accepted'].includes(String(o.status).toLowerCase())).length);
   doneCount      = computed(() => this.orders().filter(o => ['done', 'ready', 'completed'].includes(String(o.status).toLowerCase())).length);
 
+  // ── Chef <-> Owner Direct Chat ──────────────────────────────────
+  showDirectChatModal    = signal<boolean>(false);
+  directChatMessageInput = signal<string>('');
+  unreadChatCount        = computed(() => this.chatService.unreadTotalCount());
+  chatContacts           = computed(() => this.chatService.contacts());
+  activeChatContact      = computed(() => this.chatService.activeContact());
+  activeChatThread       = computed(() => this.chatService.activeThread());
+  isSendingChat          = computed(() => this.chatService.isSending());
+  isLoadingThread        = computed(() => this.chatService.isLoadingThread());
+
+  openDirectChatModal() {
+    this.showDirectChatModal.set(true);
+    const rId = 1;
+    this.chatService.fetchContacts(rId).subscribe(contacts => {
+      if (contacts && contacts.length > 0) {
+        const ownerContact = contacts.find(c => c.role === 'OWNER') || contacts[0];
+        this.chatService.loadThread(rId, ownerContact).subscribe();
+      }
+    });
+  }
+
+  closeDirectChatModal() {
+    this.showDirectChatModal.set(false);
+  }
+
+  selectChatContact(contact: ChatContact) {
+    this.chatService.loadThread(1, contact).subscribe();
+  }
+
+  sendDirectMessage() {
+    const text = this.directChatMessageInput().trim();
+    const contact = this.chatService.activeContact();
+    if (!text || !contact) return;
+
+    this.directChatMessageInput.set('');
+    this.chatService.sendMessage(1, contact.userId, text).subscribe();
+  }
+
+  sendQuickChatMessage(snippet: string) {
+    this.directChatMessageInput.set(snippet);
+    this.sendDirectMessage();
+  }
+
   // Kitchen Support & Tickets
   showKitchenSupportModal   = signal<boolean>(false);
   showChefTicketsListModal  = signal<boolean>(false);
@@ -70,14 +117,22 @@ export class ChefDashboard implements OnInit, OnDestroy {
   ngOnInit() {
     this.orderService.fetchOrders(1).subscribe();
     this.ticketService.fetchOwnerTickets(1).subscribe();
+    this.chatService.fetchUnreadCount(1);
 
     this.clockTicker = setInterval(() => {
       this.currentTime.set(Date.now());
     }, 1000);
 
-    // Live order and ticket sync every 2.5s
+    // Live order, chat, and ticket sync every 2.5s
     this.pollTicker = setInterval(() => {
       this.orderService.fetchOrders(1).subscribe();
+      this.chatService.fetchUnreadCount(1);
+      if (this.showDirectChatModal()) {
+        const activeC = this.chatService.activeContact();
+        if (activeC) {
+          this.chatService.refreshThreadSilently(1, activeC.userId);
+        }
+      }
     }, 2500);
   }
 
@@ -151,7 +206,8 @@ export class ChefDashboard implements OnInit, OnDestroy {
       }
     }
     this.orderService.updateOrderStatus(orderId, nextStatus).subscribe();
-    this.toastService.success('Order Status Updated', `Order ${target.orderNumber || orderId} set to ${nextStatus}`);
+    const orderNum = target.orderNumber || orderId;
+    this.undoService.showUndo(`Order #${orderNum} marked ${nextStatus}`, () => this.orderService.updateOrderStatus(orderId, currentStatus), 7);
   }
 
   parseDate(date: string | Date): Date {

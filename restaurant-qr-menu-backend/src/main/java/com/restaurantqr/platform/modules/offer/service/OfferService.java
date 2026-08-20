@@ -120,6 +120,16 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
+    @Transactional
+    public Offer restore(Long id, Long restaurantId) {
+        restaurantService.findById(restaurantId);
+        var offer = offerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Offer", id));
+        assertOwnership(offer, restaurantId);
+        offer.restore();
+        return offerRepository.save(offer);
+    }
+
     private void assertOwnership(Offer offer, Long restaurantId) {
         if (!offer.getRestaurant().getId().equals(restaurantId)) {
             throw new ForbiddenException("This offer does not belong to your restaurant");

@@ -68,6 +68,7 @@ public class Notification extends BaseEntity {
         TICKET_RESOLVED,
         SUPPORT_TICKET_UPDATE,
         SECURITY_ALERT,
+        CHAT_MESSAGE,
         SYSTEM_NOTICE
     }
 

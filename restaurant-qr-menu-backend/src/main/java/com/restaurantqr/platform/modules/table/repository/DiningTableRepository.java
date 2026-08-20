@@ -12,20 +12,24 @@ import java.util.Optional;
 @Repository
 public interface DiningTableRepository extends JpaRepository<DiningTable, Long> {
 
-    List<DiningTable> findByRestaurantIdOrderByTableNumberAsc(Long restaurantId);
+    List<DiningTable> findByRestaurantIdAndIsDeletedFalseOrderByTableNumberAsc(Long restaurantId);
 
-    List<DiningTable> findByRestaurantIdAndBranchIdOrderByTableNumberAsc(Long restaurantId, Long branchId);
+    List<DiningTable> findByRestaurantIdAndBranchIdAndIsDeletedFalseOrderByTableNumberAsc(Long restaurantId, Long branchId);
 
-    Optional<DiningTable> findByRestaurantIdAndTableNumber(Long restaurantId, String tableNumber);
+    Optional<DiningTable> findByRestaurantIdAndTableNumberAndIsDeletedFalse(Long restaurantId, String tableNumber);
 
-    List<DiningTable> findByRestaurantIdAndStatus(Long restaurantId, DiningTable.Status status);
+    List<DiningTable> findByRestaurantIdAndStatusAndIsDeletedFalse(Long restaurantId, DiningTable.Status status);
 
-    @Query("SELECT t FROM DiningTable t WHERE t.restaurant.id = :restaurantId AND (t.tableNumber = :tableNum OR t.tableNumber = :altTableNum)")
+    @Query("SELECT t FROM DiningTable t WHERE t.restaurant.id = :restaurantId AND t.isDeleted = false AND (t.tableNumber = :tableNum OR t.tableNumber = :altTableNum)")
     List<DiningTable> findByRestaurantIdAndTableNumberFuzzy(@Param("restaurantId") Long restaurantId,
                                                             @Param("tableNum") String tableNum,
                                                             @Param("altTableNum") String altTableNum);
 
-    long countByRestaurantIdAndStatus(Long restaurantId, DiningTable.Status status);
+    long countByRestaurantIdAndStatusAndIsDeletedFalse(Long restaurantId, DiningTable.Status status);
 
-    long countByRestaurantId(Long restaurantId);
+    long countByRestaurantIdAndIsDeletedFalse(Long restaurantId);
+
+    default long countByRestaurantId(Long restaurantId) {
+        return countByRestaurantIdAndIsDeletedFalse(restaurantId);
+    }
 }

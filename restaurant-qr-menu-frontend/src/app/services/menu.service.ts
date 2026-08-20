@@ -197,4 +197,20 @@ export class MenuService {
       })
     );
   }
+
+  restoreMenuItem(id: string, itemData?: MenuItem): Observable<any> {
+    if (itemData) {
+      this.menuItemsList.update(list => [...list.filter(i => i.id !== id), itemData]);
+      this.localAddedItems.push(itemData);
+      this.saveLocalItems();
+    }
+
+    const numericId = parseInt(id.replace(/^m_?/, ''), 10);
+    if (!isNaN(numericId)) {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/1/menu-items/${numericId}/restore`, {}).pipe(
+        catchError(() => of(null))
+      );
+    }
+    return of(null);
+  }
 }

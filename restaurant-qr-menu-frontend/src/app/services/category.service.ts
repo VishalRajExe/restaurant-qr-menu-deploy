@@ -167,4 +167,20 @@ export class CategoryService {
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
+
+  restoreCategory(id: string, categoryData?: Category): Observable<any> {
+    if (categoryData) {
+      this.categoriesList.update(list => [...list.filter(c => c.id !== id), categoryData]);
+      this.localAddedCategories.push(categoryData);
+      this.saveLocalCategories();
+    }
+
+    const numericId = parseInt(id.replace(/^c_?/, ''), 10);
+    if (!isNaN(numericId)) {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/1/categories/${numericId}/restore`, {}).pipe(
+        catchError(() => of(null))
+      );
+    }
+    return of(null);
+  }
 }

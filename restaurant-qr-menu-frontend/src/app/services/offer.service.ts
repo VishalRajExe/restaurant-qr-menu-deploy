@@ -71,4 +71,29 @@ export class OfferService {
 
     return newOffer;
   }
+
+  deleteOffer(id: string, restaurantId: string = '1') {
+    this.offersList.update(list => list.filter(o => o.id !== id));
+    const numericId = parseInt(id.replace('off_', ''), 10);
+    if (!isNaN(numericId)) {
+      const restId = parseInt(restaurantId.replace('r', ''), 10) || 1;
+      this.http.delete<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/offers/${numericId}`)
+        .pipe(catchError(() => of(null)))
+        .subscribe();
+    }
+  }
+
+  restoreOffer(id: string, offerData?: Offer): Observable<any> {
+    if (offerData) {
+      this.offersList.update(list => [...list.filter(o => o.id !== id), offerData]);
+    }
+    const numericId = parseInt(id.replace('off_', ''), 10);
+    if (!isNaN(numericId)) {
+      const restId = 1;
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/offers/${numericId}/restore`, {}).pipe(
+        catchError(() => of(null))
+      );
+    }
+    return of(null);
+  }
 }
