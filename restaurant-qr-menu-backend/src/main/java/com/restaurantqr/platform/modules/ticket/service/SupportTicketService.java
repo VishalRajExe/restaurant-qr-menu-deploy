@@ -9,14 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -25,8 +22,6 @@ public class SupportTicketService {
 
     private final SupportTicketRepository supportTicketRepository;
     private final TicketMessageRepository ticketMessageRepository;
-    private final KnowledgeArticleRepository knowledgeArticleRepository;
-    private final SavedReplyRepository savedReplyRepository;
     private final RestaurantService restaurantService;
     private final UserRepository userRepository;
 

@@ -122,7 +122,7 @@
                 
                 <!-- Food Image & Badges -->
                 <div class="pos-dish-img-wrap">
-                  <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="pos-dish-img"
+                  <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" [title]="dish.name" class="pos-dish-img"
                        onerror="this.src='/img/menu-1.jpg'" />
                   
                   @if (dish.isPopular) {

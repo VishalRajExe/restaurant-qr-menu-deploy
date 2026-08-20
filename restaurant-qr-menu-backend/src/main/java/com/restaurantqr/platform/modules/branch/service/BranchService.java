@@ -5,8 +5,6 @@ import com.restaurantqr.platform.common.ResourceNotFoundException;
 import com.restaurantqr.platform.modules.branch.entity.Branch;
 import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

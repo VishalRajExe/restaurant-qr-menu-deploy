@@ -1,13 +1,10 @@
 package com.restaurantqr.platform.modules.subscription.service;
 
 import com.restaurantqr.platform.common.BadRequestException;
-import com.restaurantqr.platform.common.ResourceNotFoundException;
 import com.restaurantqr.platform.modules.restaurant.entity.Restaurant;
 import com.restaurantqr.platform.modules.restaurant.repository.RestaurantRepository;
 import com.restaurantqr.platform.modules.subscription.entity.Subscription;
 import com.restaurantqr.platform.modules.subscription.repository.SubscriptionRepository;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

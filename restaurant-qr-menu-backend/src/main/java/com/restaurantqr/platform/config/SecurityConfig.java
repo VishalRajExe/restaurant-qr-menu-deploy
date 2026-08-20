@@ -34,7 +34,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -223,12 +222,5 @@ public class SecurityConfig {
             result[i] = ctx + "/" + pattern;
         }
         return result;
-    }
-
-    /**
-     * Overload for single pattern.
-     */
-    private String prependContextPath(String pattern) {
-        return prependContextPath(new String[]{pattern})[0];
     }
 }

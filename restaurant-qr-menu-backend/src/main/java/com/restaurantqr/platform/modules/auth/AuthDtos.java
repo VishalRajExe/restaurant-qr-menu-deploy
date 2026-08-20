@@ -1,6 +1,5 @@
 package com.restaurantqr.platform.modules.auth;
 
-import com.restaurantqr.platform.users.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

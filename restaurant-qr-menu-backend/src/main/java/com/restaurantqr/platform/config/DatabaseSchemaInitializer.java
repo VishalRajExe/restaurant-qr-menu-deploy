@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@org.springframework.core.annotation.Order(1)
 @org.springframework.context.annotation.Profile("!test")
 @RequiredArgsConstructor
 public class DatabaseSchemaInitializer implements CommandLineRunner {
@@ -44,6 +45,20 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
             log.info("Set default PENDING_VERIFICATION for existing NULL verification_status rows.");
         } catch (Exception e) {
             log.warn("Update NULL verification_status skipped: {}", e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("ALTER TABLE notifications MODIFY COLUMN event_type VARCHAR(100) NOT NULL");
+            log.info("Successfully updated notifications.event_type column to VARCHAR(100).");
+        } catch (Exception e) {
+            log.warn("Automatic notifications.event_type alter skipped: {}", e.getMessage());
+        }
+
+        try {
+            jdbcTemplate.execute("ALTER TABLE restaurants ADD COLUMN chef_invite_code VARCHAR(50) NULL");
+            log.info("Successfully added chef_invite_code column on restaurants table.");
+        } catch (Exception e) {
+            log.warn("chef_invite_code column already exists: {}", e.getMessage());
         }
 
     }

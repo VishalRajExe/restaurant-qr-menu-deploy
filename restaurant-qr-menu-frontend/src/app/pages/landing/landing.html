@@ -194,7 +194,7 @@
       <div class="restoran-menu-grid">
         @for (item of currentMenuItems; track item.name) {
           <div class="restoran-dish-item">
-            <img [src]="item.image" [alt]="item.name" class="dish-thumb" />
+            <img [src]="item.image" [alt]="item.name" [title]="item.name" class="dish-thumb" />
             <div class="dish-info">
               <div class="dish-header">
                 <span class="dish-name">{{ item.name }}</span>
@@ -232,48 +232,48 @@
           <h5 class="chef-name">Antoine Laurent</h5>
           <small class="chef-role">Executive Chef</small>
           <div class="chef-socials">
-            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="chef-social-link" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
 
         <div class="chef-card">
           <div class="chef-avatar-wrap">
-            <img src="/img/team-2.jpg" alt="Pastry Chef" class="chef-avatar" />
+            <img src="/img/team-2.jpg" alt="Pastry Chef" title="Marco Rossi" class="chef-avatar" />
           </div>
           <h5 class="chef-name">Marco Rossi</h5>
           <small class="chef-role">Head Grill Master</small>
           <div class="chef-socials">
-            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="chef-social-link" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
 
         <div class="chef-card">
           <div class="chef-avatar-wrap">
-            <img src="/img/team-3.jpg" alt="Sous Chef" class="chef-avatar" />
+            <img src="/img/team-3.jpg" alt="Sous Chef" title="Elena Rostova" class="chef-avatar" />
           </div>
           <h5 class="chef-name">Elena Rostova</h5>
           <small class="chef-role">Pastry & Dessert Specialist</small>
           <div class="chef-socials">
-            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="chef-social-link" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
 
         <div class="chef-card">
           <div class="chef-avatar-wrap">
-            <img src="/img/team-4.jpg" alt="Sommelier" class="chef-avatar" />
+            <img src="/img/team-4.jpg" alt="Sommelier" title="David Chen" class="chef-avatar" />
           </div>
           <h5 class="chef-name">David Chen</h5>
           <small class="chef-role">Head Sommelier & Mixologist</small>
           <div class="chef-socials">
-            <a href="#" class="chef-social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="chef-social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="chef-social-link" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="chef-social-link" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="chef-social-link" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
       </div>
@@ -372,10 +372,10 @@
           <p class="footer-text"><i class="fa fa-phone-alt text-gold me-2"></i>+1 (555) 345-6789</p>
           <p class="footer-text"><i class="fa fa-envelope text-gold me-2"></i>hello&#64;restqr.com</p>
           <div class="footer-socials">
-            <a href="#" class="footer-social-btn"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="footer-social-btn"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="footer-social-btn"><i class="fab fa-youtube"></i></a>
-            <a href="#" class="footer-social-btn"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="footer-social-btn" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="footer-social-btn" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="footer-social-btn" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="#" class="footer-social-btn" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
 

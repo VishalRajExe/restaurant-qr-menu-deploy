@@ -297,6 +297,7 @@ label.form-label,
   border-right: 1.5px solid #cbd5e1;
   display: flex;
   align-items: center;
+  -webkit-user-select: none;
   user-select: none;
   letter-spacing: 0.02em;
 }

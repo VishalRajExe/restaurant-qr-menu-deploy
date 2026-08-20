@@ -351,6 +351,7 @@
   color: #0b1c30;
   cursor: pointer;
   transition: all 0.2s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 

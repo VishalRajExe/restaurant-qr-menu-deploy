@@ -490,12 +490,12 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                   <div class="form-field">
                     <label class="form-label">Price ($) *</label>
-                    <input class="lez-input" type="number" step="0.01"
+                    <input class="lez-input" type="number" step="0.01" placeholder="0.00" title="Price" aria-label="Price"
                            [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
                   </div>
                   <div class="form-field">
                     <label class="form-label">Category</label>
-                    <select class="lez-input" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
+                    <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
                       @for (cat of categories(); track cat.id) {
                         <option [value]="cat.id">{{ cat.name }}</option>
                       }
@@ -511,9 +511,9 @@
 
                 <div class="form-field">
                   <label class="form-label">Item Photo</label>
-                  <input type="file" accept="image/*" class="lez-input" style="padding:8px" (change)="onDishImageSelected($event)" />
+                  <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Item Photo" aria-label="Item Photo" (change)="onDishImageSelected($event)" />
                   @if (imageUploadPreview()) {
-                    <img [src]="imageUploadPreview()" alt="" style="width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px" />
+                    <img [src]="imageUploadPreview()" alt="Dish Preview" title="Dish Preview" style="width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:8px" />
                   }
                 </div>
 
@@ -548,7 +548,7 @@
                     </button>
                   }
                 </div>
-                <select class="lez-input" style="width:200px" [value]="selectedFilterCategoryId()"
+                <select class="lez-input" style="width:200px" title="Filter Category" aria-label="Filter Category" [value]="selectedFilterCategoryId()"
                         (change)="selectedFilterCategoryId.set($any($event.target).value)">
                   <option value="all">All Categories ({{ menuItems().length }})</option>
                   @for (cat of categories(); track cat.id) {
@@ -575,7 +575,7 @@
                   @for (dish of paginatedMenuItems(); track dish.id) {
                     <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable" [class.is-editing]="editingItemId() === dish.id">
                       <div class="dish-card-image-wrap">
-                        <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" class="lez-dish-img" />
+                        <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" [title]="dish.name" class="lez-dish-img" />
                         <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
                           {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
                         </span>
@@ -782,15 +782,15 @@
             <div style="display:flex;flex-direction:column;gap:16px">
               <div class="form-field">
                 <label class="form-label">Restaurant Name</label>
-                <input class="lez-input" [value]="settingName()" (input)="settingName.set($any($event.target).value)" />
+                <input class="lez-input" placeholder="Restaurant Name" title="Restaurant Name" aria-label="Restaurant Name" [value]="settingName()" (input)="settingName.set($any($event.target).value)" />
               </div>
               <div class="form-field">
                 <label class="form-label">Venue Address</label>
-                <input class="lez-input" [value]="settingAddress()" (input)="settingAddress.set($any($event.target).value)" />
+                <input class="lez-input" placeholder="Venue Address" title="Venue Address" aria-label="Venue Address" [value]="settingAddress()" (input)="settingAddress.set($any($event.target).value)" />
               </div>
               <div class="form-field">
                 <label class="form-label">Phone Number</label>
-                <input class="lez-input" [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
+                <input class="lez-input" placeholder="Phone Number" title="Phone Number" aria-label="Phone Number" [value]="settingPhone()" (input)="settingPhone.set($any($event.target).value)" />
               </div>
               <button class="lez-btn lez-btn-primary" style="width:fit-content" (click)="saveRestaurantSettings()">
                 Save Profile Settings
@@ -873,7 +873,7 @@
 
           <div class="form-field">
             <label class="form-label">Urgency Priority</label>
-            <select class="lez-input" [value]="supportPriority()" (change)="supportPriority.set($any($event.target).value)">
+            <select class="lez-input" title="Urgency Priority" aria-label="Urgency Priority" [value]="supportPriority()" (change)="supportPriority.set($any($event.target).value)">
               <option value="low">Low (General Question)</option>
               <option value="medium">Medium (Menu / Table Issue)</option>
               <option value="high">High (KDS / Billing Issue)</option>
@@ -927,12 +927,12 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="form-field">
               <label class="form-label">Price ($) *</label>
-              <input class="lez-input" type="number" step="0.01" min="0.5"
+              <input class="lez-input" type="number" step="0.01" min="0.5" placeholder="0.00" title="Price" aria-label="Price"
                      [value]="newItemPrice()" (input)="newItemPrice.set(+$any($event.target).value)" />
             </div>
             <div class="form-field">
               <label class="form-label">Category</label>
-              <select class="lez-input" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
+              <select class="lez-input" title="Category" aria-label="Category" [value]="newItemCategoryId()" (change)="newItemCategoryId.set($any($event.target).value)">
                 @for (cat of categories(); track cat.id) {
                   <option [value]="cat.id">{{ cat.name }}</option>
                 }
@@ -948,9 +948,9 @@
 
           <div class="form-field">
             <label class="form-label">Dish Image</label>
-            <input type="file" accept="image/*" class="lez-input" style="padding:8px" (change)="onDishImageSelected($event)" />
+            <input type="file" accept="image/*" class="lez-input" style="padding:8px" title="Dish Image" aria-label="Dish Image" (change)="onDishImageSelected($event)" />
             @if (imageUploadPreview() || newItemImage()) {
-              <img [src]="imageUploadPreview() || newItemImage()" alt="" style="width:100%;height:120px;border-radius:10px;object-fit:cover;margin-top:8px;border:1px solid var(--border)" />
+              <img [src]="imageUploadPreview() || newItemImage()" alt="Dish Image Preview" title="Dish Image Preview" style="width:100%;height:120px;border-radius:10px;object-fit:cover;margin-top:8px;border:1px solid var(--border)" />
             }
           </div>
 

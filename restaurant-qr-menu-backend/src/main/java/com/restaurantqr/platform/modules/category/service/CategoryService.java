@@ -5,9 +5,6 @@ import com.restaurantqr.platform.common.ResourceNotFoundException;
 import com.restaurantqr.platform.modules.category.entity.Category;
 import com.restaurantqr.platform.modules.category.repository.CategoryRepository;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -93,7 +90,7 @@ public class CategoryService {
     public void reorder(Long restaurantId, List<ReorderItem> items) {
         restaurantService.findById(restaurantId);
         for (ReorderItem item : items) {
-            var category = findById(item.id, restaurantId);
+            findById(item.id, restaurantId);
             categoryRepository.updateDisplayOrder(item.id, item.displayOrder);
         }
         log.info("Reordered {} categories for restaurant={}", items.size(), restaurantId);

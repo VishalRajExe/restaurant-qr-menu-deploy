@@ -6,11 +6,9 @@ import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
 import com.restaurantqr.platform.modules.category.repository.CategoryRepository;
 import com.restaurantqr.platform.modules.menuitem.entity.MenuItem;
 import com.restaurantqr.platform.modules.menuitem.repository.MenuItemRepository;
-import com.restaurantqr.platform.modules.offer.repository.OfferRepository;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
 import com.restaurantqr.platform.modules.subscription.repository.SubscriptionRepository;
 import com.restaurantqr.platform.modules.report.dto.ReportData;
-import com.restaurantqr.platform.users.repository.StaffInvitationRepository;
 import com.restaurantqr.platform.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +30,7 @@ public class ReportService {
     private final CategoryRepository categoryRepository;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
-    private final StaffInvitationRepository staffInvitationRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final AuditLogRepository auditLogRepository;
-    private final OfferRepository offerRepository;
 
     public enum ReportType {
         DAILY,

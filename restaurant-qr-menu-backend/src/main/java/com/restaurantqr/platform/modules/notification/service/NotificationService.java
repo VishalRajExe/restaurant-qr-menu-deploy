@@ -3,6 +3,7 @@ package com.restaurantqr.platform.modules.notification.service;
 import com.restaurantqr.platform.common.ResourceNotFoundException;
 import com.restaurantqr.platform.modules.notification.entity.Notification;
 import com.restaurantqr.platform.modules.notification.repository.NotificationRepository;
+import com.restaurantqr.platform.users.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

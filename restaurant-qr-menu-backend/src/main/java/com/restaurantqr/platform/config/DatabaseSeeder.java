@@ -5,6 +5,7 @@ import com.restaurantqr.platform.modules.branch.repository.BranchRepository;
 import com.restaurantqr.platform.modules.category.entity.Category;
 import com.restaurantqr.platform.modules.category.repository.CategoryRepository;
 import com.restaurantqr.platform.modules.menuitem.entity.MenuItem;
+import com.restaurantqr.platform.modules.menuitem.repository.MenuItemRepository;
 import com.restaurantqr.platform.modules.notification.entity.Notification;
 import com.restaurantqr.platform.modules.notification.repository.NotificationRepository;
 import com.restaurantqr.platform.modules.order.entity.Order;
@@ -26,14 +27,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Component
-@org.springframework.core.annotation.Order(10)
+@org.springframework.core.annotation.Order(2)
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
 
@@ -76,13 +76,15 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         if (restaurant.getChefInviteCode() == null) {
             restaurant.setChefInviteCode("CHEF-REST01");
-            restaurant = restaurantRepository.save(restaurant);
+            restaurantRepository.save(restaurant);
         }
+
+        final Restaurant targetRestaurant = restaurant;
 
         // 2. Seed or update Branch
         Branch branch = branchRepository.findAll().stream().findFirst().orElseGet(() -> {
             Branch b = Branch.builder()
-                    .restaurant(restaurant)
+                    .restaurant(targetRestaurant)
                     .name("Main Manhattan Branch")
                     .address("123 Gourmet Blvd, New York, NY 10001")
                     .phone("+1 (555) 345-6789")
@@ -289,6 +291,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .status(SupportTicket.Status.RESOLVED)
                     .escalationLevel(SupportTicket.EscalationLevel.LEVEL_1)
                     .build());
+        }
+
         // 8. Seed Notifications
         if (notificationRepository.count() == 0) {
             log.info("Seeding system notifications...");
