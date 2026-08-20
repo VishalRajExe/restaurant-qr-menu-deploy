@@ -1594,14 +1594,15 @@ label.form-label,
   border-radius: 16px;
   border-bottom-left-radius: 4px;
   background: #ffffff;
+  color: #0f172a !important;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .chat-bubble.is-mine {
-  background: #ea580c;
-  color: #ffffff;
-  border-color: #ea580c;
+  background: #ea580c !important;
+  color: #ffffff !important;
+  border-color: #ea580c !important;
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 4px;
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
@@ -1610,29 +1611,35 @@ label.form-label,
 .chat-bubble-sender {
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: #475569 !important;
   margin-bottom: 2px;
 }
 
 .chat-bubble.is-mine .chat-bubble-sender {
-  color: #fed7aa;
+  color: #fed7aa !important;
 }
 
 .role-sub {
   font-weight: 500;
   font-size: 10px;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .chat-bubble-text {
   font-size: 13.5px;
   line-height: 1.4;
   word-break: break-word;
+  color: #0f172a !important;
+  font-weight: 500;
+}
+
+.chat-bubble.is-mine .chat-bubble-text {
+  color: #ffffff !important;
 }
 
 .chat-bubble-time {
   font-size: 10px;
-  color: #94a3b8;
+  color: #64748b !important;
   margin-top: 4px;
   text-align: right;
   display: flex;
@@ -1642,11 +1649,11 @@ label.form-label,
 }
 
 .chat-bubble.is-mine .chat-bubble-time {
-  color: #fed7aa;
+  color: #ffedd5 !important;
 }
 
 .read-ticks.read {
-  color: #67e8f9;
+  color: #67e8f9 !important;
 }
 
 .chat-composer-bar {
