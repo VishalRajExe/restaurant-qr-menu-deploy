@@ -45,6 +45,14 @@
         <span>QR Codes</span>
       </button>
 
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'support'" (click)="selectTab('support')">
+        <span class="material-symbols-outlined">support_agent</span>
+        <span>Support & Help</span>
+        @if (unseenTicketsCount() > 0) {
+          <span class="sidebar-pill-badge">{{ unseenTicketsCount() }}</span>
+        }
+      </button>
+
       <div style="margin-top:auto">
         <button class="lezato-nav-item" [class.active]="activeTab() === 'settings'" (click)="selectTab('settings')">
           <span class="material-symbols-outlined">settings</span>
@@ -334,6 +342,11 @@
                         <span class="material-symbols-outlined text-[18px]">done_all</span>
                         <span>Mark as Delivered</span>
                       </button>
+                    } @else if (current.status === 'COMPLETED' || current.status === 'DELIVERED') {
+                      <div style="grid-column:span 2;padding:10px 14px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;color:#065f46;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px">
+                        <span class="material-symbols-outlined text-[18px]">done_all</span>
+                        <span>Order Delivered & Completed</span>
+                      </div>
                     }
 
                     <button class="lez-btn lez-btn-secondary" (click)="printKOT(current)">
@@ -575,7 +588,7 @@
                   @for (dish of paginatedMenuItems(); track dish.id) {
                     <div class="lez-dish-card" [class.unavailable]="!dish.isAvailable" [class.is-editing]="editingItemId() === dish.id">
                       <div class="dish-card-image-wrap">
-                        <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" [title]="dish.name" class="lez-dish-img" />
+                        <img src="/img/menu-1.jpg" [src]="dish.image || '/img/menu-1.jpg'" alt="Menu Dish" [alt]="dish.name" title="Menu Dish" [title]="dish.name" class="lez-dish-img" />
                         <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
                           {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
                         </span>
@@ -843,57 +856,283 @@
           </div>
 
         </div>
+      } @else if (activeTab() === 'support') {
+        <!-- ══════════════════════════════════════════════════════════════════════
+             SUPPORT & REPORTS MANAGEMENT TAB
+             ══════════════════════════════════════════════════════════════════════ -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+            <div>
+              <h2 style="font-size:22px;font-weight:800;color:var(--text-primary);margin:0">Support & Help Desk</h2>
+              <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0">Create technical, billing, or equipment tickets and track resolution in real time.</p>
+            </div>
+            <button class="lez-btn lez-btn-primary" (click)="openCreateTicketModal()">
+              <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>Create New Ticket</span>
+            </button>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="pos-filter-pill-bar" style="margin:0">
+            <button class="filter-pill-btn" [class.active]="supportFilter() === 'ALL'" (click)="supportFilter.set('ALL')">
+              All Tickets ({{ ownerTickets().length }})
+            </button>
+            <button class="filter-pill-btn" [class.active]="supportFilter() === 'OPEN'" (click)="supportFilter.set('OPEN')">
+              Open
+            </button>
+            <button class="filter-pill-btn" [class.active]="supportFilter() === 'IN_PROGRESS'" (click)="supportFilter.set('IN_PROGRESS')">
+              In Progress
+            </button>
+            <button class="filter-pill-btn" [class.active]="supportFilter() === 'RESOLVED'" (click)="supportFilter.set('RESOLVED')">
+              Resolved
+            </button>
+          </div>
+
+          <!-- Tickets Table / List -->
+          <div class="lez-card" style="padding:0;overflow:hidden">
+            @if (filteredOwnerTickets().length === 0) {
+              <div style="text-align:center;padding:48px 24px">
+                <span class="material-symbols-outlined text-[48px] text-gray-300">support_agent</span>
+                <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:12px 0 4px">No support tickets found</h4>
+                <p style="font-size:13px;color:var(--text-secondary);margin:0">Need help? Submit a new ticket to get immediate assistance from our team.</p>
+              </div>
+            } @else {
+              <div style="overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
+                  <thead>
+                    <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;color:#475569;font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700">
+                      <th style="padding:14px 18px">Ticket ID</th>
+                      <th style="padding:14px 18px">Subject & Category</th>
+                      <th style="padding:14px 18px">Priority</th>
+                      <th style="padding:14px 18px">Status</th>
+                      <th style="padding:14px 18px">Created</th>
+                      <th style="padding:14px 18px;text-align:right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (t of filteredOwnerTickets(); track t.id) {
+                      <tr style="border-bottom:1px solid #e2e8f0;transition:background 0.2s" (click)="openTicketDetails(t)" class="cursor-pointer hover:bg-slate-50">
+                        <td style="padding:14px 18px;font-weight:800;color:#0b1c30;font-family:monospace">
+                          <span style="background:#fff1ec;color:#c2410c;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa;font-size:12px">
+                            {{ t.ticketNumber || t.id }}
+                          </span>
+                        </td>
+                        <td style="padding:14px 18px">
+                          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                            <span style="font-weight:700;color:#0f172a;font-size:13.5px">{{ t.subject }}</span>
+                            @if (t.isChefIssue) {
+                              <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+                            }
+                            @if (t.isEscalated) {
+                              <span class="badge-escalated">⚡ Escalated to Admin</span>
+                            }
+                          </div>
+                          <div style="font-size:11.5px;color:#64748b;margin-top:2px">
+                            Category: <strong style="color:#334155">{{ t.category }}</strong> • By: <strong>{{ t.createdByName || t.customerName || 'Staff' }}</strong>
+                          </div>
+                        </td>
+                        <td style="padding:14px 18px">
+                          <span class="lez-badge" [class]="'priority-' + t.priority.toLowerCase()">
+                            {{ t.priority }}
+                          </span>
+                        </td>
+                        <td style="padding:14px 18px">
+                          <span class="lez-badge" [class]="'status-' + t.status.toLowerCase()">
+                            ● {{ t.status }}
+                          </span>
+                        </td>
+                        <td style="padding:14px 18px;color:#475569;font-size:12px;font-weight:600">
+                          {{ t.createdAt | date:'short' }}
+                        </td>
+                        <td style="padding:14px 18px;text-align:right" (click)="$event.stopPropagation()">
+                          <div style="display:flex;gap:6px;justify-content:flex-end">
+                            @if (!t.isEscalated && t.status !== 'RESOLVED' && t.status !== 'CLOSED') {
+                              <button class="lez-btn lez-btn-sm" style="background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700;font-size:11.5px"
+                                      (click)="escalateTicketToAdmin(t.id)" title="Escalate to Super Admin">
+                                <span class="material-symbols-outlined text-[14px]">bolt</span>
+                                <span>Send to Admin</span>
+                              </button>
+                            }
+                            <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="openTicketDetails(t)">
+                              <span class="material-symbols-outlined text-[15px]">chat</span>
+                              <span>View & Chat</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+        </div>
       }
 
     </main>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════════
-       SUPPORT & STAFF INQUIRY MODAL
+       CREATE SUPPORT TICKET MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
-  @if (showSupportModal()) {
-    <div class="lez-overlay animate-fade-in" (click)="closeSupportModal()">
-      <div class="lez-modal" style="max-width:480px" (click)="$event.stopPropagation()">
+  @if (showCreateTicketModal()) {
+    <div class="lez-overlay animate-fade-in" (click)="showCreateTicketModal.set(false)">
+      <div class="lez-modal" style="max-width:520px" (click)="$event.stopPropagation()">
+        
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
           <div style="display:flex;align-items:center;gap:10px">
             <span class="material-symbols-outlined text-[24px] text-accent">support_agent</span>
-            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Restaurant Support & Inquiry</h3>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Create Support Ticket</h3>
           </div>
-          <button class="pos-modal-close" (click)="closeSupportModal()">
+          <button class="pos-modal-close" (click)="showCreateTicketModal.set(false)">
             <span class="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:14px">
           <div class="form-field">
-            <label class="form-label">Subject</label>
-            <input class="lez-input" placeholder="e.g. Menu Update Request, Kitchen Terminal"
-                   [value]="supportSubject()" (input)="supportSubject.set($any($event.target).value)" />
+            <label class="form-label">Subject *</label>
+            <input class="lez-input" placeholder="e.g. Printer Offline / KDS Delay / Billing Query"
+                   [value]="ticketSubject()" (input)="ticketSubject.set($any($event.target).value)" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-field">
+              <label class="form-label">Category</label>
+              <select class="lez-input" title="Category" aria-label="Category" [value]="ticketCategory()" (change)="ticketCategory.set($any($event.target).value)">
+                <option value="TECHNICAL_ISSUE">Technical Issue</option>
+                <option value="KITCHEN_EQUIPMENT">Kitchen / POS Terminal</option>
+                <option value="BILLING">Billing & Invoices</option>
+                <option value="MENU_ISSUE">Menu / Price Query</option>
+                <option value="QR_PROBLEM">QR Code Assistance</option>
+                <option value="GENERAL">General Inquiry</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Priority Level</label>
+              <select class="lez-input" title="Priority" aria-label="Priority" [value]="ticketPriority()" (change)="ticketPriority.set($any($event.target).value)">
+                <option value="LOW">Low (General)</option>
+                <option value="MEDIUM">Medium (Needs Attention)</option>
+                <option value="HIGH">High (Urgent Issue)</option>
+                <option value="CRITICAL">Critical (System Down)</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-field">
-            <label class="form-label">Urgency Priority</label>
-            <select class="lez-input" title="Urgency Priority" aria-label="Urgency Priority" [value]="supportPriority()" (change)="supportPriority.set($any($event.target).value)">
-              <option value="low">Low (General Question)</option>
-              <option value="medium">Medium (Menu / Table Issue)</option>
-              <option value="high">High (KDS / Billing Issue)</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Message Details</label>
-            <textarea class="lez-input" rows="4" placeholder="Describe the issue or assistance required..."
-                      [value]="supportMessage()" (input)="supportMessage.set($any($event.target).value)"></textarea>
+            <label class="form-label">Detailed Description *</label>
+            <textarea class="lez-input" rows="4" placeholder="Describe the issue in detail, error messages, and table/device affected..."
+                      [value]="ticketDescription()" (input)="ticketDescription.set($any($event.target).value)"></textarea>
           </div>
         </div>
 
         <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeSupportModal()">Cancel</button>
-          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitSupportTicket()">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="showCreateTicketModal.set(false)">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitOwnerTicket()">
             <span class="material-symbols-outlined text-[16px]">send</span>
-            <span>Send Inquiry</span>
+            <span>Submit Ticket</span>
           </button>
         </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       TICKET CONVERSATION DETAILS MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showTicketDetailsModal()) {
+    <div class="lez-overlay animate-fade-in" (click)="showTicketDetailsModal.set(false)">
+      <div class="lez-modal" style="max-width:640px" (click)="$event.stopPropagation()">
+        
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-family:monospace;font-size:12px;font-weight:800;color:#c2410c;background:#fff1ec;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa">
+                {{ selectedTicketDetails()?.ticket?.ticketNumber }}
+              </span>
+              <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
+                ● {{ selectedTicketDetails()?.ticket?.status }}
+              </span>
+              <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
+                {{ selectedTicketDetails()?.ticket?.priority }}
+              </span>
+              @if (selectedTicketDetails()?.ticket?.isChefIssue) {
+                <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+              }
+              @if (selectedTicketDetails()?.ticket?.isEscalated) {
+                <span class="badge-escalated">⚡ Escalated to Admin Desk</span>
+              }
+            </div>
+            <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin:8px 0 2px">
+              {{ selectedTicketDetails()?.ticket?.subject }}
+            </h3>
+            <p style="font-size:12px;color:#64748b;margin:0">
+              Category: <strong style="color:#334155">{{ selectedTicketDetails()?.ticket?.category }}</strong> • Reported by: <strong style="color:#334155">{{ selectedTicketDetails()?.ticket?.createdByName || selectedTicketDetails()?.ticket?.customerName || 'Staff' }}</strong> • {{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}
+            </p>
+          </div>
+          <button class="pos-modal-close" (click)="showTicketDetailsModal.set(false)">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Message Thread -->
+        <div style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:14px;background:#f8fafc;border-radius:12px;margin-bottom:16px;border:1px solid #e2e8f0">
+          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
+            <div style="display:flex;flex-direction:column;gap:4px"
+                 [style.align-items]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' ? 'flex-end' : 'flex-start'">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b">
+                <strong style="color:#1e293b">{{ msg.senderName }}</strong>
+                <span>({{ msg.senderRole }})</span>
+                <span>• {{ msg.createdAt | date:'shortTime' }}</span>
+              </div>
+              <div style="padding:10px 14px;border-radius:12px;font-size:13px;max-width:85%;line-height:1.4"
+                   [style.background]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' ? '#ff6b35' : (msg.senderRole === 'SUPER_ADMIN' ? '#0b1c30' : '#ffffff')"
+                   [style.color]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' || msg.senderRole === 'SUPER_ADMIN' ? '#ffffff' : '#0b1c30'"
+                   [style.border]="msg.senderRole === 'OWNER' || msg.senderRole === 'CHEF' || msg.senderRole === 'SUPER_ADMIN' ? 'none' : '1.5px solid #cbd5e1'">
+                {{ msg.message }}
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Reply Input -->
+        @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
+          <div style="display:flex;gap:8px">
+            <input class="lez-input" style="flex:1" placeholder="Type your reply message..."
+                   [value]="newReplyMessage()" (input)="newReplyMessage.set($any($event.target).value)"
+                   (keyup.enter)="sendTicketReply()" />
+            <button class="lez-btn lez-btn-primary" [disabled]="isSendingReply() || !newReplyMessage().trim()" (click)="sendTicketReply()">
+              <span class="material-symbols-outlined text-[16px]">send</span>
+              <span>Reply</span>
+            </button>
+          </div>
+        }
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
+              <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="resolveOwnerTicket(selectedTicketDetails()!.ticket.id)">
+                <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                <span>Mark as Resolved</span>
+              </button>
+
+              @if (!selectedTicketDetails()?.ticket?.isEscalated) {
+                <button class="lez-btn lez-btn-sm" style="background:#faf5ff;color:#7e22ce;border:1.5px solid #d8b4fe;font-weight:700"
+                        (click)="escalateTicketToAdmin(selectedTicketDetails()!.ticket.id)">
+                  <span class="material-symbols-outlined text-[15px]">bolt</span>
+                  <span>Escalate to Admin Desk</span>
+                </button>
+              }
+            } @else {
+              <span style="font-size:12px;color:#166534;font-weight:700">✓ Ticket is marked resolved</span>
+            }
+          </div>
+          <button class="lez-btn lez-btn-sm lez-btn-outline" (click)="showTicketDetailsModal.set(false)">Close</button>
+        </div>
+
       </div>
     </div>
   }

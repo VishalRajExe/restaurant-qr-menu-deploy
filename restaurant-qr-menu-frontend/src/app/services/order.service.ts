@@ -36,6 +36,9 @@ export interface Order {
 export class OrderService {
   private http = inject(HttpClient);
   private ordersList = signal<Order[]>([]);
+  private unseenOrders = signal<number>(0);
+
+  unseenOrdersCount = this.unseenOrders.asReadonly();
 
   constructor() {
     this.loadOrders();
@@ -58,29 +61,7 @@ export class OrderService {
     } catch (e) {
       console.warn('Could not load orders from storage', e);
     }
-
-    // Default seed order if local storage is empty
-    const seedOrders: Order[] = [
-      {
-        id: 'ORD-101',
-        orderNumber: 'ORD-101',
-        table: 'Table 05',
-        tableNumber: '05',
-        customerMobile: '9876543210',
-        customerName: 'Guest Customer',
-        placedAt: new Date(Date.now() - 300000).toISOString(),
-        status: 'PENDING',
-        totalAmount: 450,
-        items: [
-          { name: 'Truffle Mushroom Burger', qty: 2, price: 180, subtotal: 360, note: 'Medium Spice' },
-          { name: 'Artisanal French Fries', qty: 1, price: 90, subtotal: 90 }
-        ],
-        specialRequest: 'No cutlery required, extra napkins please.',
-        waiterName: 'Self-Order QR'
-      }
-    ];
-    this.ordersList.set(seedOrders);
-    this.saveOrders(seedOrders);
+    this.ordersList.set([]);
   }
 
   private saveOrders(list: Order[]): void {
@@ -99,11 +80,17 @@ export class OrderService {
     return this.ordersList.asReadonly();
   }
 
+  markOrdersAsSeen(restaurantId: string | number = 1): void {
+    const numericRestId = parseInt(String(restaurantId), 10) || 1;
+    localStorage.setItem(`last_seen_orders_time_${numericRestId}`, String(Date.now()));
+    this.unseenOrders.set(0);
+  }
+
   fetchOrders(restaurantId: string | number = 1): Observable<Order[]> {
     const numericRestId = parseInt(String(restaurantId), 10) || 1;
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/restaurants/${numericRestId}/orders`).pipe(
       map(res => {
-        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+        if (res && res.success && Array.isArray(res.data)) {
           const mapped: Order[] = res.data.map(o => ({
             id: String(o.id || o.orderNumber),
             orderNumber: o.orderNumber || String(o.id),
@@ -125,6 +112,11 @@ export class OrderService {
           }));
           this.ordersList.set(mapped);
           this.saveOrders(mapped);
+
+          const lastSeen = parseInt(localStorage.getItem(`last_seen_orders_time_${numericRestId}`) || '0', 10);
+          const unseen = mapped.filter(o => new Date(o.placedAt).getTime() > lastSeen && (o.status === 'PENDING' || o.status === 'PREPARING')).length;
+          this.unseenOrders.set(unseen);
+
           return mapped;
         }
         return this.getOrders();
@@ -265,15 +257,12 @@ export class OrderService {
     this.saveOrders(this.ordersList());
 
     const numericRestId = parseInt(String(restaurantId), 10) || 1;
-    const numericOrderId = parseInt(orderId.replace(/^ORD-?/, ''), 10);
+    const cleanId = encodeURIComponent(orderId.trim());
 
-    if (!isNaN(numericOrderId)) {
-      return this.http.patch<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${numericRestId}/orders/${numericOrderId}/status`, { status: statusUpper })
-        .pipe(
-          map(res => res && res.success),
-          catchError(() => of(true))
-        );
-    }
-    return of(true);
+    return this.http.patch<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${numericRestId}/orders/${cleanId}/status`, { status: statusUpper })
+      .pipe(
+        map(res => res && res.success),
+        catchError(() => of(true))
+      );
   }
 }

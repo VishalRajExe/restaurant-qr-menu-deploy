@@ -1,6 +1,8 @@
 package com.restaurantqr.platform.modules.order.service;
 
 import com.restaurantqr.platform.common.ResourceNotFoundException;
+import com.restaurantqr.platform.modules.notification.entity.Notification;
+import com.restaurantqr.platform.modules.notification.service.NotificationService;
 import com.restaurantqr.platform.modules.order.entity.Order;
 import com.restaurantqr.platform.modules.order.entity.OrderItem;
 import com.restaurantqr.platform.modules.order.repository.OrderRepository;
@@ -22,6 +24,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final RestaurantService restaurantService;
+    private final NotificationService notificationService;
 
     @Transactional
     public Order createOrder(OrderRequest request) {
@@ -71,6 +74,20 @@ public class OrderService {
         order.setTotalAmount(grandTotal);
         Order saved = orderRepository.save(order);
         log.info("Created multi-item order: orderNumber={} customerMobile={} total={}", saved.getOrderNumber(), saved.getCustomerMobile(), saved.getTotalAmount());
+
+        try {
+            if (saved.getRestaurant() != null) {
+                notificationService.notifyRestaurant(
+                        saved.getRestaurant().getId(),
+                        Notification.EventType.NEW_ORDER,
+                        "🔔 New Kitchen Order Placed",
+                        "New order #" + saved.getOrderNumber() + " received for Table " + saved.getTableNumber()
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send new order notification: {}", e.getMessage());
+        }
+
         return saved;
     }
 
@@ -97,18 +114,79 @@ public class OrderService {
 
     @Transactional
     public Order updateStatus(Long orderId, Order.Status status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+        return updateStatus(String.valueOf(orderId), status);
+    }
+
+    @Transactional
+    public Order updateStatus(String orderIdentifier, Order.Status status) {
+        if (orderIdentifier == null || orderIdentifier.isBlank()) {
+            throw new ResourceNotFoundException("Invalid order identifier");
+        }
+
+        Order order = null;
+        try {
+            Long numericId = Long.parseLong(orderIdentifier.trim());
+            order = orderRepository.findById(numericId).orElse(null);
+        } catch (NumberFormatException ignored) {}
+
+        if (order == null) {
+            order = orderRepository.findByOrderNumber(orderIdentifier.trim()).orElse(null);
+        }
+
+        if (order == null && !orderIdentifier.startsWith("ORD-")) {
+            order = orderRepository.findByOrderNumber("ORD-" + orderIdentifier.trim()).orElse(null);
+        }
+
+        if (order == null) {
+            List<Order> matches = orderRepository.findByOrderNumberContaining(orderIdentifier.trim());
+            if (!matches.isEmpty()) {
+                order = matches.get(0);
+            }
+        }
+
+        if (order == null) {
+            throw new ResourceNotFoundException("Order not found with identifier: " + orderIdentifier);
+        }
+
+        Order.Status prevStatus = order.getStatus();
         order.setStatus(status);
         Order updated = orderRepository.save(order);
-        log.info("Updated status for orderId={} to {}", orderId, status);
+        log.info("Updated status for order id={} number={} to {}", updated.getId(), updated.getOrderNumber(), status);
+
+        try {
+            if (updated.getRestaurant() != null && prevStatus != status) {
+                if (status == Order.Status.READY) {
+                    notificationService.notifyRestaurant(
+                            updated.getRestaurant().getId(),
+                            Notification.EventType.ORDER_READY,
+                            "🍳 Kitchen Alert: Order Ready!",
+                            "Chef finished preparing Order #" + updated.getOrderNumber() + " for Table " + updated.getTableNumber() + ". Ready to be served!"
+                    );
+                } else if (status == Order.Status.COMPLETED || status == Order.Status.DELIVERED) {
+                    notificationService.notifyRestaurant(
+                            updated.getRestaurant().getId(),
+                            Notification.EventType.ORDER_STATUS_CHANGED,
+                            "✅ Order Delivered",
+                            "Order #" + updated.getOrderNumber() + " (Table " + updated.getTableNumber() + ") marked as delivered to guest."
+                    );
+                } else if (status == Order.Status.PREPARING) {
+                    notificationService.notifyRestaurant(
+                            updated.getRestaurant().getId(),
+                            Notification.EventType.ORDER_STATUS_CHANGED,
+                            "👨‍🍳 Cooking in Kitchen",
+                            "Chef started preparing Order #" + updated.getOrderNumber() + " (Table " + updated.getTableNumber() + ")."
+                    );
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to dispatch order status notification: {}", e.getMessage());
+        }
+
         return updated;
     }
 
     @Transactional
     public Order updateStatusByOrderNumber(String orderNumber, Order.Status status) {
-        Order order = findByOrderNumber(orderNumber);
-        order.setStatus(status);
-        return orderRepository.save(order);
+        return updateStatus(orderNumber, status);
     }
 }

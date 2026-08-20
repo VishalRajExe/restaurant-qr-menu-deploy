@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,7 @@ public class SupportTicketController {
     private final KnowledgeArticleRepository knowledgeArticleRepository;
     private final com.restaurantqr.platform.users.repository.UserRepository userRepository;
 
+    // ─── AUTHENTICATED TICKET CREATION (OWNER / CHEF) ───────────────────────────
     @PostMapping("/restaurants/{restaurantId}")
     public ResponseEntity<ApiResponse<SupportTicket>> createTicket(
             @AuthenticationPrincipal JwtUserDetails currentUser,
@@ -46,18 +48,68 @@ public class SupportTicketController {
     }
 
     @GetMapping("/restaurants/{restaurantId}")
-    public ResponseEntity<ApiResponse<Page<SupportTicket>>> getRestaurantTickets(
-            @PathVariable Long restaurantId,
-            Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(supportTicketRepository.findByRestaurantIdAndIsDeletedFalse(restaurantId, pageable)));
+    public ResponseEntity<ApiResponse<List<SupportTicket>>> getRestaurantTickets(
+            @PathVariable Long restaurantId) {
+        return ResponseEntity.ok(ApiResponse.success(supportTicketRepository.findByRestaurantIdAndIsDeletedFalseOrderByCreatedAtDesc(restaurantId)));
     }
 
+    // ─── PUBLIC CUSTOMER TICKET & REPORT ENDPOINTS ──────────────────────────────
+    @PostMapping("/public/restaurants/{restaurantId}")
+    public ResponseEntity<ApiResponse<SupportTicket>> createCustomerTicket(
+            @PathVariable Long restaurantId,
+            @RequestBody CreateCustomerTicketRequest request) {
+
+        SupportTicket ticket = supportTicketService.createCustomerTicket(
+                restaurantId, request.customerName, request.customerMobile, request.customerEmail,
+                request.category, request.subject, request.description, request.attachments);
+
+        return ResponseEntity.ok(ApiResponse.success("Dining report/ticket created successfully", ticket));
+    }
+
+    @GetMapping("/public/track")
+    public ResponseEntity<ApiResponse<List<SupportTicket>>> trackCustomerTickets(
+            @RequestParam Long restaurantId,
+            @RequestParam(required = false) String mobile,
+            @RequestParam(required = false) String ticketNumber) {
+
+        if (ticketNumber != null && !ticketNumber.isBlank()) {
+            var single = supportTicketRepository.findByTicketNumber(ticketNumber.trim());
+            return ResponseEntity.ok(ApiResponse.success(single.map(List::of).orElse(List.of())));
+        }
+
+        if (mobile != null && !mobile.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.success(
+                    supportTicketRepository.findByRestaurantIdAndCustomerMobileAndIsDeletedFalseOrderByCreatedAtDesc(restaurantId, mobile.trim())));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(List.of()));
+    }
+
+    @GetMapping("/public/{ticketId}")
+    public ResponseEntity<ApiResponse<TicketDetailsPayload>> getPublicTicketDetails(@PathVariable Long ticketId) {
+        SupportTicket ticket = supportTicketRepository.findById(ticketId).orElse(null);
+        List<TicketMessage> messages = supportTicketService.getMessagesForUser(ticketId, false);
+        return ResponseEntity.ok(ApiResponse.success(TicketDetailsPayload.builder().ticket(ticket).messages(messages).build()));
+    }
+
+    @PostMapping("/public/{ticketId}/messages")
+    public ResponseEntity<ApiResponse<TicketMessage>> addPublicCustomerMessage(
+            @PathVariable Long ticketId,
+            @RequestBody SendCustomerMessageRequest request) {
+
+        TicketMessage msg = supportTicketService.addMessage(
+                ticketId, null, request.senderName, "CUSTOMER", request.message, request.attachments, false);
+
+        return ResponseEntity.ok(ApiResponse.success("Message sent", msg));
+    }
+
+    // ─── TICKET DETAILS & MESSAGES ──────────────────────────────────────────────
     @GetMapping("/{ticketId}")
     public ResponseEntity<ApiResponse<TicketDetailsPayload>> getTicketDetails(
             @AuthenticationPrincipal JwtUserDetails currentUser,
             @PathVariable Long ticketId) {
 
-        boolean isAdmin = "SUPER_ADMIN".equalsIgnoreCase(currentUser.getRole());
+        boolean isAdmin = currentUser != null && "SUPER_ADMIN".equalsIgnoreCase(currentUser.getRole());
         SupportTicket ticket = supportTicketRepository.findById(ticketId).orElse(null);
         List<TicketMessage> messages = supportTicketService.getMessagesForUser(ticketId, isAdmin);
 
@@ -74,11 +126,18 @@ public class SupportTicketController {
                 .orElseThrow(() -> new com.restaurantqr.platform.common.ResourceNotFoundException("User", currentUser.getUserId()));
 
         boolean isInternal = Boolean.TRUE.equals(request.isInternalNote) && "SUPER_ADMIN".equalsIgnoreCase(currentUser.getRole());
-        TicketMessage msg = supportTicketService.addMessage(ticketId, user, request.message, request.attachments, isInternal);
+        TicketMessage msg = supportTicketService.addMessage(
+                ticketId, user, user.getName(), user.getRole().name(), request.message, request.attachments, isInternal);
 
         return ResponseEntity.ok(ApiResponse.success("Message sent", msg));
     }
 
+    @PatchMapping("/{ticketId}/status")
+    public ResponseEntity<ApiResponse<SupportTicket>> updateTicketStatus(
+            @PathVariable Long ticketId,
+            @RequestParam SupportTicket.Status status) {
+        return ResponseEntity.ok(ApiResponse.success("Ticket status updated", supportTicketService.updateTicketStatus(ticketId, status)));
+    }
 
     @RequestMapping(value = "/{ticketId}/reopen", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<ApiResponse<SupportTicket>> reopenTicket(@PathVariable Long ticketId) {
@@ -91,6 +150,31 @@ public class SupportTicketController {
             @RequestParam int rating,
             @RequestParam(required = false) String feedback) {
         return ResponseEntity.ok(ApiResponse.success("Ticket rated and closed", supportTicketService.rateTicket(ticketId, rating, feedback)));
+    }
+
+    @PostMapping("/{ticketId}/escalate")
+    public ResponseEntity<ApiResponse<SupportTicket>> escalateTicketToAdmin(
+            @AuthenticationPrincipal JwtUserDetails currentUser,
+            @PathVariable Long ticketId,
+            @RequestBody(required = false) EscalateRequest request) {
+
+        var user = currentUser != null ? userRepository.findById(currentUser.getUserId()).orElse(null) : null;
+        String reason = request != null ? request.reason : null;
+        SupportTicket escalated = supportTicketService.escalateTicketToAdmin(ticketId, reason, user);
+        return ResponseEntity.ok(ApiResponse.success("Ticket escalated to Super Admin desk successfully", escalated));
+    }
+
+    // ─── ADMIN ENDPOINTS ────────────────────────────────────────────────────────
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<List<SupportTicket>>> getAllTicketsAdmin() {
+        return ResponseEntity.ok(ApiResponse.success(supportTicketRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc()));
+    }
+
+    @PatchMapping("/admin/{ticketId}/resolve")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<SupportTicket>> resolveTicketAdmin(@PathVariable Long ticketId) {
+        return ResponseEntity.ok(ApiResponse.success("Ticket resolved", supportTicketService.resolveTicket(ticketId)));
     }
 
     @GetMapping("/{ticketId}/transcript")
@@ -107,6 +191,7 @@ public class SupportTicketController {
         return ResponseEntity.ok(ApiResponse.success(knowledgeArticleRepository.searchArticles(q)));
     }
 
+    // ─── DTOs ───────────────────────────────────────────────────────────────────
     @Data
     public static class CreateTicketRequest {
         public SupportTicket.Category category;
@@ -117,10 +202,33 @@ public class SupportTicketController {
     }
 
     @Data
+    public static class CreateCustomerTicketRequest {
+        public String customerName;
+        public String customerMobile;
+        public String customerEmail;
+        public SupportTicket.Category category;
+        public String subject;
+        public String description;
+        public String attachments;
+    }
+
+    @Data
     public static class SendMessageRequest {
         public String message;
         public String attachments;
         public Boolean isInternalNote;
+    }
+
+    @Data
+    public static class SendCustomerMessageRequest {
+        public String senderName;
+        public String message;
+        public String attachments;
+    }
+
+    @Data
+    public static class EscalateRequest {
+        public String reason;
     }
 
     @Data

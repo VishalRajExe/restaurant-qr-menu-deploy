@@ -29,6 +29,11 @@
       <span class="lez-badge lez-badge-preparing">Preparing: {{ preparingCount() }}</span>
       <span class="lez-badge lez-badge-ready">Ready: {{ doneCount() }}</span>
 
+      <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="openKitchenSupportModal()">
+        <span class="material-symbols-outlined text-[16px]">support_agent</span>
+        <span>Kitchen Help / Report</span>
+      </button>
+
       <app-notification-center></app-notification-center>
 
       <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="logout()">
@@ -233,6 +238,71 @@
             }
           </div>
         }
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       KITCHEN SUPPORT / ISSUE REPORT MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showKitchenSupportModal()) {
+    <div class="lez-overlay animate-fade-in" (click)="showKitchenSupportModal.set(false)">
+      <div class="lez-modal" style="max-width:500px" (click)="$event.stopPropagation()">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[24px] text-accent">skillet</span>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text-primary);margin:0">Kitchen Support & Incident Report</h3>
+          </div>
+          <button class="pos-modal-close" (click)="showKitchenSupportModal.set(false)">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-field">
+            <label class="form-label">Subject *</label>
+            <input class="lez-input" placeholder="e.g. Out of Truffle Mayo / KDS Display Glitch / Grill Temp"
+                   [value]="chefSupportSubject()" (input)="chefSupportSubject.set($any($event.target).value)" />
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-field">
+              <label class="form-label">Category</label>
+              <select class="lez-input" title="Category" aria-label="Category" [value]="chefSupportCategory()" (change)="chefSupportCategory.set($any($event.target).value)">
+                <option value="KITCHEN_EQUIPMENT">Kitchen Equipment / Oven</option>
+                <option value="TECHNICAL_ISSUE">KDS / Display Lag</option>
+                <option value="MENU_ISSUE">Ingredient Shortage</option>
+                <option value="ORDER_ISSUE">Order / Ticket Discrepancy</option>
+                <option value="GENERAL">General Kitchen Query</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Priority</label>
+              <select class="lez-input" title="Priority" aria-label="Priority" [value]="chefSupportPriority()" (change)="chefSupportPriority.set($any($event.target).value)">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High (Urgent)</option>
+                <option value="CRITICAL">Critical (Station Down)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Incident Details *</label>
+            <textarea class="lez-input" rows="4" placeholder="Detail the kitchen problem or ingredient shortage..."
+                      [value]="chefSupportDescription()" (input)="chefSupportDescription.set($any($event.target).value)"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="showKitchenSupportModal.set(false)">Cancel</button>
+          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="submitKitchenTicket()">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Dispatch to Management</span>
+          </button>
+        </div>
+
       </div>
     </div>
   }

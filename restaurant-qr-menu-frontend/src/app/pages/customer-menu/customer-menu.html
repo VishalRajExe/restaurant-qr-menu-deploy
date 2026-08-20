@@ -79,6 +79,12 @@
             <span>My Orders</span>
           </button>
 
+          <!-- Report / Help Button -->
+          <button class="pos-diet-pill" (click)="openCustomerReportModal()" title="Dining Assistance & Feedback">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">live_help</span>
+            <span>Help / Report</span>
+          </button>
+
           <!-- Order Status Tracker Icon -->
           <button class="pos-track-icon-btn" (click)="openOrderTracker()" title="Track Active Order">
             <span class="material-symbols-outlined text-[20px] text-gray-700">receipt_long</span>
@@ -122,7 +128,7 @@
                 
                 <!-- Food Image & Badges -->
                 <div class="pos-dish-img-wrap">
-                  <img [src]="dish.image || '/img/menu-1.jpg'" [alt]="dish.name" [title]="dish.name" class="pos-dish-img"
+                  <img src="/img/menu-1.jpg" [src]="dish.image || '/img/menu-1.jpg'" alt="Menu Dish" [alt]="dish.name" title="Menu Dish" [title]="dish.name" class="pos-dish-img"
                        onerror="this.src='/img/menu-1.jpg'" />
                   
                   @if (dish.isPopular) {
@@ -400,7 +406,7 @@
                   <p>Your meal is freshly prepared and ready for serving at Table {{ activeOrder()?.tableNumber || '01' }}.</p>
                 </div>
               </div>
-            } @else if (activeOrder()?.status === 'PREPARING' || activeOrder()?.status === 'COOKING') {
+            } @else if (activeOrder()?.status === 'PREPARING') {
               <div class="pos-order-alert-preparing animate-pulse-subtle">
                 <span class="material-symbols-outlined text-[22px]">local_fire_department</span>
                 <div>
@@ -408,7 +414,7 @@
                   <p>Chef Antoine is preparing your fresh culinary ingredients right now.</p>
                 </div>
               </div>
-            } @else if (activeOrder()?.status === 'COMPLETED' || activeOrder()?.status === 'DELIVERED') {
+            } @else if (activeOrder()?.status === 'COMPLETED') {
               <div class="pos-order-alert-ready">
                 <span class="material-symbols-outlined text-[22px]">task_alt</span>
                 <div>
@@ -456,7 +462,20 @@
                 </div>
                 <div class="step-meta">
                   <div class="step-title">Ready for Pickup / Serving</div>
-                  <div class="step-sub">On its way to Table {{ activeOrder()?.tableNumber || '01' }}</div>
+                  <div class="step-sub">Dishes ready at kitchen station</div>
+                </div>
+              </div>
+
+              <!-- Step 4: Delivered -->
+              <div class="pos-timeline-step"
+                   [class.done]="isStatusPassed('DELIVERED', activeOrder()?.status)"
+                   [class.active]="isStatusCurrent('DELIVERED', activeOrder()?.status)">
+                <div class="pos-step-icon-wrap">
+                  <span class="material-symbols-outlined text-[18px]">task_alt</span>
+                </div>
+                <div class="step-meta">
+                  <div class="step-title">Delivered & Served</div>
+                  <div class="step-sub">Delivered to Table {{ activeOrder()?.tableNumber || '01' }}</div>
                 </div>
               </div>
 
@@ -474,6 +493,18 @@
                     </div>
                   }
                 </div>
+              </div>
+
+              <!-- Customer Print / Invoice Actions -->
+              <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
+                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700" (click)="printCustomerKOT(activeOrder())">
+                  <span class="material-symbols-outlined text-[16px]">print</span>
+                  <span>Print KOT</span>
+                </button>
+                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700" (click)="printCustomerInvoice(activeOrder())">
+                  <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                  <span>Invoice</span>
+                </button>
               </div>
             }
 
@@ -563,7 +594,11 @@
 
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">
                   <span style="font-size:13px;font-weight:800;color:#0b1c30">Total: ${{ (pastOrder.totalAmount || 0).toFixed(2) }}</span>
-                  <div style="display:flex;gap:8px">
+                  <div style="display:flex;gap:6px">
+                    <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="printCustomerInvoice(pastOrder)" title="View & Print Tax Invoice">
+                      <span class="material-symbols-outlined text-[15px]">receipt</span>
+                      <span>Invoice</span>
+                    </button>
                     <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="trackSpecificOrder(pastOrder)">
                       <span class="material-symbols-outlined text-[15px]">radar</span>
                       <span>Track</span>
@@ -581,6 +616,123 @@
 
         <div class="pos-modal-footer">
           <button class="lez-btn lez-btn-secondary w-full" (click)="closeOrderHistory()">Close</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       CUSTOMER DINING REPORT / HELP & FEEDBACK MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showCustomerReportModal()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeCustomerReportModal()">
+      <div class="pos-modal-card" style="max-width:540px" (click)="$event.stopPropagation()">
+        
+        <div class="pos-modal-header">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-amber-500 text-[24px]">live_help</span>
+            <div>
+              <h3 class="pos-modal-title">Dining Help & Feedback</h3>
+              <p style="font-size:12px;color:#64748b;margin:2px 0 0">{{ restaurant()?.name || 'Restaurant' }} • Table {{ tableNumber() || '01' }}</p>
+            </div>
+          </div>
+          <button class="pos-modal-close" (click)="closeCustomerReportModal()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Navigation Tabs between "New Report" and "My Reports" -->
+        <div style="display:flex;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:0 16px">
+          <button style="padding:10px 16px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent"
+                  [style.border-bottom-color]="activeReportTab() === 'create' ? '#ff6b35' : 'transparent'"
+                  [style.color]="activeReportTab() === 'create' ? '#ff6b35' : '#64748b'"
+                  (click)="activeReportTab.set('create')">
+            New Request / Report
+          </button>
+          <button style="padding:10px 16px;font-size:13px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent"
+                  [style.border-bottom-color]="activeReportTab() === 'history' ? '#ff6b35' : 'transparent'"
+                  [style.color]="activeReportTab() === 'history' ? '#ff6b35' : '#64748b'"
+                  (click)="activeReportTab.set('history'); loadCustomerTickets()">
+            My Reports ({{ customerTicketsList().length }})
+          </button>
+        </div>
+
+        <div class="pos-modal-body" style="padding:18px;max-height:420px;overflow-y:auto">
+          @if (activeReportTab() === 'create') {
+            <div style="display:flex;flex-direction:column;gap:14px">
+              
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="pos-field">
+                  <label class="pos-label">Your Mobile Number *</label>
+                  <input type="tel" maxlength="10" class="pos-input" placeholder="10-digit number"
+                         [value]="reportDinerMobile()" (input)="reportDinerMobile.set($any($event.target).value)" />
+                </div>
+                <div class="pos-field">
+                  <label class="pos-label">Your Name</label>
+                  <input type="text" class="pos-input" placeholder="e.g. John"
+                         [value]="reportDinerName()" (input)="reportDinerName.set($any($event.target).value)" />
+                </div>
+              </div>
+
+              <div class="pos-field">
+                <label class="pos-label">What is this regarding?</label>
+                <select class="pos-input" title="Category" aria-label="Category" [value]="reportIssueCategory()" (change)="reportIssueCategory.set($any($event.target).value)">
+                  <option value="FOOD_QUALITY">🍽️ Food Taste / Quality Issue</option>
+                  <option value="ORDER_ISSUE">⏳ Order Delay or Missing Dish</option>
+                  <option value="SERVICE_FEEDBACK">🙋 Table Service / Cutlery / Napkins</option>
+                  <option value="BILLING">💳 Billing / Payment Assistance</option>
+                  <option value="MENU_ISSUE">📋 Allergy / Dietary Question</option>
+                  <option value="GENERAL">💬 General Compliment or Feedback</option>
+                </select>
+              </div>
+
+              <div class="pos-field">
+                <label class="pos-label">Subject *</label>
+                <input type="text" class="pos-input" placeholder="e.g. Extra spicy requested / Missing fries"
+                       [value]="reportSubject()" (input)="reportSubject.set($any($event.target).value)" />
+              </div>
+
+              <div class="pos-field">
+                <label class="pos-label">Details / Description *</label>
+                <textarea class="pos-input" rows="3" placeholder="Please provide any helpful details for our chef or floor staff..."
+                          [value]="reportDescription()" (input)="reportDescription.set($any($event.target).value)"></textarea>
+              </div>
+
+              <button class="lez-btn lez-btn-primary w-full" [disabled]="isSubmittingReport()" (click)="submitCustomerReport()">
+                <span class="material-symbols-outlined text-[16px]">send</span>
+                <span>{{ isSubmittingReport() ? 'Sending Report...' : 'Send to Restaurant' }}</span>
+              </button>
+            </div>
+          } @else {
+            <div style="display:flex;flex-direction:column;gap:12px">
+              @if (customerTicketsList().length === 0) {
+                <div style="text-align:center;padding:32px 16px">
+                  <span class="material-symbols-outlined text-[42px] text-gray-300">chat_bubble_outline</span>
+                  <h4 style="font-size:15px;font-weight:700;color:#0b1c30;margin:10px 0 4px">No Reports Yet</h4>
+                  <p style="font-size:12.5px;color:#64748b;margin:0">Reports you submit will appear here with live resolution status.</p>
+                </div>
+              } @else {
+                @for (t of customerTicketsList(); track t.id) {
+                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                      <span style="font-family:monospace;font-size:12px;font-weight:800;color:#ff6b35">{{ t.ticketNumber || t.id }}</span>
+                      <span class="lez-badge" [class]="'status-' + (t.status.toLowerCase() || 'open')">
+                        ● {{ t.status }}
+                      </span>
+                    </div>
+                    <div style="font-size:13.5px;font-weight:700;color:#0b1c30">{{ t.subject }}</div>
+                    <div style="font-size:12px;color:#64748b;line-height:1.4">{{ t.description }}</div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ t.createdAt | date:'medium' }}</div>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        <div class="pos-modal-footer">
+          <button class="lez-btn lez-btn-secondary w-full" (click)="closeCustomerReportModal()">Close</button>
         </div>
 
       </div>

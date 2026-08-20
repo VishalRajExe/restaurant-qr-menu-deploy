@@ -194,7 +194,7 @@
       <div class="restoran-menu-grid">
         @for (item of currentMenuItems; track item.name) {
           <div class="restoran-dish-item">
-            <img [src]="item.image" [alt]="item.name" [title]="item.name" class="dish-thumb" />
+            <img src="/img/menu-1.jpg" [src]="item.image" alt="Menu Item" [alt]="item.name" title="Menu Item" [title]="item.name" class="dish-thumb" />
             <div class="dish-info">
               <div class="dish-header">
                 <span class="dish-name">{{ item.name }}</span>

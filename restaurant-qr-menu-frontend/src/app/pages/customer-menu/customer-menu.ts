@@ -15,7 +15,10 @@ import { Offer } from '../../models/offer.model';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 import { OrderService, Order } from '../../services/order.service';
+import { PrintService } from '../../services/print.service';
 import { BackButton } from '../../components/back-button/back-button';
+
+import { TicketService, SupportTicketData } from '../../services/ticket.service';
 
 export interface CartItem {
   menuItem: MenuItem;
@@ -39,6 +42,8 @@ export class CustomerMenu implements OnInit, OnDestroy {
   toastService      = inject(ToastService);
   modalService      = inject(ModalService);
   orderService      = inject(OrderService);
+  ticketService     = inject(TicketService);
+  printService      = inject(PrintService);
 
   // ── Restaurant data ──────────────────────────────────────────────────────────
   restaurant = signal<Restaurant | undefined>(undefined);
@@ -52,6 +57,18 @@ export class CustomerMenu implements OnInit, OnDestroy {
   maxPriceFilter       = signal<number>(100);
   selectedLanguage     = signal<string>('en');
   isDarkMode           = signal<boolean>(false);
+
+  // ── Customer Dining Support & Issue Reports ──────────────────────────────────
+  showCustomerReportModal  = signal<boolean>(false);
+  reportIssueCategory      = signal<string>('FOOD_QUALITY');
+  reportSubject            = signal<string>('');
+  reportDescription        = signal<string>('');
+  reportDinerMobile        = signal<string>('');
+  reportDinerName          = signal<string>('');
+  customerTicketsList      = signal<SupportTicketData[]>([]);
+  isSubmittingReport       = signal<boolean>(false);
+  showCustomerTicketsList  = signal<boolean>(false);
+  activeReportTab          = signal<'create' | 'history'>('create');
 
   goBack() {
     if (window.history.length > 1) {
@@ -506,6 +523,42 @@ export class CustomerMenu implements OnInit, OnDestroy {
     this.showOrderTracker.set(false);
   }
 
+  printCustomerInvoice(order?: Order | null) {
+    const target = order || this.activeOrder();
+    if (!target) {
+      this.toastService.show('No active order to print invoice', 'warning');
+      return;
+    }
+    const r = this.restaurant();
+    this.printService.printInvoice(target, {
+      name: r?.name || 'RestQR Gourmet Bistro',
+      address: r?.address || '123 Gourmet Blvd, New York, NY',
+      phone: r?.phone || '+1 (555) 345-6789',
+      email: r?.email || 'contact@restqr.com',
+      currency: '$'
+    });
+    this.toastService.success('Tax Invoice Generated', `Invoice ready for Order #${target.orderNumber || target.id}`);
+  }
+
+  printCustomerKOT(order?: Order | null) {
+    const target = order || this.activeOrder();
+    if (!target) {
+      this.toastService.show('No active order to print KOT', 'warning');
+      return;
+    }
+    const r = this.restaurant();
+    this.printService.printKOT(target, {
+      name: r?.name || 'RestQR Gourmet Bistro',
+      address: r?.address || '123 Gourmet Blvd, New York, NY',
+      phone: r?.phone || '+1 (555) 345-6789'
+    });
+    this.toastService.success('KOT Printed', `Kitchen slip printed for Table ${target.tableNumber || '01'}`);
+  }
+
+  printCustomerBill(order?: Order | null) {
+    this.printCustomerInvoice(order);
+  }
+
   isStatusPassed(stepName: string, currentStatus?: string): boolean {
     if (!currentStatus) return stepName === 'RECEIVED';
     const statusHierarchy: Record<string, number> = {
@@ -531,6 +584,64 @@ export class CustomerMenu implements OnInit, OnDestroy {
     if (stepName === 'READY') return s === 'READY';
     if (stepName === 'DELIVERED') return s === 'DELIVERED' || s === 'COMPLETED';
     return false;
+  }
+
+  // ── Dining Support & Feedback Report Methods ────────────────────────────────
+  openCustomerReportModal() {
+    if (!this.reportDinerMobile() && this.customerMobile()) {
+      this.reportDinerMobile.set(this.customerMobile());
+    }
+    if (!this.reportDinerName() && this.customerName()) {
+      this.reportDinerName.set(this.customerName());
+    }
+    this.showCustomerReportModal.set(true);
+    if (this.reportDinerMobile()) {
+      this.loadCustomerTickets();
+    }
+  }
+
+  closeCustomerReportModal() {
+    this.showCustomerReportModal.set(false);
+  }
+
+  submitCustomerReport() {
+    const mobile = this.reportDinerMobile().trim();
+    if (!mobile || !/^\d{10}$/.test(mobile)) {
+      this.toastService.show('Please provide a valid 10-digit mobile number for ticket tracking', 'warning');
+      return;
+    }
+    if (!this.reportSubject().trim() || !this.reportDescription().trim()) {
+      this.toastService.show('Please describe the issue or feedback', 'warning');
+      return;
+    }
+
+    const rId = this.restaurant()?.id || 1;
+    this.isSubmittingReport.set(true);
+
+    this.ticketService.createCustomerTicket({
+      restaurantId: rId,
+      customerName: this.reportDinerName().trim() || 'Dining Guest',
+      customerMobile: mobile,
+      category: this.reportIssueCategory(),
+      subject: `[Table ${this.tableNumber() || '01'}] ${this.reportSubject().trim()}`,
+      description: this.reportDescription().trim()
+    }).subscribe(() => {
+      this.isSubmittingReport.set(false);
+      this.toastService.success('Report Sent to Management', 'Staff and kitchen have been notified.');
+      this.reportSubject.set('');
+      this.reportDescription.set('');
+      this.activeReportTab.set('history');
+      this.loadCustomerTickets();
+    });
+  }
+
+  loadCustomerTickets() {
+    const mobile = this.reportDinerMobile().trim();
+    if (!mobile) return;
+    const rId = this.restaurant()?.id || 1;
+    this.ticketService.fetchCustomerTickets(rId, mobile).subscribe(list => {
+      this.customerTicketsList.set(list);
+    });
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────

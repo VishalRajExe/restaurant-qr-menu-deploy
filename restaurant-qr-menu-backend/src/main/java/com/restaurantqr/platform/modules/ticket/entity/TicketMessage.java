@@ -19,9 +19,12 @@ public class TicketMessage extends BaseEntity {
     @JoinColumn(name = "ticket_id", nullable = false)
     private SupportTicket ticket;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sender_user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_user_id", nullable = true)
     private User senderUser;
+
+    @Column(name = "sender_name", length = 100)
+    private String senderName;
 
     @Column(name = "sender_role", nullable = false, length = 50)
     private String senderRole;

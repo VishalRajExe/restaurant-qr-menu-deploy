@@ -55,11 +55,39 @@ public class DatabaseSchemaInitializer implements CommandLineRunner {
         }
 
         try {
+            jdbcTemplate.execute("ALTER TABLE notifications MODIFY COLUMN restaurant_id BIGINT NULL");
+            log.info("Successfully updated notifications.restaurant_id column to NULLABLE.");
+        } catch (Exception e) {
+            log.warn("notifications.restaurant_id alter skipped: {}", e.getMessage());
+        }
+
+        try {
             jdbcTemplate.execute("ALTER TABLE restaurants ADD COLUMN chef_invite_code VARCHAR(50) NULL");
             log.info("Successfully added chef_invite_code column on restaurants table.");
         } catch (Exception e) {
             log.warn("chef_invite_code column already exists: {}", e.getMessage());
         }
 
+        String[] ticketAlters = {
+            "ALTER TABLE support_tickets MODIFY COLUMN created_by_user_id BIGINT NULL",
+            "ALTER TABLE support_tickets MODIFY COLUMN category VARCHAR(100) NOT NULL",
+            "ALTER TABLE support_tickets MODIFY COLUMN status VARCHAR(100) NOT NULL",
+            "ALTER TABLE support_tickets MODIFY COLUMN priority VARCHAR(100) NOT NULL",
+            "ALTER TABLE support_tickets ADD COLUMN customer_name VARCHAR(100) NULL",
+            "ALTER TABLE support_tickets ADD COLUMN customer_mobile VARCHAR(30) NULL",
+            "ALTER TABLE support_tickets ADD COLUMN customer_email VARCHAR(150) NULL",
+            "ALTER TABLE ticket_messages MODIFY COLUMN sender_user_id BIGINT NULL",
+            "ALTER TABLE ticket_messages ADD COLUMN sender_name VARCHAR(100) NULL",
+            "ALTER TABLE ticket_messages ADD COLUMN sender_role VARCHAR(50) NULL"
+        };
+
+        for (String sql : ticketAlters) {
+            try {
+                jdbcTemplate.execute(sql);
+            } catch (Exception e) {
+                log.debug("Ticket alter execution notice for [{}]: {}", sql, e.getMessage());
+            }
+        }
+        log.info("Support tickets schema alters migration executed successfully.");
     }
 }

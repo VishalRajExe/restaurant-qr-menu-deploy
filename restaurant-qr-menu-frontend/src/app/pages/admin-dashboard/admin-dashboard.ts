@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminRestaurantData } from '../../services/admin.service';
-import { TicketService, SupportTicketData } from '../../services/ticket.service';
+import { TicketService, SupportTicketData, TicketMessageData } from '../../services/ticket.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 import { NotificationCenter } from '../../components/notification-center/notification-center';
@@ -126,19 +126,34 @@ export class AdminDashboard implements OnInit, OnDestroy {
   totalScans        = computed(() => this.restaurants().reduce((s: number, r: AdminRestaurantData) => s + r.totalScans, 0));
   proPlans          = computed(() => this.restaurants().filter((r: AdminRestaurantData) => r.plan === 'Pro').length);
 
+  selectTab(tab: 'analytics' | 'restaurants' | 'tickets') {
+    this.activeTab.set(tab);
+    if (tab === 'tickets') {
+      this.ticketService.markTicketsAsSeen();
+      this.ticketService.fetchAdminTickets().subscribe();
+    }
+  }
+
   // ── Support Tickets ───────────────────────────────────────────────────────
   tickets          = computed(() => this.ticketService.ticketsList());
   ticketFilter     = signal<'all' | 'open' | 'resolved'>('all');
   expandedTicketId = signal<string | null>(null);
+  selectedTicketDetails = signal<{ ticket: SupportTicketData; messages: TicketMessageData[] } | null>(null);
+  showTicketModal       = signal<boolean>(false);
+  adminReplyMessage     = signal<string>('');
+  isSendingReply        = signal<boolean>(false);
 
   filteredTickets = computed(() => {
     const f = this.ticketFilter();
-    if (f === 'all') return this.tickets();
-    return this.tickets().filter((t: SupportTicketData) => t.status === f);
+    const list = this.tickets();
+    if (f === 'all') return list;
+    if (f === 'open') return list.filter((t: SupportTicketData) => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'open');
+    if (f === 'resolved') return list.filter((t: SupportTicketData) => t.status === 'RESOLVED' || t.status === 'CLOSED' || t.status === 'resolved');
+    return list;
   });
 
-  openTicketsCount     = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'open').length);
-  resolvedTicketsCount = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'resolved').length);
+  openTicketsCount     = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'OPEN' || t.status === 'IN_PROGRESS' || t.status === 'open').length);
+  resolvedTicketsCount = computed(() => this.tickets().filter((t: SupportTicketData) => t.status === 'RESOLVED' || t.status === 'CLOSED' || t.status === 'resolved').length);
 
   private autoRefreshTimer: any;
 
@@ -155,6 +170,38 @@ export class AdminDashboard implements OnInit, OnDestroy {
     if (this.autoRefreshTimer) {
       clearInterval(this.autoRefreshTimer);
     }
+  }
+
+  openTicketDetails(ticket: SupportTicketData) {
+    this.ticketService.getTicketDetails(ticket.id).subscribe(res => {
+      this.selectedTicketDetails.set(res || { ticket, messages: [] });
+      this.showTicketModal.set(true);
+    });
+  }
+
+  sendAdminReply() {
+    const text = this.adminReplyMessage().trim();
+    const details = this.selectedTicketDetails();
+    if (!text || !details?.ticket) return;
+
+    this.isSendingReply.set(true);
+    this.ticketService.addMessage(details.ticket.id, text, 'Super Admin').subscribe(msg => {
+      this.isSendingReply.set(false);
+      this.adminReplyMessage.set('');
+      if (msg) {
+        this.selectedTicketDetails.update(d => d ? { ...d, messages: [...d.messages, msg] } : d);
+        this.toastService.success('Reply Dispatched', 'Response sent to restaurant and diner.');
+        this.refreshData();
+      }
+    });
+  }
+
+  updateTicketStatus(ticketId: string, status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED') {
+    this.ticketService.updateTicketStatus(ticketId, status).subscribe(() => {
+      this.toastService.success('Status Updated', `Ticket marked as ${status}`);
+      this.selectedTicketDetails.update(d => d ? { ...d, ticket: { ...d.ticket, status } } : d);
+      this.refreshData();
+    });
   }
 
   refreshData() {

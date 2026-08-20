@@ -64,6 +64,7 @@ public class Order extends BaseEntity {
         PREPARING,
         READY,
         COMPLETED,
+        DELIVERED,
         CANCELLED
     }
 }

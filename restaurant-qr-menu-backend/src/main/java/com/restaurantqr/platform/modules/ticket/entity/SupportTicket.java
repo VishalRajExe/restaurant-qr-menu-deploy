@@ -29,9 +29,18 @@ public class SupportTicket extends BaseEntity {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "created_by_user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id", nullable = true)
     private User createdByUser;
+
+    @Column(name = "customer_name", length = 100)
+    private String customerName;
+
+    @Column(name = "customer_mobile", length = 30)
+    private String customerMobile;
+
+    @Column(name = "customer_email", length = 150)
+    private String customerEmail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_user_id")
@@ -89,8 +98,13 @@ public class SupportTicket extends BaseEntity {
         TECHNICAL_ISSUE,
         QR_PROBLEM,
         MENU_ISSUE,
+        ORDER_ISSUE,
+        FOOD_QUALITY,
+        SERVICE_FEEDBACK,
+        KITCHEN_EQUIPMENT,
         FEATURE_REQUEST,
         BUG_REPORT,
+        GENERAL,
         OTHER
     }
 

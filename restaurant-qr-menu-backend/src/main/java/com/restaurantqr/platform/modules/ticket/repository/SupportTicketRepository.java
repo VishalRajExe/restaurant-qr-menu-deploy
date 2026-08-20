@@ -18,6 +18,14 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, Lo
 
     Page<SupportTicket> findByRestaurantIdAndIsDeletedFalse(Long restaurantId, Pageable pageable);
 
+    List<SupportTicket> findByRestaurantIdAndIsDeletedFalseOrderByCreatedAtDesc(Long restaurantId);
+
+    List<SupportTicket> findByRestaurantIdAndCustomerMobileAndIsDeletedFalseOrderByCreatedAtDesc(Long restaurantId, String customerMobile);
+
+    List<SupportTicket> findByCreatedByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId);
+
+    List<SupportTicket> findAllByIsDeletedFalseOrderByCreatedAtDesc();
+
     @Query("SELECT t FROM SupportTicket t WHERE t.isDeleted = false ORDER BY t.createdAt DESC")
     Page<SupportTicket> findAllTickets(Pageable pageable);
 

@@ -10,6 +10,7 @@ import { BackButton } from '../../components/back-button/back-button';
 
 import { NotificationCenter } from '../../components/notification-center/notification-center';
 import { NotificationService } from '../../services/notification.service';
+import { TicketService, SupportTicketData, TicketMessageData } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-chef-dashboard',
@@ -22,6 +23,7 @@ export class ChefDashboard implements OnInit, OnDestroy {
   toastService        = inject(ToastService);
   modalService        = inject(ModalService);
   orderService        = inject(OrderService);
+  ticketService       = inject(TicketService);
   notificationService = inject(NotificationService);
   http                = inject(HttpClient);
   router              = inject(Router);
@@ -49,20 +51,89 @@ export class ChefDashboard implements OnInit, OnDestroy {
   preparingCount = computed(() => this.orders().filter(o => ['preparing', 'accepted'].includes(String(o.status).toLowerCase())).length);
   doneCount      = computed(() => this.orders().filter(o => ['done', 'ready', 'completed'].includes(String(o.status).toLowerCase())).length);
 
+  // Kitchen Support & Tickets
+  showKitchenSupportModal   = signal<boolean>(false);
+  showChefTicketsListModal  = signal<boolean>(false);
+  chefSupportSubject        = signal<string>('');
+  chefSupportCategory       = signal<string>('KITCHEN_EQUIPMENT');
+  chefSupportPriority       = signal<string>('HIGH');
+  chefSupportDescription    = signal<string>('');
+  chefTickets               = computed(() => this.ticketService.ticketsList());
+  selectedChefTicketDetails = signal<{ ticket: SupportTicketData; messages: TicketMessageData[] } | null>(null);
+  chefReplyText             = signal<string>('');
+  isChefReplying            = signal<boolean>(false);
+
   private clockTicker: any;
+  private pollTicker: any;
   Math = Math;
 
   ngOnInit() {
     this.orderService.fetchOrders(1).subscribe();
+    this.ticketService.fetchOwnerTickets(1).subscribe();
+
     this.clockTicker = setInterval(() => {
       this.currentTime.set(Date.now());
     }, 1000);
+
+    // Live order and ticket sync every 2.5s
+    this.pollTicker = setInterval(() => {
+      this.orderService.fetchOrders(1).subscribe();
+    }, 2500);
   }
 
   ngOnDestroy() {
-    if (this.clockTicker) {
-      clearInterval(this.clockTicker);
+    if (this.clockTicker) clearInterval(this.clockTicker);
+    if (this.pollTicker) clearInterval(this.pollTicker);
+  }
+
+  openKitchenSupportModal() {
+    this.chefSupportSubject.set('');
+    this.chefSupportDescription.set('');
+    this.chefSupportCategory.set('KITCHEN_EQUIPMENT');
+    this.chefSupportPriority.set('HIGH');
+    this.showKitchenSupportModal.set(true);
+  }
+
+  submitKitchenTicket() {
+    if (!this.chefSupportSubject().trim() || !this.chefSupportDescription().trim()) {
+      this.toastService.show('Please provide a subject and details for kitchen inquiry', 'warning');
+      return;
     }
+
+    this.ticketService.createTicket({
+      restaurantId: 1,
+      category: this.chefSupportCategory(),
+      priority: this.chefSupportPriority(),
+      subject: this.chefSupportSubject().trim(),
+      description: this.chefSupportDescription().trim()
+    }).subscribe(() => {
+      this.toastService.success('Kitchen Report Dispatched', 'Management & Tech support notified.');
+      this.showKitchenSupportModal.set(false);
+      this.ticketService.fetchOwnerTickets(1).subscribe();
+    });
+  }
+
+  openChefTicketDetails(ticket: SupportTicketData) {
+    this.ticketService.getTicketDetails(ticket.id).subscribe(res => {
+      this.selectedChefTicketDetails.set(res || { ticket, messages: [] });
+      this.showChefTicketsListModal.set(true);
+    });
+  }
+
+  sendChefReply() {
+    const text = this.chefReplyText().trim();
+    const details = this.selectedChefTicketDetails();
+    if (!text || !details?.ticket) return;
+
+    this.isChefReplying.set(true);
+    this.ticketService.addMessage(details.ticket.id, text, 'Chef Kitchen Station').subscribe(msg => {
+      this.isChefReplying.set(false);
+      this.chefReplyText.set('');
+      if (msg) {
+        this.selectedChefTicketDetails.update(d => d ? { ...d, messages: [...d.messages, msg] } : d);
+        this.toastService.success('Reply Sent', 'Your message has been posted.');
+      }
+    });
   }
 
   advanceOrder(orderId: string, specificStatus?: string) {

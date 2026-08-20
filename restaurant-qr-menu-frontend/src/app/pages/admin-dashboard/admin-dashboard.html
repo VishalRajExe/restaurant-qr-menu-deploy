@@ -13,18 +13,18 @@
 
     <!-- Navigation -->
     <nav class="adm-nav-menu">
-      <button class="adm-nav-item" [class.active]="activeTab() === 'analytics'" (click)="activeTab.set('analytics')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'analytics'" (click)="selectTab('analytics')">
         <span class="material-symbols-outlined">leaderboard</span>
         <span>Analytics</span>
       </button>
 
-      <button class="adm-nav-item" [class.active]="activeTab() === 'restaurants'" (click)="activeTab.set('restaurants')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'restaurants'" (click)="selectTab('restaurants')">
         <span class="material-symbols-outlined">storefront</span>
         <span>Venues & Partners</span>
         <span class="adm-badge-count">{{ totalRestaurants() }}</span>
       </button>
 
-      <button class="adm-nav-item" [class.active]="activeTab() === 'tickets'" (click)="activeTab.set('tickets')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'tickets'" (click)="selectTab('tickets')">
         <span class="material-symbols-outlined">support_agent</span>
         <span>Support Desk</span>
         @if (openTicketsCount() > 0) {
@@ -588,41 +588,71 @@
            ════════════════════════════════════════════════════════ -->
       @if (activeTab() === 'tickets') {
         <div class="animate-fade-in">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
             <div>
-              <h2 class="adm-page-title">Support Desk</h2>
-              <p class="adm-breadcrumb">Resolve customer & restaurant inquiries</p>
+              <h2 class="adm-page-title">Support & Incident Command Desk</h2>
+              <p class="adm-breadcrumb">Resolve customer dining reports and restaurant inquiries across all venues</p>
             </div>
             <div style="display:flex;gap:6px">
-              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'all'" (click)="ticketFilter.set('all')">All ({{ tickets().length }})</button>
-              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'open'" (click)="ticketFilter.set('open')">Open ({{ openTicketsCount() }})</button>
+              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'all'" (click)="ticketFilter.set('all')">All Tickets ({{ tickets().length }})</button>
+              <button class="lez-filter-pill" [class.active]="ticketFilter() === 'open'" (click)="ticketFilter.set('open')">Open / Active ({{ openTicketsCount() }})</button>
               <button class="lez-filter-pill" [class.active]="ticketFilter() === 'resolved'" (click)="ticketFilter.set('resolved')">Resolved ({{ resolvedTicketsCount() }})</button>
             </div>
           </div>
 
           <div style="display:flex;flex-direction:column;gap:12px">
-            @for (ticket of filteredTickets(); track ticket.id) {
-              <div class="adm-card" style="padding:18px">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                  <div style="display:flex;align-items:center;gap:12px">
-                    <span class="lez-badge" [class.lez-badge-ready]="ticket.status === 'resolved'" [class.lez-badge-pending]="ticket.status === 'open'">
-                      {{ ticket.status }}
-                    </span>
-                    <div>
-                      <h4 style="font-size:15px;font-weight:700;margin:0">{{ ticket.subject }}</h4>
-                      <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">{{ ticket.restaurantName }} • {{ timeAgo(ticket.createdAt) }}</p>
+            @if (filteredTickets().length === 0) {
+              <div class="adm-card" style="text-align:center;padding:48px 24px">
+                <span class="material-symbols-outlined text-[48px] text-gray-300">support_agent</span>
+                <h4 style="font-size:16px;font-weight:700;margin:12px 0 4px">No support tickets found</h4>
+                <p style="font-size:13px;color:var(--text-secondary);margin:0">All customer and restaurant inquiries have been resolved.</p>
+              </div>
+            } @else {
+              @for (ticket of filteredTickets(); track ticket.id) {
+                <div class="adm-card" style="padding:18px;border-left:4px solid #ff6b35;transition:all 0.2s" (click)="openTicketDetails(ticket)" class="cursor-pointer hover:shadow-md">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                    <div style="display:flex;align-items:flex-start;gap:12px">
+                      <span class="lez-badge" [class]="'status-' + ticket.status.toLowerCase()">
+                        ● {{ ticket.status }}
+                      </span>
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                          <span style="font-family:monospace;font-size:12px;font-weight:800;color:#c2410c;background:#fff1ec;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa">
+                            {{ ticket.ticketNumber || ticket.id }}
+                          </span>
+                          <h4 style="font-size:15px;font-weight:700;margin:0;color:#0f172a">{{ ticket.subject }}</h4>
+                          <span class="lez-badge" [class]="'priority-' + ticket.priority.toLowerCase()">
+                            {{ ticket.priority }}
+                          </span>
+                          @if (ticket.isChefIssue) {
+                            <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+                          }
+                          @if (ticket.isEscalated) {
+                            <span class="badge-escalated">⚡ Escalated by Owner</span>
+                          }
+                        </div>
+                        <p style="font-size:12px;color:#64748b;margin:6px 0 0">
+                          Venue: <strong style="color:#0f172a">{{ ticket.restaurantName }}</strong> • Reporter: <strong style="color:#0f172a">{{ ticket.createdByName || ticket.customerName || 'Staff' }}</strong> (Role: <span style="font-weight:700;color:#c2410c">{{ ticket.senderRole || (ticket.customerMobile ? 'CUSTOMER' : 'STAFF') }}</span>) • {{ timeAgo(ticket.createdAt) }}
+                        </p>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:8px" (click)="$event.stopPropagation()">
+                      <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="openTicketDetails(ticket)">
+                        <span class="material-symbols-outlined text-[15px]">chat</span>
+                        <span>View & Reply</span>
+                      </button>
+                      @if (ticket.status === 'OPEN' || ticket.status === 'open' || ticket.status === 'IN_PROGRESS') {
+                        <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="updateTicketStatus(ticket.id, 'RESOLVED')">Resolve</button>
+                      } @else {
+                        <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="updateTicketStatus(ticket.id, 'OPEN')">Reopen</button>
+                      }
                     </div>
                   </div>
-                  <div style="display:flex;gap:8px">
-                    @if (ticket.status === 'open') {
-                      <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="resolveTicket(ticket.id)">Mark Resolved</button>
-                    } @else {
-                      <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="reopenTicket(ticket.id)">Reopen</button>
-                    }
-                  </div>
+                  <p style="font-size:13px;color:#334155;margin:12px 0 0;line-height:1.5;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0">
+                    {{ ticket.description || ticket.message }}
+                  </p>
                 </div>
-                <p style="font-size:13px;color:var(--text-secondary);margin:12px 0 0;line-height:1.5">{{ ticket.description || ticket.message }}</p>
-              </div>
+              }
             }
           </div>
         </div>
@@ -630,5 +660,95 @@
 
     </main>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADMIN TICKET CONVERSATION & RESOLUTION MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showTicketModal()) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="showTicketModal.set(false)">
+      <div class="pos-modal-card" style="max-width:680px" (click)="$event.stopPropagation()">
+        
+        <div class="pos-modal-header" style="padding-bottom:14px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-family:monospace;font-size:12px;font-weight:800;color:#c2410c;background:#fff1ec;padding:3px 8px;border-radius:6px;border:1px solid #fed7aa">
+                {{ selectedTicketDetails()?.ticket?.ticketNumber }}
+              </span>
+              <span class="lez-badge" [class]="'status-' + (selectedTicketDetails()?.ticket?.status?.toLowerCase() || 'open')">
+                ● {{ selectedTicketDetails()?.ticket?.status }}
+              </span>
+              <span class="lez-badge" [class]="'priority-' + (selectedTicketDetails()?.ticket?.priority?.toLowerCase() || 'medium')">
+                {{ selectedTicketDetails()?.ticket?.priority }}
+              </span>
+              @if (selectedTicketDetails()?.ticket?.isChefIssue) {
+                <span class="badge-chef-issue">👨‍🍳 Chef Incident</span>
+              }
+              @if (selectedTicketDetails()?.ticket?.isEscalated) {
+                <span class="badge-escalated">⚡ Escalated by Owner</span>
+              }
+            </div>
+            <h3 class="pos-modal-title" style="margin-top:8px;font-size:17px;font-weight:800;color:#0f172a">
+              {{ selectedTicketDetails()?.ticket?.subject }}
+            </h3>
+            <p style="font-size:12px;color:#64748b;margin:4px 0 0">
+              Restaurant: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.restaurantName }}</strong> • Reporter: <strong style="color:#0f172a">{{ selectedTicketDetails()?.ticket?.customerName || selectedTicketDetails()?.ticket?.createdByName || 'Staff' }}</strong> (Role: <span style="color:#c2410c;font-weight:700">{{ selectedTicketDetails()?.ticket?.senderRole || 'STAFF' }}</span>) • {{ selectedTicketDetails()?.ticket?.createdAt | date:'medium' }}
+            </p>
+          </div>
+          <button class="pos-modal-close" (click)="showTicketModal.set(false)">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="pos-modal-body" style="padding:16px;max-height:360px;overflow-y:auto;background:#f8fafc;display:flex;flex-direction:column;gap:12px;border:1px solid #e2e8f0;border-radius:12px;margin:14px 0">
+          @for (msg of selectedTicketDetails()?.messages; track msg.id) {
+            <div style="display:flex;flex-direction:column;gap:4px"
+                 [style.align-items]="msg.senderRole === 'SUPER_ADMIN' ? 'flex-end' : 'flex-start'">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b">
+                <strong style="color:#1e293b">{{ msg.senderName }}</strong>
+                <span>({{ msg.senderRole }})</span>
+                <span>• {{ msg.createdAt | date:'shortTime' }}</span>
+              </div>
+              <div style="padding:10px 14px;border-radius:12px;font-size:13px;max-width:85%;line-height:1.4"
+                   [style.background]="msg.senderRole === 'SUPER_ADMIN' ? '#0b1c30' : '#ffffff'"
+                   [style.color]="msg.senderRole === 'SUPER_ADMIN' ? '#ffffff' : '#0b1c30'"
+                   [style.border]="msg.senderRole === 'SUPER_ADMIN' ? 'none' : '1.5px solid #cbd5e1'">
+                {{ msg.message }}
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="pos-modal-footer" style="flex-direction:column;gap:12px;align-items:stretch">
+          <div style="display:flex;gap:8px">
+            <input class="lez-input" style="flex:1" placeholder="Type administrative response / instruction..."
+                   [value]="adminReplyMessage()" (input)="adminReplyMessage.set($any($event.target).value)"
+                   (keyup.enter)="sendAdminReply()" />
+            <button class="lez-btn lez-btn-primary" [disabled]="isSendingReply() || !adminReplyMessage().trim()" (click)="sendAdminReply()">
+              <span class="material-symbols-outlined text-[16px]">send</span>
+              <span>Reply</span>
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #e2e8f0">
+            <div style="display:flex;gap:8px">
+              @if (selectedTicketDetails()?.ticket?.status !== 'RESOLVED' && selectedTicketDetails()?.ticket?.status !== 'CLOSED') {
+                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'RESOLVED')">
+                  <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                  <span>Resolve Ticket</span>
+                </button>
+              } @else {
+                <button class="lez-btn lez-btn-sm lez-btn-secondary" (click)="updateTicketStatus(selectedTicketDetails()!.ticket.id, 'OPEN')">
+                  <span class="material-symbols-outlined text-[15px]">refresh</span>
+                  <span>Reopen Ticket</span>
+                </button>
+              }
+            </div>
+            <button class="lez-btn lez-btn-sm lez-btn-outline" (click)="showTicketModal.set(false)">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
 
 </div>

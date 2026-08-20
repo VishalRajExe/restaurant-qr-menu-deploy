@@ -33,7 +33,11 @@ export class NotificationCenter {
   toggle() {
     this.notificationService.toggleDropdown();
     if (this.isOpen()) {
-      this.notificationService.fetchNotifications().subscribe();
+      if (this.unreadCount() > 0) {
+        this.notificationService.markAllAsRead().subscribe();
+      } else {
+        this.notificationService.fetchNotifications().subscribe();
+      }
     }
   }
 

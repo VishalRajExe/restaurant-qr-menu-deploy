@@ -440,6 +440,35 @@
   color: #475569;
 }
 
+.input-wrap .password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.input-wrap .password-toggle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input-wrap .password-toggle-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.input-wrap:has(.password-toggle-btn) .custom-input {
+  padding-right: 46px;
+}
+
 .custom-select {
   cursor: pointer;
   appearance: none;

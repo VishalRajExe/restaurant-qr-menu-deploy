@@ -24,6 +24,7 @@ public class SupportTicketService {
     private final TicketMessageRepository ticketMessageRepository;
     private final RestaurantService restaurantService;
     private final UserRepository userRepository;
+    private final com.restaurantqr.platform.modules.notification.service.NotificationService notificationService;
 
     @Transactional
     public SupportTicket createTicket(Long restaurantId, com.restaurantqr.platform.users.entity.User user,
@@ -63,12 +64,12 @@ public class SupportTicketService {
                 .assignedTeam(SupportTicket.Team.SUPPORT_AGENT)
                 .escalationLevel(SupportTicket.EscalationLevel.LEVEL_1)
                 .subject(subject)
-                .category(category)
+                .category(category != null ? category : SupportTicket.Category.GENERAL)
                 .priority(priority != null ? priority : SupportTicket.Priority.MEDIUM)
                 .status(SupportTicket.Status.OPEN)
                 .slaResponseDeadline(responseDeadline)
                 .slaResolutionDeadline(resolutionDeadline)
-                .tags(category.name() + "," + (priority != null ? priority.name() : "MEDIUM"))
+                .tags(category != null ? category.name() : "GENERAL")
                 .build();
 
         SupportTicket savedTicket = supportTicketRepository.save(ticket);
@@ -76,18 +77,81 @@ public class SupportTicketService {
         var firstMessage = TicketMessage.builder()
                 .ticket(savedTicket)
                 .senderUser(user)
-                .senderRole(user.getRole().name())
+                .senderName(user != null ? user.getName() : "Staff Member")
+                .senderRole(user != null && user.getRole() != null ? user.getRole().name() : "OWNER")
                 .message(description)
                 .attachments(attachments)
                 .isInternalNote(false)
                 .build();
 
         ticketMessageRepository.save(firstMessage);
+
+        // Notify Admin of new ticket
+        notificationService.notifyRole(com.restaurantqr.platform.users.entity.User.Role.SUPER_ADMIN,
+                com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_CREATED,
+                "New Support Ticket #" + ticketNumber,
+                "Ticket submitted by " + (user != null ? user.getName() : "Restaurant") + ": " + subject);
+
+        return savedTicket;
+    }
+
+    @Transactional
+    public SupportTicket createCustomerTicket(Long restaurantId, String customerName, String customerMobile,
+                                              String customerEmail, SupportTicket.Category category,
+                                              String subject, String description, String attachments) {
+        var restaurant = restaurantService.findById(restaurantId);
+        String ticketNumber = "CUST-" + (System.currentTimeMillis() % 1000000);
+
+        var ticket = SupportTicket.builder()
+                .ticketNumber(ticketNumber)
+                .restaurant(restaurant)
+                .createdByUser(null)
+                .customerName(customerName != null && !customerName.isBlank() ? customerName : "Dining Guest")
+                .customerMobile(customerMobile)
+                .customerEmail(customerEmail)
+                .assignedTeam(SupportTicket.Team.SUPPORT_AGENT)
+                .escalationLevel(SupportTicket.EscalationLevel.LEVEL_1)
+                .subject(subject)
+                .category(category != null ? category : SupportTicket.Category.SERVICE_FEEDBACK)
+                .priority(SupportTicket.Priority.MEDIUM)
+                .status(SupportTicket.Status.OPEN)
+                .tags("CUSTOMER_REPORT," + (category != null ? category.name() : "GENERAL"))
+                .build();
+
+        SupportTicket savedTicket = supportTicketRepository.save(ticket);
+
+        var firstMessage = TicketMessage.builder()
+                .ticket(savedTicket)
+                .senderUser(null)
+                .senderName(customerName != null && !customerName.isBlank() ? customerName : "Dining Guest")
+                .senderRole("CUSTOMER")
+                .message(description)
+                .attachments(attachments)
+                .isInternalNote(false)
+                .build();
+
+        ticketMessageRepository.save(firstMessage);
+
+        // Notify Restaurant Owner & Chef of customer feedback/report
+        notificationService.notifyRestaurant(restaurantId,
+                com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_CREATED,
+                "Customer Dining Report #" + ticketNumber,
+                "Customer " + (customerName != null ? customerName : "") + " reported: " + subject);
+
         return savedTicket;
     }
 
     @Transactional
     public TicketMessage addMessage(Long ticketId, com.restaurantqr.platform.users.entity.User sender,
+                                    String messageText, String attachments, boolean isInternalNote) {
+        return addMessage(ticketId, sender, sender != null ? sender.getName() : "Anonymous",
+                sender != null && sender.getRole() != null ? sender.getRole().name() : "USER",
+                messageText, attachments, isInternalNote);
+    }
+
+    @Transactional
+    public TicketMessage addMessage(Long ticketId, com.restaurantqr.platform.users.entity.User sender,
+                                    String senderName, String senderRole,
                                     String messageText, String attachments, boolean isInternalNote) {
         var ticket = supportTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("SupportTicket", ticketId));
@@ -95,15 +159,23 @@ public class SupportTicketService {
         var msg = TicketMessage.builder()
                 .ticket(ticket)
                 .senderUser(sender)
-                .senderRole(sender.getRole().name())
+                .senderName(sender != null ? sender.getName() : senderName)
+                .senderRole(sender != null && sender.getRole() != null ? sender.getRole().name() : senderRole)
                 .message(messageText)
                 .attachments(attachments)
                 .isInternalNote(isInternalNote)
                 .build();
 
         if (!isInternalNote) {
-            if (sender.getRole() == com.restaurantqr.platform.users.entity.User.Role.SUPER_ADMIN) {
+            if (sender != null && sender.getRole() == com.restaurantqr.platform.users.entity.User.Role.SUPER_ADMIN) {
                 ticket.setStatus(SupportTicket.Status.WAITING_FOR_CUSTOMER);
+                // Notify restaurant
+                if (ticket.getRestaurant() != null) {
+                    notificationService.notifyRestaurant(ticket.getRestaurant().getId(),
+                            com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_REPLIED,
+                            "Support Reply on Ticket #" + ticket.getTicketNumber(),
+                            "Admin replied: " + (messageText.length() > 50 ? messageText.substring(0, 47) + "..." : messageText));
+                }
             } else {
                 ticket.setStatus(SupportTicket.Status.IN_PROGRESS);
             }
@@ -118,6 +190,22 @@ public class SupportTicketService {
             return ticketMessageRepository.findAllMessagesForTicket(ticketId);
         }
         return ticketMessageRepository.findCustomerMessagesForTicket(ticketId);
+    }
+
+    @Transactional
+    public SupportTicket updateTicketStatus(Long ticketId, SupportTicket.Status newStatus) {
+        var ticket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("SupportTicket", ticketId));
+        ticket.setStatus(newStatus);
+        SupportTicket updated = supportTicketRepository.save(ticket);
+
+        if (ticket.getRestaurant() != null) {
+            notificationService.notifyRestaurant(ticket.getRestaurant().getId(),
+                    com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_RESOLVED,
+                    "Ticket #" + ticket.getTicketNumber() + " Status Updated",
+                    "Ticket is now marked as " + newStatus.name());
+        }
+        return updated;
     }
 
     @Transactional
@@ -146,11 +234,45 @@ public class SupportTicketService {
     }
 
     @Transactional
+    public SupportTicket escalateTicketToAdmin(Long ticketId, String escalationReason, com.restaurantqr.platform.users.entity.User escalatedBy) {
+        var ticket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("SupportTicket", ticketId));
+        ticket.setEscalationLevel(SupportTicket.EscalationLevel.LEVEL_2);
+        ticket.setStatus(SupportTicket.Status.IN_PROGRESS);
+        String existingTags = ticket.getTags() != null ? ticket.getTags() : "";
+        if (!existingTags.contains("ESCALATED_TO_ADMIN")) {
+            ticket.setTags((existingTags.isBlank() ? "" : existingTags + ",") + "ESCALATED_TO_ADMIN");
+        }
+
+        // Record escalation note in ticket thread
+        String note = "⚡ ESCALATED TO SUPER ADMIN: " + (escalationReason != null && !escalationReason.isBlank() ? escalationReason : "Owner requested urgent platform support.");
+        addMessage(ticketId, escalatedBy, escalatedBy != null ? escalatedBy.getName() : "Owner",
+                escalatedBy != null && escalatedBy.getRole() != null ? escalatedBy.getRole().name() : "OWNER",
+                note, null, false);
+
+        // Notify Super Admins
+        notificationService.notifyRole(com.restaurantqr.platform.users.entity.User.Role.SUPER_ADMIN,
+                com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_CREATED,
+                "🚨 Urgent Escalation: Ticket #" + ticket.getTicketNumber(),
+                (ticket.getRestaurant() != null ? ticket.getRestaurant().getName() : "Venue") + " escalated: " + ticket.getSubject());
+
+        return supportTicketRepository.save(ticket);
+    }
+
+    @Transactional
     public SupportTicket resolveTicket(Long ticketId) {
         var ticket = supportTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("SupportTicket", ticketId));
         ticket.setStatus(SupportTicket.Status.RESOLVED);
-        return supportTicketRepository.save(ticket);
+        SupportTicket saved = supportTicketRepository.save(ticket);
+
+        if (ticket.getRestaurant() != null) {
+            notificationService.notifyRestaurant(ticket.getRestaurant().getId(),
+                    com.restaurantqr.platform.modules.notification.entity.Notification.EventType.TICKET_RESOLVED,
+                    "Ticket #" + ticket.getTicketNumber() + " Resolved",
+                    "Your ticket '" + ticket.getSubject() + "' has been resolved.");
+        }
+        return saved;
     }
 
     @Transactional
@@ -180,12 +302,13 @@ public class SupportTicketService {
         StringBuilder sb = new StringBuilder();
         sb.append("TICKET TRANSCRIPT: ").append(ticket.getTicketNumber()).append("\n");
         sb.append("Subject: ").append(ticket.getSubject()).append("\n");
-        sb.append("Restaurant: ").append(ticket.getRestaurant().getName()).append("\n");
+        sb.append("Restaurant: ").append(ticket.getRestaurant() != null ? ticket.getRestaurant().getName() : "N/A").append("\n");
         sb.append("Status: ").append(ticket.getStatus().name()).append("\n\n");
 
         for (TicketMessage m : messages) {
+            String name = m.getSenderUser() != null ? m.getSenderUser().getName() : (m.getSenderName() != null ? m.getSenderName() : "User");
             sb.append("[").append(m.getCreatedAt()).append("] ")
-                    .append(m.getSenderUser().getName()).append(" (").append(m.getSenderRole()).append("):\n")
+                    .append(name).append(" (").append(m.getSenderRole()).append("):\n")
                     .append(m.getMessage()).append("\n\n");
         }
 

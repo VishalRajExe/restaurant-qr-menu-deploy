@@ -25,8 +25,8 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "restaurant_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = true)
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
@@ -63,6 +63,9 @@ public class Notification extends BaseEntity {
         SUBSCRIPTION_EXPIRING,
         OFFER_ENDING,
         NEW_STAFF_JOINED,
+        TICKET_CREATED,
+        TICKET_REPLIED,
+        TICKET_RESOLVED,
         SUPPORT_TICKET_UPDATE,
         SECURITY_ALERT,
         SYSTEM_NOTICE

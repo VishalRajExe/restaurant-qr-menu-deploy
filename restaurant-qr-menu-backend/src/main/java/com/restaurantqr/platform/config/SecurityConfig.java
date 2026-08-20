@@ -74,6 +74,7 @@ public class SecurityConfig {
             "/auth/reset-password",
             "/auth/invitations/**",
             "/public/**",
+            "/tickets/public/**",
             "/actuator/health",
             "/actuator/info",
     };

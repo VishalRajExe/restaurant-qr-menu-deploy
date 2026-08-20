@@ -26,12 +26,14 @@ export class Signup {
   ownerName = signal<string>('');
   ownerEmail = signal<string>('');
   ownerPassword = signal<string>('');
+  showOwnerPassword = signal<boolean>(false);
   ownerPhone = signal<string>('');
 
   // Step 1: Chef Info
   chefName = signal<string>('');
   chefEmail = signal<string>('');
   chefPassword = signal<string>('');
+  showChefPassword = signal<boolean>(false);
   chefPhone = signal<string>('');
   chefInviteCode = signal<string>('');
 

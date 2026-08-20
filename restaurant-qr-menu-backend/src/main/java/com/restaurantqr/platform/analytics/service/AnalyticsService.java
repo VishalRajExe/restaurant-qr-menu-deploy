@@ -12,6 +12,7 @@ import com.restaurantqr.platform.modules.category.repository.CategoryRepository;
 import com.restaurantqr.platform.modules.menuitem.entity.MenuItem;
 import com.restaurantqr.platform.modules.menuitem.repository.MenuItemRepository;
 import com.restaurantqr.platform.modules.offer.repository.OfferRepository;
+import com.restaurantqr.platform.modules.qr.entity.QrCode;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

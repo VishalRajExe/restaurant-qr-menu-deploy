@@ -9,11 +9,12 @@ import { MenuService } from '../../services/menu.service';
 import { OfferService } from '../../services/offer.service';
 import { QrService, QrCodeData } from '../../services/qr.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import { TicketService } from '../../services/ticket.service';
+import { TicketService, SupportTicketData, TicketMessageData } from '../../services/ticket.service';
 import { UploadService } from '../../services/upload.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 import { OrderService, Order } from '../../services/order.service';
+import { PrintService } from '../../services/print.service';
 import { BackButton } from '../../components/back-button/back-button';
 import { Category } from '../../models/category.model';
 import { MenuItem } from '../../models/menu-item.model';
@@ -38,12 +39,13 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   ticketService       = inject(TicketService);
   uploadService       = inject(UploadService);
   toastService        = inject(ToastService);
+  printService        = inject(PrintService);
   modalService        = inject(ModalService);
   orderService        = inject(OrderService);
   notificationService = inject(NotificationService);
   router              = inject(Router);
 
-  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'qr' | 'settings'
+  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'qr' | 'support' | 'settings'
   activeTab = signal<string>('overview');
 
   // Active restaurant selection
@@ -58,13 +60,190 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   activeOrderFilter = signal<string>('ALL');
   selectedOrder = signal<Order | null>(null);
 
-  // Pending Orders Count for Sidebar Badge (turns off when worked/cancelled)
-  pendingOrdersCount = computed(() => {
-    return this.ordersList().filter(o => 
-      o.status.toUpperCase() === 'PENDING' || 
-      o.status.toUpperCase() === 'RECEIVED'
-    ).length;
+  // Unseen Orders Count for Sidebar Badge (clears to 0 when Orders tab is clicked)
+  pendingOrdersCount = computed(() => this.orderService.unseenOrdersCount());
+
+  // Support Ticket signals & badges
+  ownerTickets = computed(() => this.ticketService.ticketsList());
+  unseenTicketsCount = computed(() => this.ticketService.unseenTicketsCount());
+  supportFilter = signal<'ALL' | 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'>('ALL');
+  selectedTicketDetails = signal<{ ticket: SupportTicketData; messages: TicketMessageData[] } | null>(null);
+  showTicketDetailsModal = signal<boolean>(false);
+  newReplyMessage = signal<string>('');
+  isSendingReply = signal<boolean>(false);
+  showCreateTicketModal = signal<boolean>(false);
+  ticketCategory = signal<string>('TECHNICAL_ISSUE');
+  ticketPriority = signal<string>('MEDIUM');
+  ticketSubject = signal<string>('');
+  ticketDescription = signal<string>('');
+
+  filteredOwnerTickets = computed(() => {
+    const list = this.ownerTickets();
+    const f = this.supportFilter();
+    if (f === 'ALL') return list;
+    return list.filter(t => t.status.toUpperCase() === f);
   });
+
+  private pollTimer: any;
+
+  ngOnInit() {
+    this.loadInitialData();
+    // Background polling every 2.5s so Chef status changes reflect immediately
+    this.pollTimer = setInterval(() => {
+      const rId = this.activeRestaurant()?.id || 1;
+      this.orderService.fetchOrders(rId).subscribe(orders => {
+        const cur = this.selectedOrder();
+        if (cur && orders && orders.length > 0) {
+          const fresh = orders.find(o => o.id === cur.id || o.orderNumber === cur.orderNumber);
+          if (fresh) {
+            if (fresh.status !== cur.status) {
+              this.selectedOrder.set(fresh);
+              if (fresh.status === 'READY') {
+                this.toastService.show(`🔔 Chef Alert: Order #${fresh.orderNumber || fresh.id} (Table ${fresh.tableNumber}) is READY for serving!`, 'success');
+              }
+            }
+          }
+        }
+      });
+      if (this.activeTab() === 'support') {
+        this.loadOwnerTickets();
+      }
+    }, 2500);
+  }
+
+  ngOnDestroy() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+    }
+  }
+
+  loadInitialData() {
+    const userSession = this.authService.currentUser();
+    const rId = userSession?.restaurantId || this.activeRestaurant()?.id || '1';
+    this.restaurantService.fetchRestaurantProfile(rId).subscribe(rest => {
+      if (rest) {
+        this.restaurantService.setRestaurant(rest);
+      }
+    });
+
+    this.categoryService.fetchCategories(rId).subscribe(cats => {
+      if (cats && cats.length > 0 && !this.newItemCategoryId()) {
+        this.newItemCategoryId.set(cats[0].id);
+      }
+    });
+
+    this.menuService.fetchMenuItems(rId).subscribe();
+    this.qrService.fetchQrCodes(rId).subscribe(qrs => {
+      if (qrs && qrs.length > 0) {
+        this.selectedQr.set(qrs[0]);
+      }
+    });
+
+    this.analyticsService.loadDashboardMetrics().subscribe();
+    this.orderService.fetchOrders(rId).subscribe();
+    this.loadOwnerTickets();
+  }
+
+  selectTab(tab: string) {
+    this.activeTab.set(tab);
+    this.editingCategoryId.set(null);
+    this.editingItemId.set(null);
+    this.currentPage.set(1);
+    const rId = this.activeRestaurant()?.id || '1';
+
+    if (tab === 'orders') {
+      this.orderService.markOrdersAsSeen(rId);
+      this.orderService.fetchOrders(rId).subscribe();
+    } else if (tab === 'support') {
+      this.ticketService.markTicketsAsSeen();
+      this.loadOwnerTickets();
+    } else if (tab === 'items' || tab === 'categories') {
+      this.categoryService.fetchCategories(rId).subscribe();
+      this.menuService.fetchMenuItems(rId).subscribe();
+    } else if (tab === 'qr') {
+      this.qrService.fetchQrCodes(rId).subscribe();
+    }
+  }
+
+  loadOwnerTickets() {
+    const rId = this.activeRestaurant()?.id || 1;
+    this.ticketService.fetchOwnerTickets(rId).subscribe();
+  }
+
+  openCreateTicketModal() {
+    this.ticketSubject.set('');
+    this.ticketDescription.set('');
+    this.ticketCategory.set('TECHNICAL_ISSUE');
+    this.ticketPriority.set('MEDIUM');
+    this.showCreateTicketModal.set(true);
+  }
+
+  submitOwnerTicket() {
+    if (!this.ticketSubject().trim() || !this.ticketDescription().trim()) {
+      this.toastService.show('Please provide a subject and details for your ticket', 'warning');
+      return;
+    }
+    const rId = this.activeRestaurant()?.id || 1;
+    this.ticketService.createTicket({
+      restaurantId: rId,
+      category: this.ticketCategory(),
+      priority: this.ticketPriority(),
+      subject: this.ticketSubject().trim(),
+      description: this.ticketDescription().trim()
+    }).subscribe(created => {
+      this.toastService.success(
+        `Ticket #${created.ticketNumber || created.id} Created`,
+        `Subject: ${created.subject} • Status: ${created.status} • Date: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      );
+      this.showCreateTicketModal.set(false);
+      this.loadOwnerTickets();
+      if (created) {
+        this.openTicketDetails(created);
+      }
+    });
+  }
+
+  openTicketDetails(ticket: SupportTicketData) {
+    this.ticketService.markTicketsAsSeen();
+    this.ticketService.getTicketDetails(ticket.id).subscribe(res => {
+      this.selectedTicketDetails.set(res || { ticket, messages: [] });
+      this.showTicketDetailsModal.set(true);
+    });
+  }
+
+  escalateTicketToAdmin(ticketId: string | number, reason?: string) {
+    this.ticketService.escalateTicket(ticketId, reason || 'Owner escalated issue to platform administrators').subscribe(() => {
+      this.toastService.success('Escalated to Admin Desk', 'Platform Super Admin team has received this incident.');
+      this.loadOwnerTickets();
+      if (this.selectedTicketDetails()?.ticket?.id === String(ticketId)) {
+        this.openTicketDetails({ ...this.selectedTicketDetails()!.ticket, isEscalated: true, status: 'IN_PROGRESS' });
+      }
+    });
+  }
+
+  sendTicketReply() {
+    const text = this.newReplyMessage().trim();
+    const details = this.selectedTicketDetails();
+    if (!text || !details?.ticket) return;
+
+    this.isSendingReply.set(true);
+    this.ticketService.addMessage(details.ticket.id, text).subscribe(msg => {
+      this.isSendingReply.set(false);
+      this.newReplyMessage.set('');
+      if (msg) {
+        this.selectedTicketDetails.update(d => d ? { ...d, messages: [...d.messages, msg] } : d);
+        this.toastService.success('Reply Sent', 'Your message has been posted.');
+      }
+    });
+  }
+
+  resolveOwnerTicket(ticketId: string) {
+    this.ticketService.updateTicketStatus(ticketId, 'RESOLVED').subscribe(() => {
+      this.toastService.success('Ticket Resolved', 'Ticket marked as resolved.');
+      this.selectedTicketDetails.update(d => d ? { ...d, ticket: { ...d.ticket, status: 'RESOLVED' } } : d);
+      this.loadOwnerTickets();
+    });
+  }
 
   filteredOrders = computed(() => {
     const list = this.ordersList();
@@ -126,12 +305,34 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
   printKOT(order?: Order | null) {
     const target = order || this.selectedOrder();
-    this.toastService.success('KOT Printed', `Kitchen Order Ticket printed for ${target?.orderNumber || target?.id || 'Order'}`);
+    if (!target) {
+      this.toastService.show('Please select an order to print KOT', 'warning');
+      return;
+    }
+    const r = this.activeRestaurant();
+    this.printService.printKOT(target, {
+      name: r?.name || 'RestQR Gourmet Bistro',
+      address: r?.address || '123 Gourmet Blvd, New York, NY',
+      phone: r?.phone || '+1 (555) 345-6789'
+    });
+    this.toastService.success('KOT Dispatched', `Kitchen ticket printed for Table ${target.tableNumber || '01'}`);
   }
 
   generateInvoice(order?: Order | null) {
     const target = order || this.selectedOrder();
-    this.toastService.success('Invoice Generated', `Invoice generated for ${target?.orderNumber || target?.id || 'Order'}`);
+    if (!target) {
+      this.toastService.show('Please select an order to generate invoice', 'warning');
+      return;
+    }
+    const r = this.activeRestaurant();
+    this.printService.printInvoice(target, {
+      name: r?.name || 'RestQR Gourmet Bistro',
+      address: r?.address || '123 Gourmet Blvd, New York, NY',
+      phone: r?.phone || '+1 (555) 345-6789',
+      email: r?.email || 'contact@restqr.com',
+      currency: '$'
+    });
+    this.toastService.success('Tax Invoice Generated', `Invoice ready for Order #${target.orderNumber || target.id}`);
   }
 
   // --- Category Management States ---
@@ -318,50 +519,6 @@ export class OwnerDashboard implements OnInit, OnDestroy {
       title: 'Restaurant Profile Updated',
       message: 'Profile name, address and phone contact synchronized.'
     });
-  }
-
-  ngOnInit() {
-    const userSession = this.authService.currentUser();
-    const rId = userSession?.restaurantId || '1';
-    this.restaurantService.fetchRestaurantProfile(rId).subscribe(rest => {
-      if (rest) {
-        this.restaurantService.setRestaurant(rest);
-      }
-    });
-
-    this.categoryService.fetchCategories(rId).subscribe(cats => {
-      if (cats && cats.length > 0 && !this.newItemCategoryId()) {
-        this.newItemCategoryId.set(cats[0].id);
-      }
-    });
-
-    this.menuService.fetchMenuItems(rId).subscribe();
-    this.qrService.fetchQrCodes(rId).subscribe(qrs => {
-      if (qrs && qrs.length > 0) {
-        this.selectedQr.set(qrs[0]);
-      }
-    });
-
-    this.analyticsService.loadDashboardMetrics().subscribe();
-    this.orderService.fetchOrders(this.activeRestaurant()?.id || 1).subscribe();
-  }
-
-  ngOnDestroy() {}
-
-  selectTab(tabName: string) {
-    this.activeTab.set(tabName);
-    this.editingCategoryId.set(null);
-    this.editingItemId.set(null);
-    this.currentPage.set(1);
-    const rId = this.activeRestaurant()?.id || '1';
-    if (tabName === 'orders') {
-      this.orderService.fetchOrders(rId).subscribe();
-    } else if (tabName === 'items' || tabName === 'categories') {
-      this.categoryService.fetchCategories(rId).subscribe();
-      this.menuService.fetchMenuItems(rId).subscribe();
-    } else if (tabName === 'qr') {
-      this.qrService.fetchQrCodes(rId).subscribe();
-    }
   }
 
   // Categories

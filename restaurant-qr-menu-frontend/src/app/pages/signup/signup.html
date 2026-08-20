@@ -147,7 +147,14 @@
                   <label class="field-label">Desired Secure Password *</label>
                   <div class="input-wrap">
                     <span class="material-symbols-outlined input-icon">lock</span>
-                    <input type="password" [(ngModel)]="ownerPassword" placeholder="Minimum 8 characters" class="custom-input" />
+                    <input [type]="showOwnerPassword() ? 'text' : 'password'" [(ngModel)]="ownerPassword" placeholder="Minimum 8 characters" class="custom-input" />
+                    <button type="button"
+                            class="password-toggle-btn"
+                            (click)="showOwnerPassword.set(!showOwnerPassword())"
+                            [title]="showOwnerPassword() ? 'Hide password' : 'Show password'"
+                            [attr.aria-label]="showOwnerPassword() ? 'Hide password' : 'Show password'">
+                      <span class="material-symbols-outlined">{{ showOwnerPassword() ? 'visibility_off' : 'visibility' }}</span>
+                    </button>
                   </div>
                   <span class="field-hint">Must contain at least 8 characters.</span>
                 </div>
@@ -331,7 +338,14 @@
                   <label class="field-label">Password *</label>
                   <div class="input-wrap">
                     <span class="material-symbols-outlined input-icon">lock</span>
-                    <input type="password" [(ngModel)]="chefPassword" placeholder="Minimum 8 characters" class="custom-input" />
+                    <input [type]="showChefPassword() ? 'text' : 'password'" [(ngModel)]="chefPassword" placeholder="Minimum 8 characters" class="custom-input" />
+                    <button type="button"
+                            class="password-toggle-btn"
+                            (click)="showChefPassword.set(!showChefPassword())"
+                            [title]="showChefPassword() ? 'Hide password' : 'Show password'"
+                            [attr.aria-label]="showChefPassword() ? 'Hide password' : 'Show password'">
+                      <span class="material-symbols-outlined">{{ showChefPassword() ? 'visibility_off' : 'visibility' }}</span>
+                    </button>
                   </div>
                 </div>
 

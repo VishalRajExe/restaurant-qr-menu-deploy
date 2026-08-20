@@ -20,9 +20,10 @@ export class Login implements OnInit {
   activeTab = signal<'owner' | 'chef' | 'super-admin'>('owner');
 
   // Input states
-  email      = signal<string>('owner@restaurant.com');
-  password   = signal<string>('Owner@12345');
-  rememberMe = signal<boolean>(true);
+  email        = signal<string>('owner@restaurant.com');
+  password     = signal<string>('Owner@12345');
+  showPassword = signal<boolean>(false);
+  rememberMe   = signal<boolean>(true);
 
   isLoading    = signal<boolean>(false);
   errorMessage = signal<string>('');

@@ -66,12 +66,19 @@
             <span class="material-symbols-outlined input-icon">lock</span>
             <input id="login-password"
                    class="lez-input"
-                   type="password"
+                   [type]="showPassword() ? 'text' : 'password'"
                    autocomplete="current-password"
                    placeholder="Enter your password"
                    [value]="password()"
                    (input)="password.set($any($event.target).value)"
                    required />
+            <button type="button"
+                    class="password-toggle-btn"
+                    (click)="showPassword.set(!showPassword())"
+                    [title]="showPassword() ? 'Hide password' : 'Show password'"
+                    [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+              <span class="material-symbols-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
           </div>
         </div>
 

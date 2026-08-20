@@ -909,6 +909,160 @@
   color: #8c9ba5;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   HIGH-CONTRAST SUPPORT TICKET BADGES & PILLS (Admin Desk)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.lez-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.lez-filter-pill:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.lez-filter-pill.active {
+  background: #ff6b35 !important;
+  color: #ffffff !important;
+  border-color: #ff6b35 !important;
+  box-shadow: 0 2px 6px rgba(255, 107, 53, 0.25);
+}
+
+.priority-low,
+.lez-badge.priority-low {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #7dd3fc !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.priority-medium,
+.lez-badge.priority-medium {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.priority-high,
+.lez-badge.priority-high {
+  background: #ffedd5 !important;
+  color: #c2410c !important;
+  border: 1px solid #fdba74 !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.priority-critical,
+.lez-badge.priority-critical {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fca5a5 !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.status-open,
+.lez-badge.status-open,
+.lez-badge.lez-badge-pending {
+  background: #ecfdf5 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.status-in_progress,
+.status-in-progress,
+.lez-badge.status-in_progress,
+.lez-badge.status-in-progress {
+  background: #eff6ff !important;
+  color: #1e40af !important;
+  border: 1px solid #93c5fd !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.status-resolved,
+.status-closed,
+.lez-badge.status-resolved,
+.lez-badge.status-closed,
+.lez-badge.lez-badge-ready {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 800 !important;
+  font-size: 11.5px !important;
+  padding: 4px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.badge-chef-issue {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border: 1.5px solid #fda4af !important;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-escalated {
+  background: #faf5ff !important;
+  color: #6b21a8 !important;
+  border: 1.5px solid #d8b4fe !important;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* ── Responsive Rules ────────────────────────────────────────────────── */
 @media (max-width: 1200px) {
   .adm-kpi-row {

@@ -19,16 +19,16 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','STAFF','SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','STAFF','SUPER_ADMIN','CHEF')")
     public ResponseEntity<ApiResponse<List<Order>>> getOrders(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(ApiResponse.success(orderService.findByRestaurant(restaurantId)));
     }
 
     @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','STAFF','SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('RESTAURANT_OWNER','MANAGER','STAFF','SUPER_ADMIN','CHEF')")
     public ResponseEntity<ApiResponse<Order>> updateStatus(
             @PathVariable Long restaurantId,
-            @PathVariable Long orderId,
+            @PathVariable String orderId,
             @RequestBody Map<String, String> body) {
         String statusStr = body.get("status");
         Order.Status status = Order.Status.valueOf(statusStr.toUpperCase());

@@ -148,34 +148,9 @@ export class NotificationService {
   }
 
   private initDefaultNotifications() {
-    const defaults: AppNotification[] = [
-      {
-        id: '1',
-        eventType: 'NEW_ORDER',
-        title: 'New Order #ORD-8821',
-        message: 'Table 01 placed an order for 2x Truffle Mushroom Burger + Chocolate Fondant ($46.00).',
-        isRead: false,
-        createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString()
-      },
-      {
-        id: '2',
-        eventType: 'PAYMENT_RECEIVED',
-        title: 'Settlement Received',
-        message: 'Daily dine-in revenue settlement of $951.52 processed successfully.',
-        isRead: false,
-        createdAt: new Date(Date.now() - 35 * 60 * 1000).toISOString()
-      },
-      {
-        id: '3',
-        eventType: 'QR_GENERATED',
-        title: 'High QR Traffic Alert',
-        message: 'Table 01 QR code has reached 42 active guest scans today.',
-        isRead: true,
-        createdAt: new Date(Date.now() - 120 * 60 * 1000).toISOString()
-      }
-    ];
-
-    this.notifications.set(defaults);
-    this.unread.set(defaults.filter(d => !d.isRead).length);
+    this.notifications.set([]);
+    this.unread.set(0);
+    // Fetch live backend notifications
+    this.fetchNotifications().subscribe();
   }
 }
