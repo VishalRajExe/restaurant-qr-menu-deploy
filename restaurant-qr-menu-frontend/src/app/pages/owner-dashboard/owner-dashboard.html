@@ -35,6 +35,11 @@
         <span>Tables</span>
       </button>
 
+      <button class="lezato-nav-item" [class.active]="activeTab() === 'customers'" (click)="selectTab('customers')">
+        <span class="material-symbols-outlined">person_search</span>
+        <span>Customer History</span>
+      </button>
+
       <button class="lezato-nav-item" [class.active]="activeTab() === 'categories'" (click)="selectTab('categories')">
         <span class="material-symbols-outlined">category</span>
         <span>Categories</span>
@@ -96,8 +101,10 @@
           @else if (activeTab() === 'orders') { Orders Management }
           @else if (activeTab() === 'items') { Menu Management }
           @else if (activeTab() === 'tables') { Table Management }
+          @else if (activeTab() === 'customers') { Customer Order History & Tracking }
           @else if (activeTab() === 'categories') { Category Management }
           @else if (activeTab() === 'qr') { Table QR Scanner & Manager }
+          @else if (activeTab() === 'support') { Support & Help Desk }
           @else { Restaurant Settings }
         </h2>
       </div>
@@ -962,6 +969,397 @@
           </div>
 
         </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: CUSTOMER ORDER HISTORY & TRACKING
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'customers') {
+      <div class="animate-fade-in" style="display:flex;flex-direction:column;gap:22px">
+        
+        <!-- Top Search Card & Recent Customer Pills -->
+        <div class="lez-card" style="padding:22px 26px;background:linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);border:1px solid #fed7aa;box-shadow:0 6px 20px -4px rgba(234, 88, 12, 0.08)">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:42px;height:42px;border-radius:12px;background:#ffedd5;color:#ea580c;display:flex;align-items:center;justify-content:center">
+                <span class="material-symbols-outlined text-[24px]">person_search</span>
+              </div>
+              <div>
+                <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin:0 0 2px">Customer Order History & Tracking</h3>
+                <p style="font-size:12.5px;color:#64748b;margin:0">Search any guest by their 10-digit mobile number to view their restaurant-specific visit records and item breakdowns.</p>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="lez-badge lez-badge-preparing" style="font-size:12px;padding:4px 10px">
+                <span class="material-symbols-outlined text-[14px]">verified_user</span>
+                <span>Restaurant Isolated Data</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- 10-Digit Phone Search Bar Form -->
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:280px;position:relative">
+              <div style="position:relative;display:flex;align-items:center">
+                <span class="material-symbols-outlined" style="position:absolute;left:14px;color:#94a3b8;font-size:20px">phone</span>
+                <span style="position:absolute;left:42px;font-size:13px;font-weight:700;color:#64748b;border-right:1px solid #cbd5e1;padding-right:8px">+91</span>
+                <input type="tel"
+                       maxlength="10"
+                       class="lez-input"
+                       style="padding-left:84px;font-size:15px;font-weight:700;letter-spacing:0.05em;border-radius:12px;height:44px"
+                       placeholder="Enter 10-digit mobile number (e.g. 9876543210)"
+                       [ngModel]="customerSearchPhone()"
+                       (ngModelChange)="customerSearchPhone.set($event); customerPhoneError.set(null)"
+                       (keydown.enter)="searchCustomerByPhone()" />
+                @if (customerSearchPhone()) {
+                  <button type="button"
+                          (click)="customerSearchPhone.set(''); customerPhoneError.set(null)"
+                          style="position:absolute;right:12px;background:none;border:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                }
+              </div>
+              @if (customerPhoneError()) {
+                <div style="font-size:12px;font-weight:600;color:#dc2626;margin-top:6px;display:flex;align-items:center;gap:4px">
+                  <span class="material-symbols-outlined text-[14px]">error</span>
+                  <span>{{ customerPhoneError() }}</span>
+                </div>
+              }
+            </div>
+
+            <button class="lez-btn lez-btn-primary"
+                    style="height:44px;padding:0 22px;border-radius:12px;font-size:13.5px;font-weight:700"
+                    (click)="searchCustomerByPhone()"
+                    [disabled]="isSearchingCustomer()">
+              @if (isSearchingCustomer()) {
+                <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                <span>Searching Records...</span>
+              } @else {
+                <span class="material-symbols-outlined text-[18px]">search</span>
+                <span>Search Customer</span>
+              }
+            </button>
+          </div>
+
+          <!-- Quick Select: Recent Customers Strip -->
+          @if (recentCustomersList().length > 0) {
+            <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #fed7aa;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:11.5px;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:0.5px">Recent Diners:</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                @for (cust of recentCustomersList(); track cust.customerMobile) {
+                  <button type="button"
+                          class="recent-customer-chip"
+                          (click)="selectRecentCustomer(cust)"
+                          [class.active]="customerSearchPhone() === cust.customerMobile">
+                    <span class="material-symbols-outlined text-[13px]">person</span>
+                    <span>{{ cust.customerName }} ({{ cust.customerMobile }})</span>
+                    <strong style="opacity:0.75;font-size:10.5px">• {{ cust.orderCount }} {{ cust.orderCount === 1 ? 'order' : 'orders' }}</strong>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Search Error Banner if API error -->
+        @if (customerHistorySearchError()) {
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:14px;padding:14px 18px;color:#991b1b;display:flex;align-items:center;gap:10px">
+            <span class="material-symbols-outlined text-[22px]">error</span>
+            <span style="font-size:13.5px;font-weight:600">{{ customerHistorySearchError() }}</span>
+          </div>
+        }
+
+        <!-- Active Customer Profile & Order History Container -->
+        @if (customerHistoryData(); as profile) {
+          @if (profile.totalOrders > 0) {
+            <!-- 1. Customer Intelligence Header Card -->
+            <div class="lez-card customer-profile-banner" style="padding:24px;border-radius:16px;background:#ffffff;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div class="customer-avatar-badge">
+                    {{ profile.customerName.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <h3 style="font-size:20px;font-weight:800;color:#0f172a;margin:0">{{ profile.customerName }}</h3>
+                      <span class="lez-badge lez-badge-ready" style="font-size:11px;padding:2px 8px">Registered Guest</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;margin-top:4px;font-size:12.5px;color:#64748b">
+                      <span style="display:flex;align-items:center;gap:4px">
+                        <span class="material-symbols-outlined text-[15px] text-accent">call</span>
+                        <strong style="color:#0f172a">+91 {{ profile.customerMobile }}</strong>
+                      </span>
+                      <span>•</span>
+                      <span>Branch: <strong>{{ profile.restaurantName }}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Top Favorite Dishes Ordered by Customer -->
+                @if (profile.favoriteItems && profile.favoriteItems.length > 0) {
+                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px">
+                    <span style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">Top Ordered Dishes:</span>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      @for (fav of profile.favoriteItems; track fav.itemName) {
+                        <span class="fav-item-chip">
+                          <span>{{ fav.itemName }}</span>
+                          <span class="fav-item-qty">x{{ fav.totalQuantity }}</span>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- 4-Stat Metric Strip -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;padding-top:16px;border-top:1px solid #f1f5f9">
+                <div class="cust-stat-box">
+                  <div class="cust-stat-icon" style="background:#fff7ed;color:#ea580c">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                  </div>
+                  <div>
+                    <div class="cust-stat-value">{{ profile.totalOrders }}</div>
+                    <div class="cust-stat-label">Total Visits / Orders</div>
+                  </div>
+                </div>
+
+                <div class="cust-stat-box">
+                  <div class="cust-stat-icon" style="background:#f0fdf4;color:#16a34a">
+                    <span class="material-symbols-outlined">payments</span>
+                  </div>
+                  <div>
+                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '₹' }}{{ profile.totalSpent.toFixed(2) }}</div>
+                    <div class="cust-stat-label">Lifetime Spend</div>
+                  </div>
+                </div>
+
+                <div class="cust-stat-box">
+                  <div class="cust-stat-icon" style="background:#eff6ff;color:#2563eb">
+                    <span class="material-symbols-outlined">query_stats</span>
+                  </div>
+                  <div>
+                    <div class="cust-stat-value">{{ activeRestaurant()?.currency || '₹' }}{{ profile.averageOrderValue.toFixed(2) }}</div>
+                    <div class="cust-stat-label">Average Order Value</div>
+                  </div>
+                </div>
+
+                <div class="cust-stat-box">
+                  <div class="cust-stat-icon" style="background:#faf5ff;color:#9333ea">
+                    <span class="material-symbols-outlined">history</span>
+                  </div>
+                  <div>
+                    <div class="cust-stat-value" style="font-size:14px">{{ profile.lastOrderDate ? (profile.lastOrderDate | date:'mediumDate') : 'Today' }}</div>
+                    <div class="cust-stat-label">Last Visited Restaurant</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Filters Toolbar for Customer's Orders -->
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#ffffff;padding:12px 18px;border-radius:14px;border:1px solid var(--border)">
+              <!-- Date Range Quick Pills -->
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:11.5px;font-weight:700;color:#64748b;margin-right:4px">Date:</span>
+                <button class="lez-filter-pill" [class.active]="customerOrderDateFilter() === 'ALL'" (click)="customerOrderDateFilter.set('ALL')">All Time</button>
+                <button class="lez-filter-pill" [class.active]="customerOrderDateFilter() === 'TODAY'" (click)="customerOrderDateFilter.set('TODAY')">Today</button>
+                <button class="lez-filter-pill" [class.active]="customerOrderDateFilter() === 'WEEK'" (click)="customerOrderDateFilter.set('WEEK')">Last 7 Days</button>
+                <button class="lez-filter-pill" [class.active]="customerOrderDateFilter() === 'MONTH'" (click)="customerOrderDateFilter.set('MONTH')">Last 30 Days</button>
+              </div>
+
+              <!-- Status & Table Dropdown Selectors & Keyword Search -->
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <!-- Status Filter -->
+                <div style="display:flex;align-items:center;gap:6px">
+                  <label style="font-size:11.5px;font-weight:700;color:#64748b">Status:</label>
+                  <select class="lez-input" style="padding:6px 10px;font-size:12.5px;height:36px;border-radius:8px;width:130px"
+                          [value]="customerOrderStatusFilter()"
+                          (change)="customerOrderStatusFilter.set($any($event.target).value)">
+                    <option value="ALL">All Statuses</option>
+                    <option value="COMPLETED">Completed / Done</option>
+                    <option value="PREPARING">Preparing</option>
+                    <option value="READY">Ready for Serving</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                <!-- Table Filter -->
+                <div style="display:flex;align-items:center;gap:6px">
+                  <label style="font-size:11.5px;font-weight:700;color:#64748b">Table:</label>
+                  <select class="lez-input" style="padding:6px 10px;font-size:12.5px;height:36px;border-radius:8px;width:120px"
+                          [value]="customerOrderTypeFilter()"
+                          (change)="customerOrderTypeFilter.set($event.target ? $any($event.target).value : 'ALL')">
+                    <option value="ALL">All Tables</option>
+                    <option value="TAKEAWAY">Takeaway</option>
+                    @for (tbl of tablesList(); track tbl.id) {
+                      <option [value]="tbl.tableNumber">{{ tbl.tableNumber }}</option>
+                    }
+                  </select>
+                </div>
+
+                <!-- Search Input within this customer's orders -->
+                <div style="position:relative;width:180px">
+                  <input type="text"
+                         class="lez-input"
+                         style="padding:6px 10px 6px 28px;font-size:12px;height:36px;border-radius:8px"
+                         placeholder="Filter dish or ID..."
+                         [ngModel]="customerOrderSearchQuery()"
+                         (ngModelChange)="customerOrderSearchQuery.set($event)" />
+                  <span class="material-symbols-outlined text-[15px]" style="position:absolute;left:8px;top:10px;color:#94a3b8">search</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Customer's Orders List Table & Cards -->
+            <div class="lez-card" style="padding:0;overflow:hidden">
+              <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="material-symbols-outlined text-[18px] text-accent">receipt</span>
+                  <h4 style="font-size:15px;font-weight:800;color:#0f172a;margin:0">
+                    Order History Records ({{ filteredCustomerOrders().length }})
+                  </h4>
+                </div>
+                <span style="font-size:12px;color:#64748b">Showing restaurant-specific orders only</span>
+              </div>
+
+              @if (filteredCustomerOrders().length === 0) {
+                <div style="padding:48px 24px;text-align:center;color:#94a3b8">
+                  <span class="material-symbols-outlined text-[42px]" style="opacity:0.6;margin-bottom:8px">filter_list_off</span>
+                  <p style="font-weight:700;font-size:15px;color:#334155;margin:0 0 4px">No Orders Match Selected Filters</p>
+                  <p style="font-size:12.5px;margin:0">Try resetting date or status filters to view all orders for this customer.</p>
+                </div>
+              } @else {
+                <div class="customer-orders-list-table">
+                  @for (order of filteredCustomerOrders(); track order.id) {
+                    <div class="cust-order-row-card">
+                      <!-- Left Column: Order Number & Date/Time -->
+                      <div class="cust-order-col-meta">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <strong style="font-family:monospace;font-size:14px;color:#0f172a">#{{ order.orderNumber || order.id }}</strong>
+                          <span class="lez-badge lez-badge-table" style="font-size:11px">
+                            <span class="material-symbols-outlined text-[12px]">table_restaurant</span>
+                            <span>{{ order.tableNumber || 'Table 01' }}</span>
+                          </span>
+                        </div>
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;display:flex;align-items:center;gap:4px">
+                          <span class="material-symbols-outlined text-[13px]">schedule</span>
+                          <span>{{ order.createdAt | date:'medium' }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Middle Column: Items Breakdown -->
+                      <div class="cust-order-col-items">
+                        <div class="cust-items-tags-wrap">
+                          @for (item of order.items; track item.id || item.itemName) {
+                            <div class="cust-order-item-pill">
+                              <span class="cust-item-qty">{{ item.quantity }}x</span>
+                              <span class="cust-item-name">{{ item.itemName }}</span>
+                              <span class="cust-item-price">{{ activeRestaurant()?.currency || '₹' }}{{ (item.price || 0).toFixed(2) }}</span>
+                            </div>
+                          }
+                        </div>
+                        @if (order.specialInstructions) {
+                          <div style="font-size:11px;color:#c2410c;margin-top:4px;display:flex;align-items:center;gap:4px">
+                            <span class="material-symbols-outlined text-[12px]">info</span>
+                            <span>Note: "{{ order.specialInstructions }}"</span>
+                          </div>
+                        }
+                      </div>
+
+                      <!-- Status Badges Column -->
+                      <div class="cust-order-col-status">
+                        <!-- Order Status -->
+                        @if (order.status === 'COMPLETED' || order.status === 'DELIVERED') {
+                          <span class="lez-badge lez-badge-delivered">
+                            <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                            <span>Delivered</span>
+                          </span>
+                        } @else if (order.status === 'PREPARING') {
+                          <span class="lez-badge lez-badge-preparing">
+                            <span class="material-symbols-outlined text-[13px]">skillet</span>
+                            <span>Cooking</span>
+                          </span>
+                        } @else if (order.status === 'READY') {
+                          <span class="lez-badge lez-badge-ready">
+                            <span class="material-symbols-outlined text-[13px]">room_service</span>
+                            <span>Ready</span>
+                          </span>
+                        } @else if (order.status === 'CANCELLED') {
+                          <span class="lez-badge lez-badge-cancelled">
+                            <span class="material-symbols-outlined text-[13px]">cancel</span>
+                            <span>Cancelled</span>
+                          </span>
+                        } @else {
+                          <span class="lez-badge lez-badge-pending">
+                            <span class="material-symbols-outlined text-[13px]">pending</span>
+                            <span>Pending</span>
+                          </span>
+                        }
+
+                        <!-- Payment Status -->
+                        <span class="lez-badge lez-badge-ready" style="font-size:10px;padding:1px 6px">PAID</span>
+                      </div>
+
+                      <!-- Price & Actions Column -->
+                      <div class="cust-order-col-actions">
+                        <div class="cust-order-total-price">
+                          {{ activeRestaurant()?.currency || '₹' }}{{ (order.totalAmount || 0).toFixed(2) }}
+                        </div>
+                        <div style="display:flex;gap:6px">
+                          <button class="lez-btn lez-btn-secondary lez-btn-sm" (click)="openOrderTrackingModal(order)" title="View Live Status Timeline & Bill Breakdown">
+                            <span class="material-symbols-outlined text-[14px]">timeline</span>
+                            <span>Timeline & Details</span>
+                          </button>
+                          <button class="lez-btn lez-btn-outline lez-btn-sm" (click)="printCustomerReceipt(order)" title="Print Tax Invoice">
+                            <span class="material-symbols-outlined text-[14px]">print</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Empty state when phone number has 0 orders at this restaurant -->
+            <div class="lez-card" style="padding:60px 24px;text-align:center">
+              <div style="width:64px;height:64px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+                <span class="material-symbols-outlined text-[32px]">person_off</span>
+              </div>
+              <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 6px">No Orders for +91 {{ profile.customerMobile }}</h3>
+              <p style="font-size:13.5px;color:#64748b;max-width:480px;margin:0 auto 18px">
+                This mobile number has not placed any orders at <strong>{{ activeRestaurant()?.name || 'this restaurant' }}</strong> yet.
+                Orders placed at other restaurants are kept completely isolated and private.
+              </p>
+              <button class="lez-btn lez-btn-secondary" (click)="customerSearchPhone.set('')">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                <span>Search Another Phone Number</span>
+              </button>
+            </div>
+          }
+        } @else {
+          <!-- Initial Search Prompt State -->
+          <div class="lez-card" style="padding:64px 24px;text-align:center;background:#ffffff;border:1px dashed #cbd5e1">
+            <div style="width:64px;height:64px;border-radius:50%;background:#fff7ed;color:#ea580c;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+              <span class="material-symbols-outlined text-[32px]">manage_search</span>
+            </div>
+            <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 6px">Search Any Customer by Phone Number</h3>
+            <p style="font-size:13.5px;color:#64748b;max-width:500px;margin:0 auto 18px">
+              Enter any guest's 10-digit mobile number above or select from the recent diners list to instantly access their lifetime visits, favorite items, and itemized order timeline.
+            </p>
+            @if (recentCustomersList().length > 0) {
+              <div style="display:inline-flex;gap:8px;align-items:center">
+                <span style="font-size:12px;color:#64748b">Or pick recent diner:</span>
+                <button class="lez-btn lez-btn-sm lez-btn-primary" (click)="selectRecentCustomer(recentCustomersList()[0])">
+                  <span>{{ recentCustomersList()[0].customerName }} ({{ recentCustomersList()[0].customerMobile }})</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
       }
 
       <!-- ════════════════════════════════════════════════════════
@@ -2376,6 +2774,196 @@
           }
         </div>
 
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ORDER TRACKING & LIVE STATUS TIMELINE MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showOrderTrackingModal() && trackingOrder(); as ord) {
+  <div class="pos-modal-overlay animate-fade-in" (click)="closeOrderTrackingModal()">
+    <div class="pos-modal-card order-tracking-modal" (click)="$event.stopPropagation()" style="max-width:680px">
+      
+      <!-- Modal Header -->
+      <div class="pos-modal-header" style="border-bottom:1px solid #e2e8f0;padding:18px 24px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center">
+            <span class="material-symbols-outlined text-[22px]">timeline</span>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin:0">Order #{{ ord.orderNumber || ord.id }}</h3>
+              <span class="lez-badge lez-badge-table" style="font-size:11.5px">
+                <span class="material-symbols-outlined text-[13px]">table_restaurant</span>
+                <span>{{ ord.tableNumber || 'Table 01' }}</span>
+              </span>
+            </div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">
+              Customer: <strong>{{ ord.customerName || 'Guest' }}</strong> (+91 {{ ord.customerMobile }}) • Placed {{ ord.createdAt | date:'medium' }}
+            </div>
+          </div>
+        </div>
+        <button class="pos-close-btn" (click)="closeOrderTrackingModal()" type="button">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="pos-modal-body" style="padding:22px 24px;display:flex;flex-direction:column;gap:22px">
+        
+        <!-- Live Status Timeline Progression -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px">
+          <h4 style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 16px">
+            Order Status Progression
+          </h4>
+          
+          <div class="order-timeline-track">
+            <!-- Step 1: Placed -->
+            <div class="timeline-step step-done">
+              <div class="step-dot">
+                <span class="material-symbols-outlined text-[14px]">check</span>
+              </div>
+              <div class="step-meta">
+                <div class="step-title">Order Placed</div>
+                <div class="step-subtitle">{{ ord.createdAt | date:'shortTime' }}</div>
+              </div>
+            </div>
+
+            <!-- Step 2: Confirmed / Accepted -->
+            <div class="timeline-step" [class.step-done]="isStatusDone(ord.status, 'CONFIRMED')">
+              <div class="step-dot">
+                <span class="material-symbols-outlined text-[14px]">check</span>
+              </div>
+              <div class="step-meta">
+                <div class="step-title">Confirmed</div>
+                <div class="step-subtitle">POS Synced</div>
+              </div>
+            </div>
+
+            <!-- Step 3: Kitchen Cooking -->
+            <div class="timeline-step"
+                 [class.step-done]="isStatusDone(ord.status, 'COOKING')"
+                 [class.step-active]="isStatusActive(ord.status, 'COOKING')">
+              <div class="step-dot">
+                @if (isStatusDone(ord.status, 'READY')) {
+                  <span class="material-symbols-outlined text-[14px]">check</span>
+                } @else {
+                  <span class="material-symbols-outlined text-[14px]">skillet</span>
+                }
+              </div>
+              <div class="step-meta">
+                <div class="step-title">Kitchen Cooking</div>
+                <div class="step-subtitle">Station Active</div>
+              </div>
+            </div>
+
+            <!-- Step 4: Ready for Service -->
+            <div class="timeline-step"
+                 [class.step-done]="isStatusDone(ord.status, 'READY')"
+                 [class.step-active]="isStatusActive(ord.status, 'READY')">
+              <div class="step-dot">
+                @if (isStatusDone(ord.status, 'COMPLETED')) {
+                  <span class="material-symbols-outlined text-[14px]">check</span>
+                } @else {
+                  <span class="material-symbols-outlined text-[14px]">room_service</span>
+                }
+              </div>
+              <div class="step-meta">
+                <div class="step-title">Food Ready</div>
+                <div class="step-subtitle">Pass Station</div>
+              </div>
+            </div>
+
+            <!-- Step 5: Completed / Delivered -->
+            <div class="timeline-step"
+                 [class.step-done]="isStatusDone(ord.status, 'COMPLETED')"
+                 [class.step-active]="isStatusActive(ord.status, 'COMPLETED')">
+              <div class="step-dot">
+                <span class="material-symbols-outlined text-[14px]">done_all</span>
+              </div>
+              <div class="step-meta">
+                <div class="step-title">Served / Done</div>
+                <div class="step-subtitle">Bill Paid</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Itemized Order Breakdown -->
+        <div>
+          <h4 style="font-size:13px;font-weight:800;color:#0f172a;margin:0 0 12px;display:flex;align-items:center;gap:6px">
+            <span class="material-symbols-outlined text-[17px] text-accent">restaurant_menu</span>
+            <span>Itemized Bill Breakdown</span>
+          </h4>
+
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <table class="lez-table" style="margin:0">
+              <thead>
+                <tr style="background:#f8fafc">
+                  <th style="font-size:11.5px">Item Name</th>
+                  <th style="font-size:11.5px;text-align:center">Qty</th>
+                  <th style="font-size:11.5px;text-align:right">Price</th>
+                  <th style="font-size:11.5px;text-align:right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of ord.items; track item.id || item.itemName) {
+                  <tr>
+                    <td style="font-weight:700;color:#0f172a">
+                      {{ item.itemName }}
+                    </td>
+                    <td style="text-align:center">
+                      <span class="lez-badge lez-badge-preparing" style="font-size:11px;padding:2px 7px">{{ item.quantity }}</span>
+                    </td>
+                    <td style="text-align:right;color:#64748b">
+                      {{ activeRestaurant()?.currency || '₹' }}{{ (item.price || 0).toFixed(2) }}
+                    </td>
+                    <td style="text-align:right;font-weight:800;color:#0f172a">
+                      {{ activeRestaurant()?.currency || '₹' }}{{ ((item.price || 0) * (item.quantity || 1)).toFixed(2) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Special Notes if present -->
+        @if (ord.specialInstructions) {
+          <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:8px">
+            <span class="material-symbols-outlined text-[18px] text-accent">edit_note</span>
+            <div style="font-size:12.5px;color:#9a3412">
+              <strong>Special Instructions:</strong> "{{ ord.specialInstructions }}"
+            </div>
+          </div>
+        }
+
+        <!-- Total Bill Summary -->
+        <div style="background:#f8fafc;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <span style="font-size:12px;color:#64748b">Payment Mode: <strong>Digital QR Pay (PAID)</strong></span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11.5px;color:#64748b">Total Amount:</div>
+            <div style="font-size:22px;font-weight:800;color:#0f172a">
+              {{ activeRestaurant()?.currency || '₹' }}{{ (ord.totalAmount || 0).toFixed(2) }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pos-modal-footer" style="padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between">
+        <button class="lez-btn lez-btn-secondary" (click)="closeOrderTrackingModal()">
+          <span>Close</span>
+        </button>
+        <button class="lez-btn lez-btn-primary" (click)="printCustomerReceipt(ord)">
+          <span class="material-symbols-outlined text-[16px]">print</span>
+          <span>Print Tax Invoice</span>
+        </button>
       </div>
 
     </div>

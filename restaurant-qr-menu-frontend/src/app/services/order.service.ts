@@ -7,7 +7,9 @@ import { ApiResponse } from '../models/api-response.model';
 export interface OrderItem {
   id?: string | number;
   name: string;
+  itemName?: string;
   qty: number;
+  quantity?: number;
   price?: number;
   subtotal?: number;
   note?: string;
@@ -17,16 +19,18 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber?: string;
-  table: string;
+  table?: string;
   tableNumber: string | number;
   customerMobile: string;
   customerName?: string;
   placedAt: string | Date;
+  createdAt?: string | Date;
   status: 'PENDING' | 'ACCEPTED' | 'PREPARING' | 'COOKING' | 'READY' | 'COMPLETED' | 'DELIVERED' | 'CANCELLED' | 'pending' | 'preparing' | 'done' | string;
   items: OrderItem[];
   totalAmount?: number;
   totalPrice?: number;
   specialRequest?: string;
+  specialInstructions?: string;
   waiterName?: string;
 }
 

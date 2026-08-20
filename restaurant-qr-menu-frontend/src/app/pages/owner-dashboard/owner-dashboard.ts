@@ -24,6 +24,7 @@ import { NotificationService } from '../../services/notification.service';
 import { TableService, DiningTableData, TableStatus, TableStatsData } from '../../services/table.service';
 import { UndoService } from '../../services/undo.service';
 import { ChatService, ChatContact, ChatMessageItem } from '../../services/chat.service';
+import { CustomerHistoryService, CustomerHistoryData, CustomerSummary } from '../../services/customer-history.service';
 
 @Component({
   selector: 'app-owner-dashboard',
@@ -32,26 +33,27 @@ import { ChatService, ChatContact, ChatMessageItem } from '../../services/chat.s
   styleUrls: ['./owner-dashboard.css']
 })
 export class OwnerDashboard implements OnInit, OnDestroy {
-  authService         = inject(AuthService);
-  restaurantService   = inject(RestaurantService);
-  categoryService     = inject(CategoryService);
-  menuService         = inject(MenuService);
-  offerService        = inject(OfferService);
-  qrService           = inject(QrService);
-  analyticsService    = inject(AnalyticsService);
-  ticketService       = inject(TicketService);
-  tableService        = inject(TableService);
-  uploadService       = inject(UploadService);
-  toastService        = inject(ToastService);
-  printService        = inject(PrintService);
-  modalService        = inject(ModalService);
-  orderService        = inject(OrderService);
-  notificationService = inject(NotificationService);
-  undoService         = inject(UndoService);
-  chatService         = inject(ChatService);
-  router              = inject(Router);
+  authService            = inject(AuthService);
+  restaurantService      = inject(RestaurantService);
+  categoryService        = inject(CategoryService);
+  menuService            = inject(MenuService);
+  offerService           = inject(OfferService);
+  qrService              = inject(QrService);
+  analyticsService       = inject(AnalyticsService);
+  ticketService          = inject(TicketService);
+  tableService           = inject(TableService);
+  customerHistoryService = inject(CustomerHistoryService);
+  uploadService          = inject(UploadService);
+  toastService           = inject(ToastService);
+  printService           = inject(PrintService);
+  modalService           = inject(ModalService);
+  orderService           = inject(OrderService);
+  notificationService    = inject(NotificationService);
+  undoService            = inject(UndoService);
+  chatService            = inject(ChatService);
+  router                 = inject(Router);
 
-  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'tables' | 'qr' | 'support' | 'settings'
+  // Active page state: 'overview' | 'orders' | 'categories' | 'items' | 'tables' | 'customers' | 'qr' | 'support' | 'settings'
   activeTab = signal<string>('overview');
 
   // Active restaurant selection
@@ -78,6 +80,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     { id: 'orders', name: 'Live Orders', category: 'Navigation', icon: 'receipt_long', description: 'Kitchen & Active Orders' },
     { id: 'items', name: 'Menu Catalog', category: 'Navigation', icon: 'restaurant_menu', description: 'Dishes, Pricing & Availability' },
     { id: 'tables', name: 'Tables & Floor Plan', category: 'Navigation', icon: 'table_restaurant', description: 'Dining Tables & Live Sessions' },
+    { id: 'customers', name: 'Customer History & Tracking', category: 'Navigation', icon: 'person_search', description: 'Search Orders by 10-Digit Mobile' },
     { id: 'categories', name: 'Categories', category: 'Navigation', icon: 'category', description: 'Menu Categories' },
     { id: 'qr', name: 'QR Codes Generator', category: 'Navigation', icon: 'qr_code_2', description: 'Table QR Codes & Tokens' },
     { id: 'support', name: 'Support & Help Desk', category: 'Navigation', icon: 'support_agent', description: 'Support Tickets & Help' },
@@ -327,6 +330,9 @@ export class OwnerDashboard implements OnInit, OnDestroy {
 
     if (tab === 'orders') {
       this.orderService.markOrdersAsSeen(rId);
+      this.orderService.fetchOrders(rId).subscribe();
+    } else if (tab === 'customers') {
+      this.customerHistoryService.fetchRecentCustomers(rId).subscribe();
       this.orderService.fetchOrders(rId).subscribe();
     } else if (tab === 'support') {
       this.ticketService.markTicketsAsSeen();
@@ -707,6 +713,155 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     const url = `${window.location.origin}/restaurant/${this.restaurantSlug()}`;
     navigator.clipboard.writeText(url);
     this.toastService.success('Copied Public Menu URL', url);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // CUSTOMER ORDER HISTORY & TRACKING MODULE
+  // ══════════════════════════════════════════════════════════════════════════
+  customerSearchPhone        = signal<string>('');
+  customerPhoneError         = signal<string | null>(null);
+  customerHistoryData        = computed(() => this.customerHistoryService.activeCustomerHistory());
+  recentCustomersList        = computed(() => this.customerHistoryService.recentCustomers());
+  isSearchingCustomer        = computed(() => this.customerHistoryService.isLoading());
+  customerHistorySearchError = computed(() => this.customerHistoryService.searchError());
+
+  // Filters for Customer's Orders
+  customerOrderDateFilter    = signal<'ALL' | 'TODAY' | 'WEEK' | 'MONTH'>('ALL');
+  customerOrderStatusFilter  = signal<string>('ALL');
+  customerOrderTypeFilter    = signal<string>('ALL');
+  customerOrderSearchQuery   = signal<string>('');
+
+  filteredCustomerOrders = computed(() => {
+    const data = this.customerHistoryData();
+    if (!data || !data.orders) return [];
+
+    let list = [...data.orders];
+    const dateF = this.customerOrderDateFilter();
+    const statusF = this.customerOrderStatusFilter();
+    const typeF = this.customerOrderTypeFilter();
+    const q = this.customerOrderSearchQuery().toLowerCase().trim();
+    const now = Date.now();
+
+    if (dateF !== 'ALL') {
+      list = list.filter(o => {
+        const d = o.createdAt || o.placedAt;
+        const orderTime = d ? new Date(d).getTime() : now;
+        const diffMs = now - orderTime;
+        if (dateF === 'TODAY') return diffMs <= 86400000;
+        if (dateF === 'WEEK') return diffMs <= 7 * 86400000;
+        if (dateF === 'MONTH') return diffMs <= 30 * 86400000;
+        return true;
+      });
+    }
+
+    if (statusF !== 'ALL') {
+      list = list.filter(o => String(o.status).toUpperCase() === statusF.toUpperCase());
+    }
+
+    if (typeF !== 'ALL') {
+      list = list.filter(o => {
+        const tblStr = String(o.tableNumber || o.table || '');
+        if (typeF === 'TAKEAWAY') return tblStr === 'TAKEAWAY';
+        return tblStr === typeF || tblStr.includes(typeF);
+      });
+    }
+
+    if (q) {
+      list = list.filter(o =>
+        (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
+        (o.items && o.items.some(i => {
+          const name = i.itemName || i.name || '';
+          return name.toLowerCase().includes(q);
+        }))
+      );
+    }
+
+    return list;
+  });
+
+  // Tracking & Timeline Modal
+  trackingOrder          = signal<Order | null>(null);
+  showOrderTrackingModal = signal<boolean>(false);
+
+  searchCustomerByPhone(presetPhone?: string) {
+    const raw = (presetPhone !== undefined ? presetPhone : this.customerSearchPhone()).trim();
+    const clean = raw.replace(/\D/g, '');
+    if (!clean) {
+      this.customerPhoneError.set('Please enter a 10-digit customer mobile number');
+      return;
+    }
+    if (clean.length !== 10) {
+      this.customerPhoneError.set(`Phone number must be exactly 10 digits (you entered ${clean.length} digits)`);
+      return;
+    }
+    this.customerPhoneError.set(null);
+    this.customerSearchPhone.set(clean);
+    const rId = this.activeRestaurant()?.id || 1;
+    this.customerHistoryService.fetchCustomerHistory(rId, clean).subscribe(res => {
+      if (res && res.totalOrders > 0) {
+        this.toastService.success('Customer Profile Found', `${res.customerName} has placed ${res.totalOrders} orders at this restaurant.`);
+      } else {
+        this.toastService.info('No Order History', `No previous orders found for mobile ${clean} at this restaurant.`);
+      }
+    });
+  }
+
+  selectRecentCustomer(cust: CustomerSummary) {
+    this.customerSearchPhone.set(cust.customerMobile);
+    this.searchCustomerByPhone(cust.customerMobile);
+  }
+
+  openOrderTrackingModal(order: Order) {
+    this.trackingOrder.set(order);
+    this.showOrderTrackingModal.set(true);
+  }
+
+  closeOrderTrackingModal() {
+    this.showOrderTrackingModal.set(false);
+    this.trackingOrder.set(null);
+  }
+
+  isStatusDone(status: string | undefined, step: string): boolean {
+    const s = (status || '').toUpperCase();
+    if (s === 'CANCELLED') return false;
+    switch (step) {
+      case 'PLACED':
+      case 'CONFIRMED':
+        return true;
+      case 'COOKING':
+        return ['PREPARING', 'READY', 'COMPLETED', 'DELIVERED'].includes(s);
+      case 'READY':
+        return ['READY', 'COMPLETED', 'DELIVERED'].includes(s);
+      case 'COMPLETED':
+        return ['COMPLETED', 'DELIVERED'].includes(s);
+      default:
+        return false;
+    }
+  }
+
+  isStatusActive(status: string | undefined, step: string): boolean {
+    const s = (status || '').toUpperCase();
+    switch (step) {
+      case 'COOKING':
+        return s === 'PREPARING';
+      case 'READY':
+        return s === 'READY';
+      case 'COMPLETED':
+        return ['COMPLETED', 'DELIVERED'].includes(s);
+      default:
+        return false;
+    }
+  }
+
+  printCustomerReceipt(order: Order) {
+    const r = this.activeRestaurant();
+    this.printService.printInvoice(order, {
+      name: r?.name || 'RestQR Gourmet Bistro',
+      address: r?.address || '123 Gourmet Blvd, New York, NY',
+      phone: r?.phone || '+1 (555) 345-6789',
+      email: r?.email || 'contact@restqr.com',
+      currency: r?.currency || '₹'
+    });
   }
 
   openAddItemModal() {
