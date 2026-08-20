@@ -1872,43 +1872,113 @@
   <!-- ══════════════════════════════════════════════════════════════════════════
        ADD / EDIT DINING TABLE MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADD / EDIT DINING TABLE MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
   @if (showAddTableModal()) {
   <div class="pos-modal-overlay animate-fade-in" (click)="closeAddTableModal()">
-    <div class="pos-modal-card" style="max-width:440px;padding:26px" (click)="$event.stopPropagation()">
+    <div class="pos-modal-card" style="max-width:500px;padding:26px" (click)="$event.stopPropagation()">
       
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0;display:flex;align-items:center;gap:8px">
           <span class="material-symbols-outlined text-[22px] text-accent">table_restaurant</span>
-          <span>{{ editingTableId() ? 'Edit Dining Table' : 'Add New Table' }}</span>
+          <span>{{ editingTableId() ? 'Edit Dining Table' : 'Add Tables (Click to Create)' }}</span>
         </h3>
         <button class="pos-modal-close" (click)="closeAddTableModal()">
           <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="form-field">
-          <label class="form-label">Table Number / Label *</label>
-          <input class="lez-input" placeholder="e.g. Table 01 or 09" [value]="tableFormNumber()" (input)="tableFormNumber.set($any($event.target).value)" />
+      @if (!editingTableId()) {
+        <!-- 1-Click Quick Add Box Grid -->
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;display:block">
+            1. Select Seating Capacity:
+          </label>
+          <div class="quick-capacity-pills">
+            <button type="button" class="quick-cap-pill" [class.active]="tableFormCapacity() === 2" (click)="setQuickCapacity(2)">
+              <span class="material-symbols-outlined text-[15px]">person</span>
+              <span>2 Seats</span>
+            </button>
+            <button type="button" class="quick-cap-pill" [class.active]="tableFormCapacity() === 4" (click)="setQuickCapacity(4)">
+              <span class="material-symbols-outlined text-[15px]">group</span>
+              <span>4 Seats</span>
+            </button>
+            <button type="button" class="quick-cap-pill" [class.active]="tableFormCapacity() === 6" (click)="setQuickCapacity(6)">
+              <span class="material-symbols-outlined text-[15px]">groups</span>
+              <span>6 Seats</span>
+            </button>
+            <button type="button" class="quick-cap-pill" [class.active]="tableFormCapacity() === 8" (click)="setQuickCapacity(8)">
+              <span class="material-symbols-outlined text-[15px]">diversity_3</span>
+              <span>8 Seats</span>
+            </button>
+          </div>
         </div>
 
-        <div class="form-field">
-          <label class="form-label">Seating Capacity (Guests) *</label>
-          <input class="lez-input" type="number" min="1" max="20" placeholder="4" [value]="tableFormCapacity()" (input)="tableFormCapacity.set(+$any($event.target).value)" />
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+            <span>2. Click Table Box to Create & Generate QR:</span>
+            <span style="font-size:11px;font-weight:600;color:#0284c7">{{ tablesList().length }} Active Tables</span>
+          </label>
+
+          <div class="quick-table-grid">
+            @for (box of quickTableBoxes(); track box.number) {
+              <button type="button"
+                      class="quick-table-box-btn"
+                      [class.is-created]="box.exists"
+                      [style.background]="box.exists ? (box.status === 'OCCUPIED' ? '#fff7ed' : box.status === 'RESERVED' ? '#eff6ff' : box.status === 'CLEANING' ? '#f5f3ff' : '#ecfdf5') : '#ffffff'"
+                      [style.border-color]="box.exists ? (box.status === 'OCCUPIED' ? '#fdba74' : box.status === 'RESERVED' ? '#93c5fd' : box.status === 'CLEANING' ? '#c4b5fd' : '#86efac') : '#cbd5e1'"
+                      (click)="quickAddTable(box)"
+                      [title]="box.exists ? 'Table ' + box.number + ' already created (Click to view)' : 'Click to create Table ' + box.number">
+                <span class="quick-box-number" [style.color]="box.exists ? '#0f172a' : '#ea580c'">
+                  {{ box.number < 10 ? '0' + box.number : box.number }}
+                </span>
+                
+                @if (box.exists) {
+                  <span class="quick-box-status" [style.color]="box.status === 'OCCUPIED' ? '#c2410c' : box.status === 'RESERVED' ? '#1d4ed8' : box.status === 'CLEANING' ? '#6d28d9' : '#15803d'">
+                    <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                    <span>{{ box.status === 'OCCUPIED' ? 'Occupied' : box.status === 'RESERVED' ? 'Reserved' : box.status === 'CLEANING' ? 'Clean' : 'Ready' }}</span>
+                  </span>
+                } @else {
+                  <span class="quick-box-status" style="color:#ea580c">
+                    <span class="material-symbols-outlined text-[13px]">add</span>
+                    <span>Create</span>
+                  </span>
+                }
+              </button>
+            }
+          </div>
         </div>
 
-        <p style="font-size:12px;color:#64748b;margin:0">
-          A unique QR code linked to this table and restaurant menu will be generated automatically.
-        </p>
-
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddTableModal()">Cancel</button>
-          <button class="lez-btn lez-btn-primary" style="flex:2" (click)="saveTable()">
-            <span class="material-symbols-outlined text-[16px]">{{ editingTableId() ? 'check' : 'add_circle' }}</span>
-            <span>{{ editingTableId() ? 'Update Table' : 'Create Table & QR' }}</span>
-          </button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">
+          <p style="font-size:11.5px;color:#64748b;margin:0">
+            Clicking any number box creates that table and generates a high-res menu QR code immediately.
+          </p>
+          <button class="lez-btn lez-btn-secondary" style="font-size:12px;padding:6px 12px" (click)="closeAddTableModal()">Done</button>
         </div>
-      </div>
+
+      } @else {
+        <!-- Edit Mode for Existing Table -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-field">
+            <label class="form-label">Table Number / Label *</label>
+            <input class="lez-input" placeholder="e.g. Table 01 or 09" [value]="tableFormNumber()" (input)="tableFormNumber.set($any($event.target).value)" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Seating Capacity (Guests) *</label>
+            <input class="lez-input" type="number" min="1" max="20" placeholder="4" [value]="tableFormCapacity()" (input)="tableFormCapacity.set(+$any($event.target).value)" />
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="closeAddTableModal()">Cancel</button>
+            <button class="lez-btn lez-btn-primary" style="flex:2" (click)="saveTable()">
+              <span class="material-symbols-outlined text-[16px]">check</span>
+              <span>Update Table</span>
+            </button>
+          </div>
+        </div>
+      }
 
     </div>
   </div>

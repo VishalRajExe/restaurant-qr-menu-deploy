@@ -898,6 +898,71 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.showAddTableModal.set(true);
   }
 
+  // Quick Table Picker Box Grid (1 to 24)
+  quickTableBoxes = computed(() => {
+    const existing = this.tablesList();
+    const boxes: {
+      number: number;
+      label: string;
+      exists: boolean;
+      existingTable?: DiningTableData;
+      status?: string;
+      capacity?: number;
+    }[] = [];
+
+    const maxCount = Math.max(20, existing.length + 8);
+    for (let i = 1; i <= maxCount; i++) {
+      const numStr = i < 10 ? `0${i}` : `${i}`;
+      const label = `Table ${numStr}`;
+      
+      const found = existing.find(t => {
+        const raw = t.tableNumber.trim().toLowerCase();
+        const numOnly = raw.replace(/\D/g, '');
+        return raw === label.toLowerCase() ||
+               raw === `t-${numStr}` ||
+               raw === `table ${i}` ||
+               numOnly === String(i) ||
+               numOnly === numStr;
+      });
+
+      boxes.push({
+        number: i,
+        label: label,
+        exists: !!found,
+        existingTable: found,
+        status: found?.status,
+        capacity: found?.capacity || this.tableFormCapacity()
+      });
+    }
+    return boxes;
+  });
+
+  quickAddTable(box: { number: number; label: string; exists: boolean; existingTable?: DiningTableData }) {
+    if (box.exists && box.existingTable) {
+      this.closeAddTableModal();
+      this.openTableDetails(box.existingTable);
+      return;
+    }
+
+    const rId = this.activeRestaurant()?.id || 1;
+    const capacity = this.tableFormCapacity() || 4;
+
+    this.tableService.createTable(rId, {
+      tableNumber: box.label,
+      capacity: capacity,
+      status: 'AVAILABLE'
+    }).subscribe({
+      next: (created) => {
+        this.toastService.success('Table Added', `${created.tableNumber} (${capacity} seats) & QR generated!`);
+      },
+      error: (err) => this.toastService.show(err?.error?.message || 'Failed to create table', 'error')
+    });
+  }
+
+  setQuickCapacity(cap: number) {
+    this.tableFormCapacity.set(cap);
+  }
+
   closeAddTableModal() {
     this.showAddTableModal.set(false);
     this.editingTableId.set(null);
