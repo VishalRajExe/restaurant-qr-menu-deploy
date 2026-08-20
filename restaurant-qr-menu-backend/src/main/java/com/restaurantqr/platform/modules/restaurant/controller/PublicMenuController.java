@@ -12,6 +12,8 @@ import com.restaurantqr.platform.modules.qr.entity.QrCode;
 import com.restaurantqr.platform.modules.qr.service.QrCodeService;
 import com.restaurantqr.platform.modules.restaurant.entity.Restaurant;
 import com.restaurantqr.platform.modules.restaurant.service.RestaurantService;
+import com.restaurantqr.platform.modules.table.dto.TableDto;
+import com.restaurantqr.platform.modules.table.service.DiningTableService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +34,7 @@ public class PublicMenuController {
     private final MenuItemService menuItemService;
     private final OfferService offerService;
     private final AnalyticsService analyticsService;
+    private final DiningTableService tableService;
 
     // ─── Resolve QR token → full restaurant menu.
     // GET /public/menu/{token}
@@ -76,6 +79,7 @@ public class PublicMenuController {
         List<Category> categories = categoryService.findActiveByRestaurant(restaurantId);
         List<MenuItem> menuItems = menuItemService.getPublicMenu(restaurantId);
         List<Offer> activeOffers = offerService.getActiveOffers(restaurantId);
+        List<TableDto> tables = tableService.getTables(restaurantId, null);
 
         // 5. Build payload
         var payload = MenuPayload.builder()
@@ -84,6 +88,7 @@ public class PublicMenuController {
                 .categories(categories)
                 .menuItems(menuItems)
                 .activeOffers(activeOffers)
+                .tables(tables)
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(payload));
@@ -103,6 +108,7 @@ public class PublicMenuController {
         List<Category> categories = categoryService.findActiveByRestaurant(restaurantId);
         List<MenuItem> menuItems = menuItemService.getPublicMenu(restaurantId);
         List<Offer> activeOffers = offerService.getActiveOffers(restaurantId);
+        List<TableDto> tables = tableService.getTables(restaurantId, null);
 
         var payload = MenuPayload.builder()
                 .restaurant(restaurant)
@@ -110,9 +116,15 @@ public class PublicMenuController {
                 .categories(categories)
                 .menuItems(menuItems)
                 .activeOffers(activeOffers)
+                .tables(tables)
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(payload));
+    }
+
+    @GetMapping("/restaurants/{restaurantId}/tables")
+    public ResponseEntity<ApiResponse<List<TableDto>>> getPublicTables(@PathVariable Long restaurantId) {
+        return ResponseEntity.ok(ApiResponse.success(tableService.getTables(restaurantId, null)));
     }
 
     @GetMapping("/restaurants/{restaurantId}/search")
@@ -173,5 +185,6 @@ public class PublicMenuController {
         private List<Category> categories;
         private List<MenuItem> menuItems;
         private List<Offer> activeOffers;
+        private List<TableDto> tables;
     }
 }

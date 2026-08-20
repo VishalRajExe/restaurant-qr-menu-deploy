@@ -34,22 +34,22 @@
 
       <div class="adm-nav-section-header">MENUS & OPS</div>
 
-      <button class="adm-nav-item" (click)="toastService.info('Menu Management', 'Redirecting to Menu Designer...')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'add-menu'" (click)="selectTab('add-menu')">
         <span class="material-symbols-outlined">add_circle</span>
         <span>Add New Menu</span>
       </button>
 
-      <button class="adm-nav-item" (click)="toastService.info('Menu Catalog', 'Loading dishes catalogue...')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'menus'" (click)="selectTab('menus')">
         <span class="material-symbols-outlined">restaurant_menu</span>
         <span>Menu List</span>
       </button>
 
-      <button class="adm-nav-item" (click)="toastService.info('Categories', 'Managing category taxonomy...')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'categories'" (click)="selectTab('categories')">
         <span class="material-symbols-outlined">category</span>
         <span>Categories</span>
       </button>
 
-      <button class="adm-nav-item" (click)="toastService.info('Customer Directory', 'Loading customer CRM...')">
+      <button class="adm-nav-item" [class.active]="activeTab() === 'customers'" (click)="selectTab('customers')">
         <span class="material-symbols-outlined">group</span>
         <span>Customer</span>
       </button>
@@ -61,7 +61,7 @@
         </div>
         <h4 class="adm-promo-title">Add Menus</h4>
         <p class="adm-promo-desc">Manage your food and beverages menus</p>
-        <button class="adm-promo-btn" (click)="toastService.success('Menu Creator', 'Opening Add Menu Wizard')">
+        <button class="adm-promo-btn" (click)="selectTab('add-menu')">
           <span>Add New Menu</span>
           <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
         </button>
@@ -666,6 +666,491 @@
         </div>
       }
 
+      <!-- ════════════════════════════════════════════════════════
+           TAB: CUSTOMER ORDER HISTORY & TRACKING (CRM)
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'customers') {
+        <div class="animate-fade-in customer-history-view-container" style="max-width:1180px;width:100%;display:flex;flex-direction:column;gap:20px">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <h2 class="adm-page-title">Customer Order History & CRM</h2>
+              <p class="adm-breadcrumb">Search customer records by 10-digit mobile number, analyze lifetime value, and track orders across restaurant venues</p>
+            </div>
+          </div>
+
+          <!-- Phone Number Search Bar & Venue Filter -->
+          <div class="adm-card" style="padding:22px 24px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff">
+            <div style="display:grid;grid-template-columns:1fr 220px auto;gap:14px;align-items:end">
+              
+              <div>
+                <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">
+                  Search Customer by Phone Number (10 Digits)
+                </label>
+                <div style="display:flex;align-items:center;position:relative">
+                  <span class="material-symbols-outlined" style="position:absolute;left:14px;color:#94a3b8;font-size:20px">phone</span>
+                  <input type="tel"
+                         maxlength="10"
+                         class="adm-search-input"
+                         style="width:100%;padding:10px 14px 10px 42px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:14px;font-weight:600"
+                         placeholder="Enter 10-digit mobile (e.g. 9876543210)"
+                         [value]="customerSearchPhone()"
+                         (input)="customerSearchPhone.set($any($event.target).value)"
+                         (keyup.enter)="searchCustomerHistory()" />
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">
+                  Restaurant Venue
+                </label>
+                <select class="adm-search-input"
+                        title="Restaurant Venue"
+                        aria-label="Restaurant Venue"
+                        style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:13.5px;font-weight:600;background:#ffffff"
+                        [value]="selectedCustomerRestaurantId()"
+                        (change)="selectedCustomerRestaurantId.set($any($event.target).value); searchCustomerHistory()">
+                  @for (r of restaurants(); track r.id) {
+                    <option [value]="r.id">{{ r.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div>
+                <button class="lez-btn lez-btn-primary"
+                        style="height:42px;padding:0 22px;display:flex;align-items:center;gap:6px"
+                        (click)="searchCustomerHistory()"
+                        [disabled]="isSearchingCustomer()">
+                  @if (isSearchingCustomer()) {
+                    <div class="spinner-sm"></div>
+                    <span>Searching...</span>
+                  } @else {
+                    <span class="material-symbols-outlined text-[18px]">search</span>
+                    <span>Search History</span>
+                  }
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Recent Diners Quick Chips -->
+            @if (customerRecentList().length > 0) {
+              <div style="margin-top:14px;padding-top:14px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="font-size:11.5px;font-weight:700;color:#64748b">Recent Diners:</span>
+                @for (c of customerRecentList().slice(0, 5); track c.customerMobile) {
+                  <button type="button"
+                          class="lez-filter-pill"
+                          style="font-size:11.5px;padding:3px 10px;cursor:pointer"
+                          (click)="quickSearchCustomer(c.customerMobile)">
+                    {{ c.customerName || 'Diner' }} ({{ c.customerMobile }})
+                  </button>
+                }
+              </div>
+            }
+
+            @if (customerSearchError()) {
+              <div style="margin-top:14px;padding:12px 16px;background:#fef2f2;border:1px solid #fecdd3;border-radius:10px;display:flex;align-items:center;gap:8px;color:#991b1b;font-size:13px;font-weight:600">
+                <span class="material-symbols-outlined text-[18px]">error</span>
+                <span>{{ customerSearchError() }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Customer Found Profile & Statistics Card -->
+          @if (customerHistoryResult(); as cust) {
+            
+            <div class="adm-card" style="padding:22px 24px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;display:flex;flex-direction:column;gap:18px">
+              
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="width:48px;height:48px;border-radius:50%;background:#fff7ed;color:#ea580c;border:2px solid #fed7aa;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">
+                    {{ (cust.customerName || 'C').charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0">{{ cust.customerName || 'Guest Customer' }}</h3>
+                    <div style="font-size:12.5px;color:#64748b;margin-top:2px;display:flex;align-items:center;gap:6px">
+                      <span class="material-symbols-outlined text-[15px]">phone_iphone</span>
+                      <span>{{ cust.customerMobile }}</span>
+                      <span>•</span>
+                      <span>Venue: <strong style="color:#0f172a">{{ cust.restaurantName || 'Main Branch' }}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px 14px;text-align:center">
+                    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Total Orders</div>
+                    <div style="font-size:17px;font-weight:800;color:#0f172a;margin-top:2px">{{ cust.totalOrders }}</div>
+                  </div>
+                  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px 14px;text-align:center">
+                    <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase">Lifetime Spend</div>
+                    <div style="font-size:17px;font-weight:800;color:#16a34a;margin-top:2px">${{ cust.totalSpent.toFixed(2) }}</div>
+                  </div>
+                  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px 14px;text-align:center">
+                    <div style="font-size:11px;font-weight:700;color:#9a3412;text-transform:uppercase">Avg Ticket</div>
+                    <div style="font-size:17px;font-weight:800;color:#ea580c;margin-top:2px">${{ cust.averageOrderValue.toFixed(2) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Favorite Dishes Ordered by Customer -->
+              @if (cust.favoriteItems && cust.favoriteItems.length > 0) {
+                <div style="padding:12px 16px;background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px">
+                  <div style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Customer's Favorite Dishes</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    @for (fav of cust.favoriteItems; track fav.itemName) {
+                      <span style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;color:#0f172a;display:inline-flex;align-items:center;gap:6px">
+                        <span style="color:#ea580c;font-weight:800">{{ fav.totalQuantity }}×</span>
+                        <span>{{ fav.itemName }}</span>
+                        <span style="color:#64748b;font-size:11px">(${{ fav.totalAmount.toFixed(2) }})</span>
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+            </div>
+
+            <!-- Complete Order History List with Filters -->
+            <div class="adm-card" style="padding:22px 24px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff">
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+                <div>
+                  <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin:0">Complete Order History</h3>
+                  <div style="font-size:12px;color:#64748b;margin-top:2px">Showing {{ filteredCustomerOrders().length }} orders for this customer</div>
+                </div>
+
+                <!-- Date & Status Filter Pills -->
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                  <div style="display:flex;gap:4px">
+                    <button class="lez-filter-pill" [class.active]="customerDateFilter() === 'all'" (click)="customerDateFilter.set('all')">All Time</button>
+                    <button class="lez-filter-pill" [class.active]="customerDateFilter() === 'today'" (click)="customerDateFilter.set('today')">Today</button>
+                    <button class="lez-filter-pill" [class.active]="customerDateFilter() === 'week'" (click)="customerDateFilter.set('week')">Last 7 Days</button>
+                  </div>
+                  <div style="width:1px;height:20px;background:#cbd5e1"></div>
+                  <div style="display:flex;gap:4px">
+                    <button class="lez-filter-pill" [class.active]="customerStatusFilter() === 'all'" (click)="customerStatusFilter.set('all')">All Status</button>
+                    <button class="lez-filter-pill" [class.active]="customerStatusFilter() === 'COMPLETED'" (click)="customerStatusFilter.set('COMPLETED')">Completed</button>
+                    <button class="lez-filter-pill" [class.active]="customerStatusFilter() === 'PENDING'" (click)="customerStatusFilter.set('PENDING')">Pending</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Orders Table / List -->
+              @if (filteredCustomerOrders().length === 0) {
+                <div style="text-align:center;padding:36px;color:#94a3b8">
+                  <span class="material-symbols-outlined text-[36px]">receipt_long</span>
+                  <p style="font-size:13px;font-weight:600;margin:8px 0 0">No orders match the selected filters</p>
+                </div>
+              } @else {
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  @for (order of filteredCustomerOrders(); track order.id) {
+                    <div style="padding:16px;border:1px solid #f1f5f9;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fafafa;transition:all 0.15s ease"
+                         class="hover:bg-white hover:shadow-sm">
+                      
+                      <div style="display:flex;flex-direction:column;gap:4px;min-width:200px">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <span style="font-family:monospace;font-size:12.5px;font-weight:800;color:#c2410c;background:#fff1ec;padding:2px 7px;border-radius:6px;border:1px solid #fed7aa">
+                            {{ order.orderNumber || order.id }}
+                          </span>
+                          <span style="font-size:12px;font-weight:700;color:#475569">Table {{ order.tableNumber || '01' }}</span>
+                        </div>
+                        <div style="font-size:11.5px;color:#64748b">
+                          Placed: {{ (order.createdAt || order.placedAt) | date:'medium' }}
+                        </div>
+                      </div>
+
+                      <!-- Items Summary -->
+                      <div style="flex:1;display:flex;flex-wrap:wrap;gap:6px">
+                        @for (item of order.items; track $index) {
+                          <span style="background:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:2px 8px;font-size:11.5px;color:#1e293b">
+                            <strong style="color:#ea580c">{{ item.quantity || item.qty || 1 }}×</strong> {{ item.name || item.itemName }}
+                          </span>
+                        }
+                      </div>
+
+                      <!-- Status & Total & Track Button -->
+                      <div style="display:flex;align-items:center;gap:16px">
+                        <div style="display:flex;flex-direction:column;align-items:flex-end">
+                          <span class="lez-badge"
+                                [class.status-completed]="order.status === 'COMPLETED' || order.status === 'completed'"
+                                [class.status-pending]="order.status === 'PENDING' || order.status === 'pending'"
+                                [class.status-in_progress]="order.status === 'PREPARING' || order.status === 'READY'">
+                            {{ order.status }}
+                          </span>
+                          <span style="font-size:11px;color:#16a34a;font-weight:700;margin-top:3px">PAID (Digital QR)</span>
+                        </div>
+
+                        <div style="text-align:right">
+                          <div style="font-size:16px;font-weight:800;color:#0f172a">${{ (order.totalAmount || 0).toFixed(2) }}</div>
+                        </div>
+
+                        <button class="lez-btn lez-btn-sm lez-btn-secondary"
+                                style="display:flex;align-items:center;gap:4px"
+                                (click)="openOrderTrackingModal(order)">
+                          <span class="material-symbols-outlined text-[15px]">timeline</span>
+                          <span>Track</span>
+                        </button>
+                      </div>
+
+                    </div>
+                  }
+                </div>
+              }
+
+            </div>
+
+          } @else {
+            <div class="adm-card" style="text-align:center;padding:48px 24px;border:1px dashed #cbd5e1;border-radius:16px;background:#fafafa">
+              <span class="material-symbols-outlined text-[48px] text-gray-300">person_search</span>
+              <h4 style="font-size:16px;font-weight:800;color:#334155;margin:12px 0 4px">Search a Customer's Phone Number</h4>
+              <p style="font-size:13px;color:#64748b;margin:0">Enter any 10-digit customer mobile number above to load their verified order history, lifetime spend, and live order tracking.</p>
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: MENU LIST & CATALOG
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'menus') {
+        <div class="animate-fade-in" style="max-width:1180px;width:100%;display:flex;flex-direction:column;gap:20px">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <h2 class="adm-page-title">Menu Dishes Catalogue</h2>
+              <p class="adm-breadcrumb">Manage dishes, pricing, availability toggles, and categories across restaurants</p>
+            </div>
+            <button class="lez-btn lez-btn-primary" (click)="selectTab('add-menu')">
+              <span class="material-symbols-outlined text-[16px]">add</span>
+              <span>Add New Dish</span>
+            </button>
+          </div>
+
+          <!-- Filter & Search Strip -->
+          <div class="adm-card" style="padding:16px 20px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:240px">
+              <span class="material-symbols-outlined text-gray-400">search</span>
+              <input type="text"
+                     class="adm-search-input"
+                     style="flex:1;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px"
+                     placeholder="Search dishes by name or description..."
+                     [value]="menuSearchQuery()"
+                     (input)="menuSearchQuery.set($any($event.target).value)" />
+            </div>
+
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="lez-filter-pill" [class.active]="selectedMenuCategory() === 'all'" (click)="selectedMenuCategory.set('all')">All Categories</button>
+              @for (cat of categories(); track cat.id) {
+                <button class="lez-filter-pill" [class.active]="selectedMenuCategory() === cat.id" (click)="selectedMenuCategory.set(cat.id)">{{ cat.name }}</button>
+              }
+            </div>
+          </div>
+
+          <!-- Dishes Grid -->
+          @if (filteredMenuItems().length === 0) {
+            <div class="adm-card" style="text-align:center;padding:48px 24px">
+              <span class="material-symbols-outlined text-[48px] text-gray-300">restaurant_menu</span>
+              <h4 style="font-size:16px;font-weight:700;margin:12px 0 4px">No dishes found</h4>
+              <p style="font-size:13px;color:#64748b">Try searching with a different keyword or create a new dish.</p>
+            </div>
+          } @else {
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px">
+              @for (item of filteredMenuItems(); track item.id) {
+                <div class="adm-card" style="padding:16px;border-radius:14px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid #e2e8f0;position:relative">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                          <h4 style="font-size:15px;font-weight:800;color:#0f172a;margin:0">{{ item.name }}</h4>
+                          @if (item.isPopular) {
+                            <span style="font-size:10px;font-weight:800;color:#d97706;background:#fef3c7;border:1px solid #fde68a;padding:1px 6px;border-radius:4px">★ POPULAR</span>
+                          }
+                        </div>
+                        <span style="font-size:11px;font-weight:700;color:#ea580c;text-transform:uppercase">{{ item.isVeg ? '🌱 Vegetarian' : '🍗 Non-Veg' }}</span>
+                      </div>
+                      <span style="font-size:16px;font-weight:800;color:#0f172a">${{ (item.price || 0).toFixed(2) }}</span>
+                    </div>
+                    <p style="font-size:12px;color:#64748b;line-height:1.4;margin:4px 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                      {{ item.description || 'Delicious freshly prepared culinary dish.' }}
+                    </p>
+                  </div>
+
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #f1f5f9">
+                    <button class="lez-btn lez-btn-sm"
+                            [class.lez-btn-primary]="item.isAvailable"
+                            [class.lez-btn-secondary]="!item.isAvailable"
+                            (click)="toggleMenuItemAvailability(item)">
+                      <span>{{ item.isAvailable ? 'Available' : 'Sold Out' }}</span>
+                    </button>
+                    <div style="display:flex;gap:6px">
+                      <button class="lez-btn lez-btn-sm"
+                              [style.background]="item.isPopular ? '#fef3c7' : '#f8fafc'"
+                              [style.color]="item.isPopular ? '#d97706' : '#94a3b8'"
+                              style="border:1px solid #e2e8f0;padding:4px 8px"
+                              [title]="item.isPopular ? 'Remove from Popular' : 'Mark as Popular'"
+                              (click)="toggleMenuItemPopular(item, $event)">
+                        <span class="material-symbols-outlined text-[16px]">{{ item.isPopular ? 'star' : 'star_border' }}</span>
+                      </button>
+                      <button class="lez-btn lez-btn-sm lez-btn-outline" style="color:#ef4444;border-color:#fecdd3" (click)="deleteMenuItem(item)">
+                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: ADD NEW MENU DISH WIZARD
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'add-menu') {
+        <div class="animate-fade-in" style="max-width:720px;width:100%;display:flex;flex-direction:column;gap:20px">
+          
+          <div>
+            <h2 class="adm-page-title">Add New Menu Dish</h2>
+            <p class="adm-breadcrumb">Create and publish a new item into the restaurant menu catalog</p>
+          </div>
+
+          <div class="adm-card" style="padding:24px;border-radius:16px;border:1px solid #e2e8f0;background:#ffffff">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              
+              <div>
+                <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">Dish Name *</label>
+                <input type="text"
+                       class="adm-search-input"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:14px;font-weight:600"
+                       placeholder="e.g. Signature Truffle Burger"
+                       [value]="newItemName()"
+                       (input)="newItemName.set($any($event.target).value)" />
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <div>
+                  <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">Price ($ USD) *</label>
+                  <input type="number"
+                         step="0.50"
+                         class="adm-search-input"
+                         style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:14px;font-weight:600"
+                         placeholder="12.99"
+                         [value]="newItemPrice()"
+                         (input)="newItemPrice.set(+$any($event.target).value)" />
+                </div>
+
+                <div>
+                  <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">Category</label>
+                  <select class="adm-search-input"
+                          title="Category"
+                          aria-label="Category"
+                          style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:14px;font-weight:600;background:#ffffff"
+                          [value]="newItemCategoryId()"
+                          (change)="newItemCategoryId.set($any($event.target).value)">
+                    @for (cat of categories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:12.5px;font-weight:700;color:#475569;display:block;margin-bottom:6px">Description & Ingredients</label>
+                <textarea rows="3"
+                          class="adm-search-input"
+                          style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:13.5px"
+                          placeholder="Describe ingredients, cooking style, or flavor notes..."
+                          [value]="newItemDescription()"
+                          (input)="newItemDescription.set($any($event.target).value)"></textarea>
+              </div>
+
+              <div style="display:flex;gap:20px;align-items:center;padding:12px 16px;background:#f8fafc;border-radius:10px">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:#0f172a">
+                  <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)" />
+                  <span>🌱 Vegetarian Option</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:#0f172a">
+                  <input type="checkbox" [checked]="newItemIsPopular()" (change)="newItemIsPopular.set($any($event.target).checked)" />
+                  <span>⭐ Chef's Special / Popular</span>
+                </label>
+              </div>
+
+              <div style="display:flex;gap:12px;margin-top:10px">
+                <button class="lez-btn lez-btn-primary" style="flex:2;height:44px" (click)="saveNewMenuItem()" [disabled]="isSavingMenuItem()">
+                  @if (isSavingMenuItem()) {
+                    <div class="spinner-sm"></div>
+                    <span>Saving...</span>
+                  } @else {
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    <span>Publish Dish to Menu</span>
+                  }
+                </button>
+                <button class="lez-btn lez-btn-secondary" style="flex:1" (click)="selectTab('menus')">
+                  <span>Cancel</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ════════════════════════════════════════════════════════
+           TAB: CATEGORIES MANAGEMENT
+           ════════════════════════════════════════════════════════ -->
+      @if (activeTab() === 'categories') {
+        <div class="animate-fade-in" style="max-width:960px;width:100%;display:flex;flex-direction:column;gap:20px">
+          
+          <div>
+            <h2 class="adm-page-title">Category Taxonomy</h2>
+            <p class="adm-breadcrumb">Organize restaurant dishes into customer-facing categories</p>
+          </div>
+
+          <!-- Add Category Inline Form -->
+          <div class="adm-card" style="padding:18px 20px;border-radius:14px;border:1px solid #e2e8f0;background:#ffffff">
+            <div style="display:flex;gap:12px;align-items:center">
+              <input type="text"
+                     class="adm-search-input"
+                     style="flex:1;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:13.5px;font-weight:600"
+                     placeholder="New category name (e.g. Artisanal Desserts, Chef Specials, Mocktails)..."
+                     [value]="newCategoryName()"
+                     (input)="newCategoryName.set($any($event.target).value)"
+                     (keyup.enter)="saveNewCategory()" />
+              <button class="lez-btn lez-btn-primary" style="height:42px;padding:0 20px" (click)="saveNewCategory()" [disabled]="isSavingCategory()">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>Add Category</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Categories List -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:16px">
+            @for (cat of categories(); track cat.id) {
+              <div class="adm-card" style="padding:18px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #e2e8f0">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:40px;height:40px;border-radius:10px;background:#fff7ed;color:#ea580c;display:flex;align-items:center;justify-content:center">
+                    <span class="material-symbols-outlined text-[22px]">{{ cat.icon || 'category' }}</span>
+                  </div>
+                  <div>
+                    <h4 style="font-size:15px;font-weight:800;color:#0f172a;margin:0">{{ cat.name }}</h4>
+                    <span style="font-size:11.5px;color:#64748b">Active Category</span>
+                  </div>
+                </div>
+
+                <button class="lez-btn lez-btn-sm lez-btn-outline" style="color:#ef4444;border-color:#fecdd3" (click)="deleteCategory(cat)">
+                  <span class="material-symbols-outlined text-[15px]">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
     </main>
   </div>
 
@@ -860,6 +1345,181 @@
             </div>
           </div>
         </footer>
+
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADMIN ORDER TRACKING & STATUS PROGRESSION TIMELINE MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (trackingOrderModal(); as ord) {
+    <div class="pos-modal-overlay animate-fade-in" (click)="closeOrderTrackingModal()">
+      <div class="pos-modal-card" style="max-width:580px;width:95vw;padding:0;overflow:hidden;border-radius:20px" (click)="$event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div class="pos-modal-header" style="padding:18px 24px;border-bottom:1px solid #e2e8f0;background:#ffffff;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:12px;background:#fff7ed;color:#ea580c;display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <h3 style="font-size:17px;font-weight:800;color:#0f172a;margin:0">
+                  {{ ord.orderNumber || ord.id }}
+                </h3>
+                <span class="lez-badge lez-badge-preparing" style="font-size:11px">
+                  Table {{ ord.tableNumber || '01' }}
+                </span>
+              </div>
+              <div style="font-size:12px;color:#64748b;margin-top:2px">
+                Customer: <strong>{{ ord.customerName || 'Guest' }}</strong> ({{ ord.customerMobile }}) • Placed {{ (ord.createdAt || ord.placedAt) | date:'medium' }}
+              </div>
+            </div>
+          </div>
+          <button class="pos-close-btn" (click)="closeOrderTrackingModal()" type="button">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="pos-modal-body" style="padding:22px 24px;display:flex;flex-direction:column;gap:20px;max-height:75vh;overflow-y:auto">
+          
+          <!-- Live Status Timeline Progression -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px">
+            <h4 style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 16px">
+              Order Status Progression
+            </h4>
+            
+            <div class="order-timeline-track">
+              <!-- Step 1: Placed -->
+              <div class="timeline-step is-complete">
+                <div class="step-dot-wrap">
+                  <div class="step-dot">
+                    <span class="material-symbols-outlined text-[14px]">check</span>
+                  </div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Order Placed</div>
+                  <div class="step-sub">{{ (ord.createdAt || ord.placedAt) | date:'shortTime' }}</div>
+                </div>
+              </div>
+
+              <!-- Step 2: In Kitchen / Preparing -->
+              <div class="timeline-step" [class.is-complete]="['PREPARING', 'READY', 'COMPLETED'].includes((ord.status || '').toUpperCase())"
+                                         [class.is-active]="(ord.status || '').toUpperCase() === 'PENDING'">
+                <div class="step-dot-wrap">
+                  <div class="step-dot">
+                    @if (['PREPARING', 'READY', 'COMPLETED'].includes((ord.status || '').toUpperCase())) {
+                      <span class="material-symbols-outlined text-[14px]">check</span>
+                    } @else {
+                      <span class="material-symbols-outlined text-[14px]">skillet</span>
+                    }
+                  </div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Kitchen Prep / Cooking</div>
+                  <div class="step-sub">{{ ['PREPARING', 'READY', 'COMPLETED'].includes((ord.status || '').toUpperCase()) ? 'Cooked by Kitchen' : 'Queued' }}</div>
+                </div>
+              </div>
+
+              <!-- Step 3: Ready for Serving -->
+              <div class="timeline-step" [class.is-complete]="['READY', 'COMPLETED'].includes((ord.status || '').toUpperCase())"
+                                         [class.is-active]="(ord.status || '').toUpperCase() === 'PREPARING'">
+                <div class="step-dot-wrap">
+                  <div class="step-dot">
+                    @if (['READY', 'COMPLETED'].includes((ord.status || '').toUpperCase())) {
+                      <span class="material-symbols-outlined text-[14px]">check</span>
+                    } @else {
+                      <span class="material-symbols-outlined text-[14px]">done_all</span>
+                    }
+                  </div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Ready for Serving</div>
+                  <div class="step-sub">{{ ['READY', 'COMPLETED'].includes((ord.status || '').toUpperCase()) ? 'Plated & Ready' : 'Pending prep' }}</div>
+                </div>
+              </div>
+
+              <!-- Step 4: Completed / Delivered -->
+              <div class="timeline-step" [class.is-complete]="(ord.status || '').toUpperCase() === 'COMPLETED'"
+                                         [class.is-active]="(ord.status || '').toUpperCase() === 'READY'">
+                <div class="step-dot-wrap">
+                  <div class="step-dot">
+                    <span class="material-symbols-outlined text-[14px]">restaurant</span>
+                  </div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Served to Table</div>
+                  <div class="step-sub">{{ (ord.status || '').toUpperCase() === 'COMPLETED' ? 'Delivered to Diner' : 'Serving queue' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items Ordered Table -->
+          <div>
+            <h4 style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px">
+              Ordered Items ({{ ord.items.length }})
+            </h4>
+
+            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+              <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead>
+                  <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#64748b;font-weight:700;font-size:11.5px;text-align:left">
+                    <th style="padding:10px 14px">Dish Name</th>
+                    <th style="padding:10px 14px;text-align:center">Qty</th>
+                    <th style="padding:10px 14px;text-align:right">Price</th>
+                    <th style="padding:10px 14px;text-align:right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of ord.items; track $index) {
+                    <tr style="border-bottom:1px solid #f1f5f9">
+                      <td style="padding:10px 14px;font-weight:700;color:#0f172a">
+                        {{ item.name || item.itemName }}
+                      </td>
+                      <td style="text-align:center;padding:10px 14px">
+                        <span class="lez-badge" style="font-size:11px;padding:2px 7px;background:#f1f5f9;color:#0f172a">
+                          {{ item.quantity || item.qty || 1 }}
+                        </span>
+                      </td>
+                      <td style="text-align:right;color:#64748b;padding:10px 14px">
+                        ${{ (item.price || 0).toFixed(2) }}
+                      </td>
+                      <td style="text-align:right;font-weight:800;color:#0f172a;padding:10px 14px">
+                        ${{ ((item.price || 0) * (item.quantity || item.qty || 1)).toFixed(2) }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Total Bill Summary -->
+          <div style="background:#f8fafc;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <span style="font-size:12px;color:#64748b">Payment Mode: <strong>Digital QR Pay (PAID)</strong></span>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11.5px;color:#64748b">Total Amount:</div>
+              <div style="font-size:22px;font-weight:800;color:#0f172a">
+                ${{ (ord.totalAmount || 0).toFixed(2) }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="pos-modal-footer" style="padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end">
+          <button class="lez-btn lez-btn-secondary" (click)="closeOrderTrackingModal()">
+            <span>Close</span>
+          </button>
+        </div>
 
       </div>
     </div>

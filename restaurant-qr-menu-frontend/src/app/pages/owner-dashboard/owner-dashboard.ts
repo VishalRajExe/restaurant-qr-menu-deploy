@@ -436,31 +436,79 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.selectedOrder.set(order);
   }
 
-  updateOrderStatus(orderId: string, newStatus: string) {
+  updateOrderStatus(orderId: string, newStatus: string, showUndo: boolean = true) {
     const rId = this.activeRestaurant()?.id || 1;
+    const current = this.ordersList().find(o => o.id === orderId || o.orderNumber === orderId) || this.selectedOrder();
+    const previousStatus = current ? (current.status || 'PENDING') : 'PENDING';
+    const targetOrderNum = current?.orderNumber || orderId;
+
     this.orderService.updateOrderStatus(orderId, newStatus, rId).subscribe(() => {
-      const current = this.selectedOrder();
       if (current && (current.id === orderId || current.orderNumber === orderId)) {
         this.selectedOrder.set({ ...current, status: newStatus.toUpperCase() as any });
       }
-      this.toastService.success('Order Updated', `Order marked as ${newStatus}`);
+      this.toastService.success('Order Updated', `Order #${targetOrderNum} marked as ${newStatus}`);
       this.notificationService.pushNotification({
         eventType: 'ORDER_STATUS_CHANGED',
         title: 'Order Status Updated',
-        message: `Order #${orderId} status changed to ${newStatus}.`
+        message: `Order #${targetOrderNum} status changed to ${newStatus}.`
       });
+
+      if (showUndo && previousStatus !== newStatus.toUpperCase()) {
+        this.undoService.showUndo(
+          `Order #${targetOrderNum} marked as ${newStatus}`,
+          () => {
+            this.updateOrderStatus(orderId, previousStatus, false);
+          },
+          8,
+          `Click UNDO or press Ctrl+Z to revert to ${previousStatus}`
+        );
+      }
     });
   }
 
   cancelOrder(orderId: string) {
+    const current = this.ordersList().find(o => o.id === orderId || o.orderNumber === orderId) || this.selectedOrder();
+    const previousStatus = current ? (current.status || 'PENDING') : 'PENDING';
+    const targetOrderNum = current?.orderNumber || orderId;
+
     this.modalService.confirm({
       title: 'Cancel Order',
-      message: `Are you sure you want to cancel Order #${orderId}?`,
+      message: `Are you sure you want to cancel Order #${targetOrderNum}? You can undo this action immediately.`,
       type: 'danger',
       confirmText: 'Cancel Order',
       onConfirm: () => {
-        this.updateOrderStatus(orderId, 'CANCELLED');
+        const rId = this.activeRestaurant()?.id || 1;
+        this.orderService.updateOrderStatus(orderId, 'CANCELLED', rId).subscribe(() => {
+          if (current && (current.id === orderId || current.orderNumber === orderId)) {
+            this.selectedOrder.set({ ...current, status: 'CANCELLED' as any });
+          }
+          this.toastService.warning('Order Cancelled', `Order #${targetOrderNum} has been cancelled`);
+          this.undoService.showUndo(
+            `Order #${targetOrderNum} Cancelled`,
+            () => {
+              this.updateOrderStatus(orderId, previousStatus, false);
+            },
+            10,
+            `Click UNDO or press Ctrl+Z to restore Order #${targetOrderNum} to ${previousStatus}`
+          );
+        });
       }
+    });
+  }
+
+  restoreCancelledOrder(order: Order) {
+    this.retryOrder(order);
+  }
+
+  retryOrder(order: Order, event?: Event) {
+    if (event) event.stopPropagation();
+    const orderId = order.orderNumber || order.id;
+    this.updateOrderStatus(orderId, 'PENDING');
+    this.toastService.success('Order Restarted', `Order #${order.orderNumber || order.id} has been restarted and moved to kitchen queue.`);
+    this.notificationService.pushNotification({
+      eventType: 'ORDER_STATUS_CHANGED',
+      title: 'Order Restarted',
+      message: `Order #${order.orderNumber || order.id} restarted back to Pending status.`
     });
   }
 
@@ -529,6 +577,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
   imageUploadPreview  = signal<string>('');   
   imageInputMode      = signal<'upload' | 'url'>('upload');
   newItemIsVeg        = signal<boolean>(true);
+  newItemIsPopular    = signal<boolean>(false);
   newItemCategoryId   = signal<string>('');
   newItemSpicyLevel   = signal<number>(0);
 
@@ -990,6 +1039,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.newItemImage.set(dish.image || '');
     this.imageUploadPreview.set(dish.image || '');
     this.newItemIsVeg.set(dish.isVeg);
+    this.newItemIsPopular.set(dish.isPopular || false);
     this.newItemCategoryId.set(dish.categoryId);
     this.newItemSpicyLevel.set(dish.spicyLevel || 0);
   }
@@ -1002,6 +1052,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
     this.newItemImage.set('');
     this.imageUploadPreview.set('');
     this.newItemIsVeg.set(true);
+    this.newItemIsPopular.set(false);
     this.newItemSpicyLevel.set(0);
   }
 
@@ -1023,6 +1074,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         description: this.newItemDescription().trim(),
         image: img,
         isVeg: this.newItemIsVeg(),
+        isPopular: this.newItemIsPopular(),
         spicyLevel: this.newItemSpicyLevel()
       });
       const updatedName = this.newItemName().trim();
@@ -1044,6 +1096,7 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         image: img,
         isAvailable: true,
         isVeg: this.newItemIsVeg(),
+        isPopular: this.newItemIsPopular(),
         spicyLevel: this.newItemSpicyLevel()
       });
       this.cancelEditMenuItem();
@@ -1055,6 +1108,22 @@ export class OwnerDashboard implements OnInit, OnDestroy {
         message: `"${createdName}" added to digital menu for diners.`
       });
     }
+  }
+
+  toggleItemPopular(dish: MenuItem, event?: Event) {
+    if (event) event.stopPropagation();
+    const next = !dish.isPopular;
+    this.menuService.updateMenuItem(dish.id, { isPopular: next });
+    this.toastService.success(
+      next ? 'Marked as Popular' : 'Removed from Popular',
+      `"${dish.name}" is ${next ? 'now featured as Popular / Bestseller' : 'no longer marked as Popular'}`
+    );
+    this.undoService.showUndo(
+      `"${dish.name}" ${next ? 'marked as Popular' : 'unmarked from Popular'}`,
+      () => this.menuService.updateMenuItem(dish.id, { isPopular: !next }),
+      8,
+      `Click UNDO or press Ctrl+Z to revert`
+    );
   }
 
   deleteMenuItem(id: string) {

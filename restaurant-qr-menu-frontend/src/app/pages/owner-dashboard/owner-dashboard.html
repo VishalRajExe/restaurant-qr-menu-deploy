@@ -324,14 +324,27 @@
                     ${{ order.totalAmount || (order.items.length * 18.5).toFixed(2) }}
                   </td>
                   <td style="text-align:center">
-                    <span class="lez-badge"
-                      [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
-                      [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'ACCEPTED'"
-                      [class.lez-badge-ready]="order.status === 'READY'"
-                      [class.lez-badge-delivered]="order.status === 'COMPLETED'"
-                      [class.lez-badge-cancelled]="order.status === 'CANCELLED'">
-                      {{ order.status }}
-                    </span>
+                    <div style="display:inline-flex;align-items:center;justify-content:center;gap:6px">
+                      <span class="lez-badge"
+                        [class.lez-badge-pending]="order.status === 'PENDING' || order.status === 'pending'"
+                        [class.lez-badge-preparing]="order.status === 'PREPARING' || order.status === 'preparing' || order.status === 'ACCEPTED'"
+                        [class.lez-badge-ready]="order.status === 'READY' || order.status === 'ready'"
+                        [class.lez-badge-delivered]="order.status === 'COMPLETED' || order.status === 'completed'"
+                        [class.lez-badge-cancelled]="order.status === 'CANCELLED' || order.status === 'cancelled' || order.status === 'REJECTED'">
+                        {{ order.status }}
+                      </span>
+                      @if (order.status === 'CANCELLED' || order.status === 'cancelled' || order.status === 'REJECTED' || order.status === 'rejected') {
+                      <button class="lez-btn lez-btn-sm"
+                        style="background:#fff1ec;color:#c2410c;border:1px solid #ffedd5;padding:3px 8px;font-size:11px;font-weight:800;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px"
+                        (click)="retryOrder(order, $event)" title="Restart / Retry Order">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                          <path d="M3 3v5h5"/>
+                        </svg>
+                        <span>Retry</span>
+                      </button>
+                      }
+                    </div>
                   </td>
                 </tr>
                 }
@@ -353,9 +366,10 @@
                   </h3>
                   <span class="lez-badge"
                     [class.lez-badge-pending]="current.status === 'PENDING' || current.status === 'pending'"
-                    [class.lez-badge-preparing]="current.status === 'PREPARING' || current.status === 'ACCEPTED'"
-                    [class.lez-badge-ready]="current.status === 'READY'"
-                    [class.lez-badge-delivered]="current.status === 'COMPLETED'">
+                    [class.lez-badge-preparing]="current.status === 'PREPARING' || current.status === 'preparing' || current.status === 'ACCEPTED'"
+                    [class.lez-badge-ready]="current.status === 'READY' || current.status === 'ready'"
+                    [class.lez-badge-delivered]="current.status === 'COMPLETED' || current.status === 'completed'"
+                    [class.lez-badge-cancelled]="current.status === 'CANCELLED' || current.status === 'cancelled' || current.status === 'REJECTED'">
                     {{ current.status }}
                   </span>
                 </div>
@@ -447,7 +461,7 @@
 
               <!-- Action Buttons -->
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                @if (current.status === 'PENDING' || current.status === 'pending' || current.status === 'ACCEPTED') {
+                @if (current.status === 'PENDING' || current.status === 'pending' || current.status === 'ACCEPTED' || current.status === 'accepted') {
                 <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px"
                   (click)="updateOrderStatus(current.orderNumber || current.id, 'PREPARING')">
                   <span class="material-symbols-outlined text-[18px]">skillet</span>
@@ -469,17 +483,36 @@
                   <span class="material-symbols-outlined text-[16px]">cancel</span>
                   <span>Cancel Order</span>
                 </button>
-                } @else if (current.status === 'READY') {
+                } @else if (current.status === 'READY' || current.status === 'ready') {
                 <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:#10B981"
                   (click)="updateOrderStatus(current.orderNumber || current.id, 'COMPLETED')">
                   <span class="material-symbols-outlined text-[18px]">done_all</span>
                   <span>Mark as Delivered</span>
                 </button>
-                } @else if (current.status === 'COMPLETED' || current.status === 'DELIVERED') {
+                } @else if (current.status === 'COMPLETED' || current.status === 'completed' || current.status === 'DELIVERED' || current.status === 'delivered') {
                 <div
-                  style="grid-column:span 2;padding:10px 14px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;color:#065f46;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px">
-                  <span class="material-symbols-outlined text-[18px]">done_all</span>
-                  <span>Order Delivered & Completed</span>
+                  style="grid-column:span 2;padding:10px 14px;background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;color:#065f46;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13.5px">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="material-symbols-outlined text-[18px]">done_all</span>
+                    <span>Order Delivered & Completed</span>
+                  </div>
+                  <button class="lez-btn lez-btn-sm" style="background:#059669;color:#ffffff;border:none;padding:5px 12px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px" (click)="updateOrderStatus(current.orderNumber || current.id, 'READY')">
+                    <span class="material-symbols-outlined text-[14px]">undo</span>
+                    <span>Reopen</span>
+                  </button>
+                </div>
+                } @else if (current.status === 'CANCELLED' || current.status === 'cancelled' || current.status === 'REJECTED' || current.status === 'rejected') {
+                <button class="lez-btn lez-btn-primary" style="grid-column:span 2;padding:12px;background:linear-gradient(135deg, #ea580c 0%, #c2410c 100%);color:#ffffff;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(234,88,12,0.3)" (click)="retryOrder(current)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                  <span>Restart / Retry Order</span>
+                </button>
+                <div
+                  style="grid-column:span 2;padding:8px 12px;background:#fef2f2;border:1px dashed #fca5a5;border-radius:8px;color:#991b1b;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px">
+                  <span class="material-symbols-outlined text-[16px]">cancel</span>
+                  <span>Order is cancelled. Click above to send back to Kitchen.</span>
                 </div>
                 }
 
@@ -673,12 +706,19 @@
                 }
               </div>
 
-              <div style="display:flex;gap:14px;align-items:center">
+              <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
                 <label
                   style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer">
                   <input type="checkbox" [checked]="newItemIsVeg()"
                     (change)="newItemIsVeg.set($any($event.target).checked)" style="accent-color:#ab3500" />
                   <span>Vegetarian</span>
+                </label>
+                <label
+                  style="display:flex;align-items:center;gap:6px;font-size:13px;color:#d97706;font-weight:700;cursor:pointer">
+                  <input type="checkbox" [checked]="newItemIsPopular()"
+                    (change)="newItemIsPopular.set($any($event.target).checked)" style="accent-color:#f59e0b" />
+                  <span class="material-symbols-outlined text-[16px]">star</span>
+                  <span>Popular / Special</span>
                 </label>
               </div>
 
@@ -743,6 +783,12 @@
                   <span class="dish-diet-pill" [class.veg]="dish.isVeg" [class.non-veg]="!dish.isVeg">
                     {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
                   </span>
+                  @if (dish.isPopular) {
+                  <span class="dish-popular-pill">
+                    <span class="material-symbols-outlined text-[12px]">star</span>
+                    <span>POPULAR</span>
+                  </span>
+                  }
                 </div>
                 <div class="lez-dish-body">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
@@ -760,6 +806,11 @@
                       {{ dish.isAvailable ? 'Available' : 'Hidden' }}
                     </button>
                     <div style="display:flex;gap:6px">
+                      <button class="icon-btn-pill star-btn" [class.active]="dish.isPopular"
+                        [title]="dish.isPopular ? 'Remove from Popular' : 'Mark as Popular / Bestseller'"
+                        (click)="toggleItemPopular(dish, $event)">
+                        <span class="material-symbols-outlined text-[16px]">{{ dish.isPopular ? 'star' : 'star_border' }}</span>
+                      </button>
                       <button class="icon-btn-pill edit-btn" title="Edit Menu Item" (click)="startEditMenuItem(dish)">
                         <span class="material-symbols-outlined text-[16px]">edit</span>
                       </button>
@@ -2061,12 +2112,20 @@
           }
         </div>
 
-        <div style="display:flex;gap:16px;align-items:center;padding:4px 0">
+        <div style="display:flex;gap:16px;align-items:center;padding:4px 0;flex-wrap:wrap">
           <label
             style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text-primary);cursor:pointer">
             <input type="checkbox" [checked]="newItemIsVeg()" (change)="newItemIsVeg.set($any($event.target).checked)"
               style="accent-color:#10b981;width:18px;height:18px" />
             <span>Vegetarian Dish</span>
+          </label>
+          <label
+            style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#d97706;cursor:pointer">
+            <input type="checkbox" [checked]="newItemIsPopular()"
+              (change)="newItemIsPopular.set($any($event.target).checked)"
+              style="accent-color:#f59e0b;width:18px;height:18px" />
+            <span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+            <span>Popular / Bestseller</span>
           </label>
         </div>
       </div>

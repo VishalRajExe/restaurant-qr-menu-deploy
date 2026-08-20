@@ -11,6 +11,7 @@ import { RestaurantService } from './restaurant.service';
 import { CategoryService } from './category.service';
 import { MenuService } from './menu.service';
 import { OfferService } from './offer.service';
+import { DiningTableData } from './table.service';
 
 export interface PublicMenuPayload {
   restaurant: Restaurant;
@@ -18,6 +19,7 @@ export interface PublicMenuPayload {
   categories: Category[];
   menuItems: MenuItem[];
   activeOffers: Offer[];
+  tables?: DiningTableData[];
 }
 
 @Injectable({
@@ -99,7 +101,22 @@ export class PublicMenuService {
           isActive:            o.isActive !== false
         }));
 
-        const payload: PublicMenuPayload = { restaurant, qrCode: d.qrCode, categories, menuItems, activeOffers };
+        const tables: DiningTableData[] = (d.tables || []).map((t: any) => ({
+          id:             t.id,
+          restaurantId:   t.restaurantId || Number(rd.id),
+          branchId:       t.branchId,
+          tableNumber:    t.tableNumber,
+          label:          t.label || `Table ${t.tableNumber}`,
+          capacity:       t.capacity || 4,
+          status:         t.status || 'AVAILABLE',
+          isDeleted:      t.isDeleted || false,
+          currentCustomerName: t.currentCustomerName,
+          currentCustomerMobile: t.currentCustomerMobile,
+          occupiedSince:  t.occupiedSince,
+          currentActiveOrdersCount: t.currentActiveOrdersCount || 0
+        }));
+
+        const payload: PublicMenuPayload = { restaurant, qrCode: d.qrCode, categories, menuItems, activeOffers, tables };
 
         // ── Cache into individual services via public methods ─────────────────
         this.restaurantService.setRestaurant(restaurant);
@@ -113,6 +130,14 @@ export class PublicMenuService {
         console.warn('Public menu fetch failed (will try fallback):', err.message);
         return of(null);
       })
+    );
+  }
+
+  fetchPublicTables(restaurantId: number | string): Observable<DiningTableData[]> {
+    const url = `${environment.apiUrl}/public/menu/restaurants/${restaurantId}/tables`;
+    return this.http.get<ApiResponse<DiningTableData[]>>(url).pipe(
+      map(res => (res && res.success && res.data) ? res.data : []),
+      catchError(() => of([]))
     );
   }
 }

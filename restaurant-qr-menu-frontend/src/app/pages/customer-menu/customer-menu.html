@@ -193,8 +193,11 @@
         </div>
 
         <!-- Table Badge Pill -->
-        <button class="pos-table-badge" (click)="startEditTable()" title="Change Table">
+        <button class="pos-table-badge" [class.table-badge-warning]="isCurrentTableOccupied()" (click)="startEditTable()" title="Change Table">
           <span>Table {{ tableNumber() > 0 ? (tableNumber() < 10 ? '0' + tableNumber() : tableNumber()) : '01' }}</span>
+          @if (isCurrentTableOccupied()) {
+            <span class="badge-occupied-tag">Occupied</span>
+          }
           <span class="material-symbols-outlined text-[14px]">edit</span>
         </button>
       </div>
@@ -529,19 +532,93 @@
   }
 
   <!-- ══════════════════════════════════════════════════════════════════════════
-       TABLE EDIT MODAL
+       TABLE SELECTION & LIVE AVAILABILITY MODAL
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (isEditingTable()) {
     <div class="pos-modal-overlay animate-fade-in" (click)="cancelTableEdit()">
-      <div class="pos-modal-card" style="max-width:380px" (click)="$event.stopPropagation()">
-        <h3 style="font-size:17px;font-weight:800;color:var(--text-primary);margin:0 0 16px">Select Your Table</h3>
-        <input class="pos-modal-input" type="number" min="1" max="99" placeholder="e.g. 04"
-               [value]="tableInputValue()" (input)="tableInputValue.set($any($event.target).value)"
-               (keydown.enter)="confirmTableEdit()" autofocus />
-        <div style="display:flex;gap:10px;margin-top:16px">
-          <button class="lez-btn lez-btn-primary" style="flex:1" (click)="confirmTableEdit()">Save Table</button>
-          <button class="lez-btn lez-btn-secondary" (click)="cancelTableEdit()">Cancel</button>
+      <div class="pos-modal-card" style="max-width:440px;width:95vw" (click)="$event.stopPropagation()">
+        
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid #e2e8f0;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:10px;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center">
+              <span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+            </div>
+            <div>
+              <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin:0">Choose Your Table</h3>
+              <p style="font-size:12px;color:var(--text-secondary);margin:2px 0 0">Select an available free table for dine-in</p>
+            </div>
+          </div>
+          <button class="pos-modal-close" (click)="cancelTableEdit()" type="button">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
         </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- Available Free Tables Section -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:11.5px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:6px">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981"></span>
+                Available Free Tables ({{ availableTables().length }})
+              </span>
+            </div>
+
+            @if (availableTables().length === 0) {
+              <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:8px">
+                <span class="material-symbols-outlined text-[20px] text-red-500">error</span>
+                <span style="font-size:12px;color:#9f1239;font-weight:600">All tables are currently occupied. Please check with restaurant staff.</span>
+              </div>
+            } @else {
+              <div class="table-chips-grid">
+                @for (tbl of availableTables(); track tbl.id) {
+                  <button type="button"
+                          class="table-picker-chip available"
+                          [class.selected]="tableNumber() === getTableNumberDigits(tbl.tableNumber)"
+                          (click)="selectTable(tbl)">
+                    <span class="chip-num">{{ formatTableDisplay(tbl) }}</span>
+                    <span class="chip-cap">{{ tbl.capacity }} Seats</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Occupied / Reserved Tables -->
+          @if (occupiedTables().length > 0) {
+            <div>
+              <div style="font-size:11.5px;font-weight:700;color:#64748b;margin-bottom:6px;display:flex;align-items:center;gap:5px">
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ef4444"></span>
+                Currently In-Use / Occupied ({{ occupiedTables().length }})
+              </div>
+              <div class="table-chips-grid">
+                @for (tbl of occupiedTables(); track tbl.id) {
+                  <div class="table-picker-chip occupied" [title]="formatTableDisplay(tbl) + ' is ' + tbl.status.toLowerCase()">
+                    <span class="chip-num">{{ formatTableDisplay(tbl) }}</span>
+                    <span class="chip-occupied-tag">{{ tbl.status === 'RESERVED' ? 'Reserved' : 'Occupied' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Manual Table Number Entry -->
+          <div style="border-top:1px solid #f1f5f9;padding-top:12px">
+            <label style="font-size:12px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">
+              Or Enter Table Number
+            </label>
+            <div style="display:flex;gap:8px">
+              <input class="pos-modal-input" type="number" min="1" max="99" placeholder="e.g. 04"
+                     [value]="tableInputValue()" (input)="tableInputValue.set($any($event.target).value)"
+                     (keydown.enter)="confirmTableEdit()" style="margin:0;flex:1" />
+              <button class="lez-btn lez-btn-primary" (click)="confirmTableEdit()" type="button">
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   }

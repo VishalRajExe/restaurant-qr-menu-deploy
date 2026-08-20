@@ -11,6 +11,7 @@ import { ApiResponse } from '../models/api-response.model';
 export class CategoryService {
   private http = inject(HttpClient);
   private categoriesList = signal<Category[]>([]);
+  readonly categories   = this.categoriesList.asReadonly();
   private localAddedCategories: Category[] = [];
 
   constructor() {
@@ -39,7 +40,7 @@ export class CategoryService {
     }
   }
 
-  getCategoriesForRestaurant(restaurantId?: string): Category[] {
+  getCategoriesForRestaurant(restaurantId?: string | number): Category[] {
     return this.categoriesList().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
@@ -47,8 +48,8 @@ export class CategoryService {
     this.categoriesList.set(categories);
   }
 
-  fetchCategories(restaurantId: string): Observable<Category[]> {
-    const numericId = parseInt(restaurantId, 10) || 1;
+  fetchCategories(restaurantId: string | number): Observable<Category[]> {
+    const numericId = parseInt(String(restaurantId), 10) || 1;
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/restaurants/${numericId}/categories`).pipe(
       map(res => {
         let apiMapped: Category[] = [];
@@ -58,18 +59,18 @@ export class CategoryService {
             restaurantId: String(restaurantId),
             name: item.name,
             icon: item.icon || 'Utensils',
-            sortOrder: item.displayOrder || item.sortOrder || 1
+            displayOrder: item.displayOrder,
+            sortOrder: item.displayOrder
           }));
-        }
 
-        const combined = [...apiMapped];
-        for (const localCat of this.localAddedCategories) {
-          if (!combined.some(c => String(c.id) === String(localCat.id) || c.name.toLowerCase() === localCat.name.toLowerCase())) {
-            combined.push(localCat);
+          // Merge API categories with locally persisted categories
+          const combined = [...apiMapped];
+          for (const localCat of this.localAddedCategories) {
+            if (!combined.some(c => String(c.id) === String(localCat.id) || c.name.toLowerCase() === localCat.name.toLowerCase())) {
+              combined.push(localCat);
+            }
           }
-        }
 
-        if (combined.length > 0) {
           this.categoriesList.set(combined);
           return combined;
         }

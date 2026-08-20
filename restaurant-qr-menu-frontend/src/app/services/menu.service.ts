@@ -11,6 +11,7 @@ import { ApiResponse } from '../models/api-response.model';
 export class MenuService {
   private http = inject(HttpClient);
   private menuItemsList = signal<MenuItem[]>([]);
+  readonly menuItems   = this.menuItemsList.asReadonly();
   private localAddedItems: MenuItem[] = [];
 
   constructor() {
@@ -55,8 +56,8 @@ export class MenuService {
     this.menuItemsList.set(items);
   }
 
-  fetchMenuItems(restaurantId: string): Observable<MenuItem[]> {
-    const numericId = parseInt(restaurantId, 10) || 1;
+  fetchMenuItems(restaurantId: string | number): Observable<MenuItem[]> {
+    const numericId = parseInt(String(restaurantId), 10) || 1;
     return this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/public/restaurants/${numericId}/menu`).pipe(
       map(res => {
         if (res && res.success && Array.isArray(res.data)) {
@@ -157,7 +158,8 @@ export class MenuService {
           description: target.description,
           price: target.price,
           vegNonveg: target.isVeg ? 'VEG' : 'NON_VEG',
-          isAvailable: target.isAvailable
+          isAvailable: target.isAvailable,
+          isPopular: target.isPopular
         };
         this.http.put<ApiResponse<any>>(`${environment.apiUrl}/restaurants/${restId}/menu-items/${numericId}`, body)
           .pipe(catchError(() => of(null)))

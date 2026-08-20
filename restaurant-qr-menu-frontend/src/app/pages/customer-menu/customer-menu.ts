@@ -19,6 +19,7 @@ import { PrintService } from '../../services/print.service';
 import { BackButton } from '../../components/back-button/back-button';
 import { UndoService } from '../../services/undo.service';
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
+import { DiningTableData } from '../../services/table.service';
 
 export interface CartItem {
   menuItem: MenuItem;
@@ -82,10 +83,43 @@ export class CustomerMenu implements OnInit, OnDestroy {
   showMobileCart       = signal<boolean>(false);
   showMobileSidebar    = signal<boolean>(false);
 
-  // ── Table number ─────────────────────────────────────────────────────────────
+  // ── Table number & Live Availability ─────────────────────────────────────────
   tableNumber      = signal<number>(0);
   isEditingTable   = signal<boolean>(false);
   tableInputValue  = signal<string>('');
+  tablesList       = signal<DiningTableData[]>([]);
+
+  getTableNumberDigits(tableNumberStr: string | number | undefined): number {
+    if (!tableNumberStr) return 0;
+    const digits = String(tableNumberStr).replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  }
+
+  formatTableDisplay(tbl: DiningTableData | string | number | undefined): string {
+    if (!tbl) return 'Table 01';
+    if (typeof tbl === 'object' && tbl !== null) {
+      const raw = tbl.tableNumber || '';
+      if (raw.toLowerCase().startsWith('table')) return raw;
+      const n = this.getTableNumberDigits(raw);
+      return n > 0 ? `Table ${n < 10 ? '0' + n : n}` : `Table ${raw}`;
+    }
+    const n = typeof tbl === 'number' ? tbl : this.getTableNumberDigits(tbl);
+    return n > 0 ? `Table ${n < 10 ? '0' + n : n}` : 'Table 01';
+  }
+
+  availableTables = computed(() => this.tablesList().filter(t => t.status === 'AVAILABLE'));
+  occupiedTables  = computed(() => this.tablesList().filter(t => t.status === 'OCCUPIED' || t.status === 'RESERVED' || t.status === 'CLEANING'));
+
+  currentTableData = computed(() => {
+    const num = this.tableNumber();
+    if (!num) return null;
+    return this.tablesList().find(t => this.getTableNumberDigits(t.tableNumber) === num) || null;
+  });
+
+  isCurrentTableOccupied = computed(() => {
+    const t = this.currentTableData();
+    return t ? t.status !== 'AVAILABLE' : false;
+  });
 
   // ── Order flow & Customer Mobile ─────────────────────────────────────────────
   customerMobile        = signal<string>('');
@@ -218,13 +252,40 @@ export class CustomerMenu implements OnInit, OnDestroy {
       this.publicMenuService.fetchPublicMenu(tokenOrSlug).subscribe((payload: PublicMenuPayload | null) => {
         if (payload) {
           this.restaurant.set(payload.restaurant);
+
+          // Populate tables list & live availability
+          const restId = payload.restaurant.id || 1;
+          if (payload.tables && payload.tables.length > 0) {
+            this.tablesList.set(payload.tables);
+          } else {
+            this.publicMenuService.fetchPublicTables(restId).subscribe(tables => {
+              if (tables && tables.length > 0) {
+                this.tablesList.set(tables);
+              }
+            });
+          }
+
           // Auto-detect table number if embedded in QR payload
           if (payload.qrCode && payload.qrCode.tableNumber) {
-            const qrTableNum = parseInt(String(payload.qrCode.tableNumber).replace(/\D/g, ''), 10);
+            const qrTableNum = this.getTableNumberDigits(payload.qrCode.tableNumber);
             if (!isNaN(qrTableNum) && qrTableNum > 0 && this.tableNumber() === 0) {
               this.tableNumber.set(qrTableNum);
             }
           }
+
+          // If tableNumber was already set, check its availability
+          if (this.tableNumber() > 0 && this.tablesList().length > 0) {
+            const match = this.tablesList().find(t => this.getTableNumberDigits(t.tableNumber) === this.tableNumber());
+            if (match && match.status !== 'AVAILABLE') {
+              this.toastService.show(`Table ${this.tableNumber()} is currently marked as ${match.status.toLowerCase()}. Please choose a free table.`, 'warning');
+            }
+          } else if (this.tableNumber() === 0 && this.availableTables().length > 0) {
+            const firstAvail = this.availableTables()[0];
+            if (firstAvail) {
+              this.tableNumber.set(this.getTableNumberDigits(firstAvail.tableNumber));
+            }
+          }
+
           this.isLoading.set(false);
         } else {
           // Fallback: try individual service calls
@@ -236,6 +297,11 @@ export class CustomerMenu implements OnInit, OnDestroy {
                 this.isLoading.set(false);
               });
               this.offerService.fetchActiveOffers(res.id).subscribe();
+              this.publicMenuService.fetchPublicTables(res.id).subscribe(tables => {
+                if (tables && tables.length > 0) {
+                  this.tablesList.set(tables);
+                }
+              });
             } else {
               this.loadError.set('Menu not found. Please scan a valid QR code.');
               this.isLoading.set(false);
@@ -282,18 +348,55 @@ export class CustomerMenu implements OnInit, OnDestroy {
     this.showMobileSidebar.set(false);
   }
 
-  // ── Table number editing ─────────────────────────────────────────────────────
+  // ── Table number editing & validation ─────────────────────────────────────────
   startEditTable() {
     this.tableInputValue.set(this.tableNumber() > 0 ? String(this.tableNumber()) : '');
     this.isEditingTable.set(true);
+
+    // Refresh live table statuses from backend
+    const restId = this.restaurant()?.id || 1;
+    this.publicMenuService.fetchPublicTables(restId).subscribe(tables => {
+      if (tables && tables.length > 0) {
+        this.tablesList.set(tables);
+      }
+    });
+  }
+
+  selectTable(table: DiningTableData) {
+    if (table.status !== 'AVAILABLE') {
+      this.toastService.show(`${this.formatTableDisplay(table)} is currently ${table.status.toLowerCase()}. Please select an available free table.`, 'warning');
+      return;
+    }
+    const num = this.getTableNumberDigits(table.tableNumber);
+    this.tableNumber.set(num);
+    this.tableInputValue.set(num > 0 ? (num < 10 ? '0' + num : String(num)) : String(table.tableNumber));
+    this.isEditingTable.set(false);
+    this.toastService.success('Table Selected', `Now dining at ${this.formatTableDisplay(table)} (${table.capacity} Seats)`);
   }
 
   confirmTableEdit() {
-    const val = Number(this.tableInputValue());
-    if (!isNaN(val) && val > 0) {
-      this.tableNumber.set(val);
+    const raw = this.tableInputValue().trim();
+    const val = this.getTableNumberDigits(raw);
+    if (isNaN(val) || val <= 0) {
+      this.toastService.show('Please enter a valid table number', 'warning');
+      return;
     }
+
+    if (this.tablesList().length > 0) {
+      const match = this.tablesList().find(t => this.getTableNumberDigits(t.tableNumber) === val);
+      if (!match) {
+        this.toastService.show(`Table ${val} does not exist at this restaurant. Please choose from the available tables.`, 'warning');
+        return;
+      }
+      if (match.status !== 'AVAILABLE') {
+        this.toastService.show(`Table ${val} is currently ${match.status.toLowerCase()}. Please choose a free table.`, 'warning');
+        return;
+      }
+    }
+
+    this.tableNumber.set(val);
     this.isEditingTable.set(false);
+    this.toastService.success('Table Updated', `Dining at Table ${val < 10 ? '0' + val : val}`);
   }
 
   cancelTableEdit() {
@@ -358,6 +461,21 @@ export class CustomerMenu implements OnInit, OnDestroy {
     if (!cleanMobile || cleanMobile.length !== 10) {
       this.toastService.show('Please enter a valid 10-digit mobile number to place your order', 'error');
       return;
+    }
+
+    // Validate table availability
+    if (this.tablesList().length > 0) {
+      if (this.tableNumber() === 0) {
+        this.toastService.show('Please select an available dining table first', 'warning');
+        this.startEditTable();
+        return;
+      }
+      const tableData = this.tablesList().find(t => this.getTableNumberDigits(t.tableNumber) === this.tableNumber());
+      if (tableData && tableData.status !== 'AVAILABLE') {
+        this.toastService.show(`Table ${this.tableNumber()} is currently ${tableData.status.toLowerCase()}. Please choose an available free table before ordering.`, 'warning');
+        this.startEditTable();
+        return;
+      }
     }
 
     this.isPlacingOrder.set(true);

@@ -253,11 +253,45 @@ label.form-label,
   color: #ffffff;
 }
 
+.dish-popular-pill {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
+}
+
 .lez-dish-body {
   padding: 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.icon-btn-pill.star-btn {
+  color: #94a3b8;
+  border-color: #e2e8f0;
+}
+
+.icon-btn-pill.star-btn:hover {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fef3c7;
+}
+
+.icon-btn-pill.star-btn.active {
+  background: #fef3c7;
+  color: #d97706;
+  border-color: #fde68a;
 }
 
 .icon-btn-pill.edit-btn:hover {

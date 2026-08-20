@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminRestaurantData } from '../../services/admin.service';
@@ -8,24 +9,37 @@ import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
 import { NotificationCenter } from '../../components/notification-center/notification-center';
 import { NotificationService } from '../../services/notification.service';
+import { CustomerHistoryService, CustomerHistoryData, CustomerSummary } from '../../services/customer-history.service';
+import { MenuService } from '../../services/menu.service';
+import { CategoryService } from '../../services/category.service';
+import { RestaurantService } from '../../services/restaurant.service';
+import { MenuItem } from '../../models/menu-item.model';
+import { Category } from '../../models/category.model';
+import { Order } from '../../services/order.service';
+import { UndoService } from '../../services/undo.service';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, NotificationCenter, RouterLink],
+  imports: [CommonModule, FormsModule, NotificationCenter, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
 export class AdminDashboard implements OnInit, OnDestroy {
-  authService         = inject(AuthService);
-  adminService        = inject(AdminService);
-  ticketService       = inject(TicketService);
-  toastService        = inject(ToastService);
-  modalService        = inject(ModalService);
-  notificationService = inject(NotificationService);
-  router              = inject(Router);
+  authService            = inject(AuthService);
+  adminService           = inject(AdminService);
+  ticketService          = inject(TicketService);
+  toastService           = inject(ToastService);
+  modalService           = inject(ModalService);
+  notificationService    = inject(NotificationService);
+  customerHistoryService = inject(CustomerHistoryService);
+  menuService            = inject(MenuService);
+  categoryService        = inject(CategoryService);
+  restaurantService      = inject(RestaurantService);
+  undoService            = inject(UndoService);
+  router                 = inject(Router);
 
   // ── Tab navigation ────────────────────────────────────────────────────────
-  activeTab = signal<'analytics' | 'restaurants' | 'tickets'>('analytics');
+  activeTab = signal<'analytics' | 'restaurants' | 'tickets' | 'add-menu' | 'menus' | 'categories' | 'customers'>('analytics');
 
   // ── Profile & Language Dropdowns ──────────────────────────────────────────
   showProfileDropdown  = signal<boolean>(false);
@@ -126,12 +140,263 @@ export class AdminDashboard implements OnInit, OnDestroy {
   totalScans        = computed(() => this.restaurants().reduce((s: number, r: AdminRestaurantData) => s + r.totalScans, 0));
   proPlans          = computed(() => this.restaurants().filter((r: AdminRestaurantData) => r.plan === 'Pro').length);
 
-  selectTab(tab: 'analytics' | 'restaurants' | 'tickets') {
+  selectTab(tab: 'analytics' | 'restaurants' | 'tickets' | 'add-menu' | 'menus' | 'categories' | 'customers') {
     this.activeTab.set(tab);
     if (tab === 'tickets') {
       this.ticketService.markTicketsAsSeen();
       this.ticketService.fetchAdminTickets().subscribe();
+    } else if (tab === 'customers') {
+      const restId = this.selectedCustomerRestaurantId() || 1;
+      this.customerHistoryService.fetchRecentCustomers(restId).subscribe();
+    } else if (tab === 'menus' || tab === 'add-menu' || tab === 'categories') {
+      const restId = this.selectedRestaurantId() || 1;
+      this.categoryService.fetchCategories(restId).subscribe();
+      this.menuService.fetchMenuItems(restId).subscribe();
     }
+  }
+
+  // ── Customer Order History & Tracking ─────────────────────────────────────
+  customerSearchPhone          = signal<string>('');
+  selectedCustomerRestaurantId = signal<number | string>(1);
+  customerHistoryResult        = signal<CustomerHistoryData | null>(null);
+  isSearchingCustomer          = signal<boolean>(false);
+  customerSearchError          = signal<string | null>(null);
+  customerRecentList           = computed(() => this.customerHistoryService.recentCustomers());
+  customerDateFilter           = signal<'all' | 'today' | 'week' | 'month'>('all');
+  customerStatusFilter         = signal<'all' | 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED'>('all');
+  trackingOrderModal           = signal<Order | null>(null);
+
+  filteredCustomerOrders = computed(() => {
+    const data = this.customerHistoryResult();
+    if (!data || !data.orders) return [];
+
+    let orders = [...data.orders];
+    const sf = this.customerStatusFilter();
+    if (sf !== 'all') {
+      orders = orders.filter(o => (o.status || '').toUpperCase() === sf);
+    }
+
+    const df = this.customerDateFilter();
+    if (df !== 'all') {
+      const now = new Date();
+      orders = orders.filter(o => {
+        const d = new Date(o.createdAt || o.placedAt || '');
+        if (isNaN(d.getTime())) return true;
+        if (df === 'today') {
+          return d.toDateString() === now.toDateString();
+        }
+        if (df === 'week') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return d >= weekAgo;
+        }
+        if (df === 'month') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          return d >= monthAgo;
+        }
+        return true;
+      });
+    }
+
+    return orders;
+  });
+
+  searchCustomerHistory() {
+    const raw = this.customerSearchPhone().trim();
+    const clean = raw.replace(/\D/g, '');
+
+    if (!clean) {
+      this.customerSearchError.set('Please enter a 10-digit mobile number');
+      return;
+    }
+    if (clean.length !== 10) {
+      this.customerSearchError.set('Phone number must be exactly 10 digits');
+      return;
+    }
+
+    this.isSearchingCustomer.set(true);
+    this.customerSearchError.set(null);
+
+    const restId = this.selectedCustomerRestaurantId() || 1;
+    this.customerHistoryService.fetchCustomerHistory(restId, clean).subscribe(result => {
+      this.isSearchingCustomer.set(false);
+      if (result) {
+        this.customerHistoryResult.set(result);
+        this.customerSearchError.set(null);
+        this.toastService.success('Customer Found', `${result.customerName || 'Customer'} has ${result.totalOrders} recorded orders`);
+      } else {
+        this.customerHistoryResult.set(null);
+        this.customerSearchError.set('No order history found for this phone number at the selected venue.');
+      }
+    });
+  }
+
+  quickSearchCustomer(phone: string) {
+    this.customerSearchPhone.set(phone);
+    this.searchCustomerHistory();
+  }
+
+  openOrderTrackingModal(order: Order) {
+    this.trackingOrderModal.set(order);
+  }
+
+  closeOrderTrackingModal() {
+    this.trackingOrderModal.set(null);
+  }
+
+  // ── Menu Catalog & Operations ─────────────────────────────────────────────
+  menuSearchQuery        = signal<string>('');
+  selectedMenuCategory   = signal<string>('all');
+  selectedRestaurantId   = signal<number | string>(1);
+  menuItems              = computed(() => this.menuService.menuItems());
+  categories             = computed(() => this.categoryService.categories());
+
+  filteredMenuItems = computed(() => {
+    let items = this.menuItems();
+    const q = this.menuSearchQuery().toLowerCase().trim();
+    if (q) {
+      items = items.filter((i: MenuItem) => i.name.toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q));
+    }
+    const cat = this.selectedMenuCategory();
+    if (cat !== 'all') {
+      items = items.filter((i: MenuItem) => String(i.categoryId) === String(cat));
+    }
+    return items;
+  });
+
+  toggleMenuItemAvailability(item: MenuItem) {
+    this.menuService.toggleAvailability(item.id);
+    this.toastService.success('Dish Status', `"${item.name}" availability updated`);
+  }
+
+  toggleMenuItemPopular(item: MenuItem, event?: Event) {
+    if (event) event.stopPropagation();
+    const next = !item.isPopular;
+    this.menuService.updateMenuItem(item.id, { isPopular: next });
+    this.toastService.success(
+      next ? 'Marked as Popular' : 'Removed from Popular',
+      `"${item.name}" is ${next ? 'now featured as Popular' : 'no longer marked as Popular'}`
+    );
+    this.undoService.showUndo(
+      `"${item.name}" ${next ? 'marked as Popular' : 'unmarked from Popular'}`,
+      () => this.menuService.updateMenuItem(item.id, { isPopular: !next }),
+      8,
+      `Click UNDO or press Ctrl+Z to revert`
+    );
+  }
+
+  deleteMenuItem(item: MenuItem) {
+    this.modalService.confirm({
+      title: 'Delete Menu Dish',
+      message: `Are you sure you want to remove "${item.name}" from the catalogue?`,
+      type: 'danger',
+      confirmText: 'Delete Dish',
+      onConfirm: () => {
+        this.menuService.deleteMenuItem(item.id);
+        this.toastService.success('Dish Deleted', `"${item.name}" was removed from menu`);
+        this.undoService.showUndo(
+          `Dish "${item.name}" Deleted`,
+          () => this.menuService.restoreMenuItem(item.id, item),
+          8,
+          `Click UNDO or press Ctrl+Z to restore "${item.name}"`
+        );
+      }
+    });
+  }
+
+  // ── Add New Menu Wizard ───────────────────────────────────────────────────
+  newItemName        = signal<string>('');
+  newItemDescription = signal<string>('');
+  newItemPrice       = signal<number>(12.99);
+  newItemCategoryId  = signal<string>('');
+  newItemIsVeg       = signal<boolean>(true);
+  newItemIsPopular   = signal<boolean>(false);
+  isSavingMenuItem   = signal<boolean>(false);
+
+  saveNewMenuItem() {
+    const name = this.newItemName().trim();
+    if (!name) {
+      this.toastService.show('Please enter a dish name', 'warning');
+      return;
+    }
+    const price = Number(this.newItemPrice());
+    if (isNaN(price) || price <= 0) {
+      this.toastService.show('Please enter a valid price', 'warning');
+      return;
+    }
+
+    this.isSavingMenuItem.set(true);
+    const payload: Omit<MenuItem, 'id'> = {
+      name,
+      description: this.newItemDescription().trim(),
+      price,
+      categoryId: this.newItemCategoryId() || (this.categories()[0]?.id || '1'),
+      isVeg: this.newItemIsVeg(),
+      isPopular: this.newItemIsPopular(),
+      isAvailable: true,
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80'
+    };
+
+    try {
+      this.menuService.addMenuItem(payload);
+      this.isSavingMenuItem.set(false);
+      this.toastService.success('Dish Created', `"${name}" added to menu catalog!`);
+      this.newItemName.set('');
+      this.newItemDescription.set('');
+      this.newItemPrice.set(12.99);
+      this.activeTab.set('menus');
+    } catch {
+      this.isSavingMenuItem.set(false);
+      this.toastService.show('Failed to save menu dish. Please check inputs.', 'error');
+    }
+  }
+
+  // ── Categories Management ─────────────────────────────────────────────────
+  newCategoryName  = signal<string>('');
+  newCategoryIcon  = signal<string>('restaurant');
+  isSavingCategory = signal<boolean>(false);
+
+  saveNewCategory() {
+    const name = this.newCategoryName().trim();
+    if (!name) {
+      this.toastService.show('Please enter a category name', 'warning');
+      return;
+    }
+
+    this.isSavingCategory.set(true);
+    const payload: Omit<Category, 'id'> = {
+      name,
+      icon: this.newCategoryIcon().trim() || 'restaurant',
+      restaurantId: String(this.selectedRestaurantId() || '1')
+    };
+
+    try {
+      this.categoryService.addCategory(payload);
+      this.isSavingCategory.set(false);
+      this.newCategoryName.set('');
+      this.toastService.success('Category Created', `Category "${name}" is active!`);
+    } catch {
+      this.isSavingCategory.set(false);
+      this.toastService.show('Failed to create category', 'error');
+    }
+  }
+
+  deleteCategory(cat: Category) {
+    this.modalService.confirm({
+      title: 'Delete Category',
+      message: `Are you sure you want to delete category "${cat.name}"?`,
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: () => {
+        this.categoryService.deleteCategory(cat.id);
+        this.toastService.success('Category Removed', `"${cat.name}" deleted.`);
+        this.undoService.showUndo(
+          `Category "${cat.name}" Deleted`,
+          () => this.categoryService.restoreCategory(cat.id, cat),
+          8,
+          `Click UNDO or press Ctrl+Z to restore "${cat.name}"`
+        );
+      }
+    });
   }
 
   // ── Support Tickets ───────────────────────────────────────────────────────
@@ -217,11 +482,23 @@ export class AdminDashboard implements OnInit, OnDestroy {
     });
   }
 
-  updateTicketStatus(ticketId: string, status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED') {
+  updateTicketStatus(ticketId: string, status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED', showUndo: boolean = true) {
+    const t = this.tickets().find(x => x.id === ticketId);
+    const prevStatus = (t?.status || 'OPEN') as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+
     this.ticketService.updateTicketStatus(ticketId, status).subscribe(() => {
-      this.toastService.success('Status Updated', `Ticket marked as ${status}`);
+      this.toastService.success('Status Updated', `Ticket #${t?.ticketNumber || ticketId} marked as ${status}`);
       this.selectedTicketDetails.update(d => d ? { ...d, ticket: { ...d.ticket, status } } : d);
       this.refreshData();
+
+      if (showUndo && prevStatus !== status) {
+        this.undoService.showUndo(
+          `Ticket #${t?.ticketNumber || ticketId} marked as ${status}`,
+          () => this.updateTicketStatus(ticketId, prevStatus, false),
+          8,
+          `Click UNDO or press Ctrl+Z to revert to ${prevStatus}`
+        );
+      }
     });
   }
 
@@ -249,7 +526,14 @@ export class AdminDashboard implements OnInit, OnDestroy {
       confirmText: actionName,
       onConfirm: () => {
         this.adminService.toggleRestaurantStatus(id).subscribe(() => {
-          this.toastService.success('Status Updated', `${r?.name} is now ${r?.status === 'active' ? 'Suspended' : 'Active'}`);
+          const newStatus = r?.status === 'active' ? 'Suspended' : 'Active';
+          this.toastService.success('Status Updated', `${r?.name} is now ${newStatus}`);
+          this.undoService.showUndo(
+            `Restaurant "${r?.name}" marked as ${newStatus}`,
+            () => this.adminService.toggleRestaurantStatus(id),
+            8,
+            `Click UNDO or press Ctrl+Z to restore ${r?.name} status`
+          );
         });
       }
     });

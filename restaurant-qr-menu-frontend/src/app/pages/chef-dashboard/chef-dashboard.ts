@@ -205,9 +205,20 @@ export class ChefDashboard implements OnInit, OnDestroy {
         nextStatus = 'COMPLETED';
       }
     }
-    this.orderService.updateOrderStatus(orderId, nextStatus).subscribe();
+    this.orderService.updateOrderStatus(orderId, nextStatus).subscribe(() => {
+      this.orderService.fetchOrders(1).subscribe();
+    });
     const orderNum = target.orderNumber || orderId;
-    this.undoService.showUndo(`Order #${orderNum} marked ${nextStatus}`, () => this.orderService.updateOrderStatus(orderId, currentStatus), 7);
+    this.undoService.showUndo(
+      `Order #${orderNum} marked ${nextStatus}`,
+      () => {
+        this.orderService.updateOrderStatus(orderId, currentStatus).subscribe(() => {
+          this.orderService.fetchOrders(1).subscribe();
+        });
+      },
+      8,
+      `Click UNDO or press Ctrl+Z to revert to ${currentStatus}`
+    );
   }
 
   parseDate(date: string | Date): Date {
