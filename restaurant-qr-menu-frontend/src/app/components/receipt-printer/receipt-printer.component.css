@@ -1,0 +1,731 @@
+/* ==========================================================================
+   Classic & Smooth Thermal Receipt Printer Animation - Luxury Edition
+   ========================================================================== */
+
+:host {
+  display: block;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --paper-bg: #fafaf8;
+  --paper-ink: #222222;
+  --paper-subtle: #666666;
+  --paper-border: #e0e0e0;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --shadow-slot: inset 0 6px 12px rgba(25, 12, 2, 0.95), inset 0 -1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.printer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1.5rem 1rem 2.5rem 1rem;
+  background: #ffffff;
+  position: relative;
+  width: 100%;
+}
+
+/* Header & Controls */
+.controls-header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  z-index: 50;
+}
+
+.brand-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9e9080;
+}
+
+.centered-options-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e6ded0;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.option-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.option-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: #635648;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d4c5b3;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+  color: #1a1a1a;
+  background: #f7f3eb;
+}
+
+.option-btn.active {
+  background: #2b2219;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(43, 34, 25, 0.2);
+  border-color: #2b2219;
+}
+
+.option-btn.active .dot {
+  background: #ecc588;
+}
+
+.divider {
+  width: 1px;
+  height: 18px;
+  background-color: #ebe3d5;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e6ded0;
+  background: #ffffff;
+  color: #635648;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: #fdf8ef;
+  color: #1a1a1a;
+  border-color: #c9b89b;
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   Printer Stage & Single Unified 3D Metallic Dispenser Machine
+   ========================================================================== */
+.printer-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+.machine-unit {
+  width: 380px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 30;
+}
+
+/* Top 3D Metallic Gold Hood */
+.machine-hood-top {
+  width: 380px;
+  height: 44px;
+  border-radius: 14px 14px 4px 4px;
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #fbf4e8 15%, 
+    #e9cf9f 45%, 
+    #d19e54 75%, 
+    #b37f35 100%
+  );
+  box-shadow: 
+    0 -2px 6px rgba(255, 255, 255, 0.9),
+    0 10px 20px rgba(179, 127, 53, 0.28),
+    inset 0 2px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(105, 68, 16, 0.45);
+  position: relative;
+  overflow: hidden;
+  z-index: 25;
+}
+
+.hood-highlight {
+  position: absolute;
+  top: 3px;
+  left: 5%;
+  width: 90%;
+  height: 5px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 100%);
+  border-radius: 999px;
+  filter: blur(1px);
+}
+
+/* Dark Slit Opening */
+.machine-slot-slit {
+  width: 340px;
+  height: 12px;
+  margin-top: -6px;
+  background: #0f0a03;
+  border-radius: 2px;
+  box-shadow: var(--shadow-slot);
+  position: relative;
+  z-index: 5;
+}
+
+/* Cutter Blade Flash Line */
+.cutter-blade-flash {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, #ffffff 50%, rgba(255,255,255,0) 100%);
+  box-shadow: 0 0 10px #ffffff;
+  z-index: 35;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cutter-blade-flash.active {
+  animation: cutterBladeFlash 0.35s ease-out forwards;
+}
+
+@keyframes cutterBladeFlash {
+  0% { opacity: 0; transform: translateX(-50%) scaleX(0.1); }
+  50% { opacity: 1; transform: translateX(-50%) scaleX(1); }
+  100% { opacity: 0; transform: translateX(-50%) scaleX(1); }
+}
+
+/* Bottom Machine Lip Base */
+.machine-hood-bottom {
+  width: 380px;
+  height: 14px;
+  margin-top: -4px;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(180deg, #9e6d2b 0%, #d8b478 40%, #fff7ea 100%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
+}
+
+.hood-shadow {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 100%);
+}
+
+/* Paper Viewport */
+.paper-viewport {
+  position: absolute;
+  top: 39px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  clip-path: inset(0px -60px -1200px -60px);
+  z-index: 8;
+  padding-bottom: 20px;
+  pointer-events: none;
+  perspective: 1200px;
+  perspective-origin: 50% 0%;
+  filter: drop-shadow(0 18px 36px rgba(20, 15, 5, 0.16)) drop-shadow(0 4px 12px rgba(20, 15, 5, 0.08));
+}
+
+/* ==========================================================================
+   Receipt Paper Component
+   ========================================================================== */
+.receipt-paper-wrapper {
+  width: 320px;
+  margin: 0 auto;
+  background-color: var(--paper-bg);
+  position: relative;
+  transform-origin: top center;
+  transform-style: preserve-3d;
+  transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  user-select: none;
+  pointer-events: auto;
+  clip-path: polygon(
+    0% 0%, 100% 0%,
+    100% calc(100% - 10px),
+    98.33% 100%, 96.67% calc(100% - 10px),
+    95.00% 100%, 93.33% calc(100% - 10px),
+    91.67% 100%, 90.00% calc(100% - 10px),
+    88.33% 100%, 86.67% calc(100% - 10px),
+    85.00% 100%, 83.33% calc(100% - 10px),
+    81.67% 100%, 80.00% calc(100% - 10px),
+    78.33% 100%, 76.67% calc(100% - 10px),
+    75.00% 100%, 73.33% calc(100% - 10px),
+    71.67% 100%, 70.00% calc(100% - 10px),
+    68.33% 100%, 66.67% calc(100% - 10px),
+    65.00% 100%, 63.33% calc(100% - 10px),
+    61.67% 100%, 60.00% calc(100% - 10px),
+    58.33% 100%, 56.67% calc(100% - 10px),
+    55.00% 100%, 53.33% calc(100% - 10px),
+    51.67% 100%, 50.00% calc(100% - 10px),
+    48.33% 100%, 46.67% calc(100% - 10px),
+    45.00% 100%, 43.33% calc(100% - 10px),
+    41.67% 100%, 40.00% calc(100% - 10px),
+    38.33% 100%, 36.67% calc(100% - 10px),
+    35.00% 100%, 33.33% calc(100% - 10px),
+    31.67% 100%, 30.00% calc(100% - 10px),
+    28.33% 100%, 26.67% calc(100% - 10px),
+    25.00% 100%, 23.33% calc(100% - 10px),
+    21.67% 100%, 20.00% calc(100% - 10px),
+    18.33% 100%, 16.67% calc(100% - 10px),
+    15.00% 100%, 13.33% calc(100% - 10px),
+    11.67% 100%, 10.00% calc(100% - 10px),
+    8.33% 100%, 6.67% calc(100% - 10px),
+    5.00% 100%, 3.33% calc(100% - 10px),
+    1.67% 100%, 0% calc(100% - 10px)
+  );
+}
+
+.receipt-paper-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 35%,
+    rgba(0, 0, 0, 0.02) 75%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* States */
+.receipt-paper-wrapper.retracted {
+  transform: translateY(-93%) rotateX(-16deg) translateZ(-25px);
+}
+
+.receipt-paper-wrapper.printed {
+  transform: translateY(0%) rotateX(0deg) translateZ(0px);
+}
+
+/* Classic Mechanical Step Animation */
+.receipt-paper-wrapper.printing-classic {
+  animation: printMechanical3D 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes printMechanical3D {
+  0% {
+    transform: translateY(-93%) rotateX(-16deg) translateZ(-25px);
+    opacity: 0.6;
+  }
+  15% {
+    transform: translateY(-78%) rotateX(-12deg) translateZ(14px);
+    opacity: 0.85;
+  }
+  35% {
+    transform: translateY(-56%) rotateX(-8deg) translateZ(22px);
+    opacity: 0.95;
+  }
+  60% {
+    transform: translateY(-30%) rotateX(-5deg) translateZ(18px);
+    opacity: 1;
+  }
+  82% {
+    transform: translateY(-8%) rotateX(-2deg) translateZ(8px);
+  }
+  100% {
+    transform: translateY(0%) rotateX(0deg) translateZ(0px);
+    opacity: 1;
+  }
+}
+
+/* Smooth Fluid Easing Animation */
+.receipt-paper-wrapper.printing-smooth {
+  animation: printSmooth3D 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes printSmooth3D {
+  0% {
+    transform: translateY(-93%) rotateX(-18deg) translateZ(-30px) scale(0.97);
+    opacity: 0.4;
+  }
+  20% {
+    transform: translateY(-70%) rotateX(-12deg) translateZ(20px) scale(0.985);
+    opacity: 0.85;
+  }
+  45% {
+    transform: translateY(-40%) rotateX(-6deg) translateZ(26px) scale(0.995);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-12%) rotateX(-2deg) translateZ(10px) scale(1);
+  }
+  90% {
+    transform: translateY(1%) rotateX(0.8deg) translateZ(2px) scale(1);
+  }
+  100% {
+    transform: translateY(0%) rotateX(0deg) translateZ(0px) scale(1);
+    opacity: 1;
+  }
+}
+
+.receipt-paper-wrapper.vibrating {
+  animation: receiptVibrate 0.05s infinite alternate ease-in-out;
+}
+
+@keyframes receiptVibrate {
+  0% { transform: translateX(-0.4px); }
+  100% { transform: translateX(0.4px); }
+}
+
+/* Hand-Tear Tear-Away Animation */
+.receipt-paper-wrapper.tearing {
+  animation: paperTearAway 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  pointer-events: none;
+  transform-origin: top right;
+}
+
+@keyframes paperTearAway {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(6px) translateX(18px) rotate(-3deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(14px) translateX(55px) rotate(-8deg) scale(0.98);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(22px) translateX(110px) rotate(-14deg) scale(0.94);
+    opacity: 0;
+  }
+}
+
+/* Receipt Body Styling */
+.receipt-content {
+  padding: 1.4rem 1.2rem 1.8rem 1.2rem;
+  font-family: var(--font-mono);
+  color: var(--paper-ink);
+  letter-spacing: 0em;
+  position: relative;
+  z-index: 2;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.header-brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 72%;
+}
+
+.brand-company-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ea580c;
+  font-family: var(--font-mono);
+}
+
+.payment-title {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #555555;
+  line-height: 1.3;
+  font-family: var(--font-mono);
+}
+
+.logo-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ea580c;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.receipt-amount-section {
+  text-align: center;
+  margin: 0.6rem 0 1rem 0;
+}
+
+.receipt-amount {
+  font-size: 1.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #111111;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.receipt-meta {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #777777;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+}
+
+.receipt-divider {
+  width: 100%;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    #999999 0,
+    #999999 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  margin: 0.85rem 0;
+}
+
+.receipt-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #222222;
+}
+
+.receipt-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  line-height: 1.35;
+}
+
+.item-name {
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+.item-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.receipt-totals-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #444444;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.receipt-grand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111111;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed #777777;
+}
+
+.receipt-footer {
+  margin-top: 1.2rem;
+  text-align: center;
+}
+
+.footer-msg {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #444444;
+  margin-bottom: 0.6rem;
+}
+
+.barcode-graphic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.barcode-lines {
+  width: 170px;
+  height: 28px;
+  background: repeating-linear-gradient(
+    90deg,
+    #111111 0,
+    #111111 2px,
+    transparent 2px,
+    transparent 4px,
+    #111111 4px,
+    #111111 7px,
+    transparent 7px,
+    transparent 9px,
+    #111111 9px,
+    #111111 10px,
+    transparent 10px,
+    transparent 13px,
+    #111111 13px,
+    #111111 16px,
+    transparent 16px,
+    transparent 17px,
+    #111111 17px,
+    #111111 20px,
+    transparent 20px,
+    transparent 23px
+  );
+}
+
+.barcode-num {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #777777;
+}
+
+/* Stage Action Controls */
+.stage-info {
+  margin-top: 1.5rem;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 40;
+}
+
+.status-heading {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.status-subtext {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.85rem;
+}
+
+.centered-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.print-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  background: #ea580c;
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
+  transition: all 0.2s ease;
+}
+
+.print-action-btn:hover:not(:disabled) {
+  background: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.36);
+}
+
+.print-action-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.secondary-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-action-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-paper-wrapper, .receipt-paper-wrapper * {
+    visibility: visible;
+  }
+  .receipt-paper-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm !important;
+    clip-path: none !important;
+    transform: none !important;
+  }
+}

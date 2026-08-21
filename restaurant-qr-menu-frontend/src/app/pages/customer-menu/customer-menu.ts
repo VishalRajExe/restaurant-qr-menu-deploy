@@ -20,6 +20,7 @@ import { BackButton } from '../../components/back-button/back-button';
 import { UndoService } from '../../services/undo.service';
 import { TicketService, SupportTicketData } from '../../services/ticket.service';
 import { DiningTableData } from '../../services/table.service';
+import { ReceiptPrinterComponent } from '../../components/receipt-printer/receipt-printer.component';
 
 export interface CartItem {
   menuItem: MenuItem;
@@ -28,7 +29,7 @@ export interface CartItem {
 
 @Component({
   selector: 'app-customer-menu',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReceiptPrinterComponent],
   templateUrl: './customer-menu.html',
   styleUrls: ['./customer-menu.css']
 })
@@ -151,6 +152,10 @@ export class CustomerMenu implements OnInit, OnDestroy {
   lookupQuery           = signal<string>('');
   trackedOrdersList     = signal<Order[]>([]);
   isTracking            = signal<boolean>(false);
+
+  // Receipt Printer Animation Modal
+  showReceiptPrinterModal = signal<boolean>(false);
+  receiptModalOrder       = signal<Order | any>(null);
 
   private pollTimer: any;
 
@@ -570,6 +575,16 @@ export class CustomerMenu implements OnInit, OnDestroy {
     this.showOrderHistoryModal.set(false);
     this.showOrderTracker.set(true);
     this.refreshActiveOrderStatus();
+  }
+
+  openReceiptPrinter(order?: Order | any) {
+    const target = order || this.activeOrder();
+    this.receiptModalOrder.set(target);
+    this.showReceiptPrinterModal.set(true);
+  }
+
+  closeReceiptPrinter() {
+    this.showReceiptPrinterModal.set(false);
   }
 
   reorderItems(order: Order) {

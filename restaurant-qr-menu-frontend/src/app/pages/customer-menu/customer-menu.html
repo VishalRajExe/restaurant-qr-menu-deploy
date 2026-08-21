@@ -500,12 +500,12 @@
 
               <!-- Customer Print / Invoice Actions -->
               <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
-                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700" (click)="printCustomerKOT(activeOrder())">
-                  <span class="material-symbols-outlined text-[16px]">print</span>
-                  <span>Print KOT</span>
+                <button class="lez-btn lez-btn-sm lez-btn-primary" style="flex:1.5;background:#ea580c;color:#ffffff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px" (click)="openReceiptPrinter(activeOrder())">
+                  <span class="material-symbols-outlined text-[16px]">receipt</span>
+                  <span>3D Thermal Receipt</span>
                 </button>
-                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700" (click)="printCustomerInvoice(activeOrder())">
-                  <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px" (click)="printCustomerInvoice(activeOrder())">
+                  <span class="material-symbols-outlined text-[16px]">print</span>
                   <span>Invoice</span>
                 </button>
               </div>
@@ -812,6 +812,25 @@
           <button class="lez-btn lez-btn-secondary w-full" (click)="closeCustomerReportModal()">Close</button>
         </div>
 
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       3D THERMAL RECEIPT PRINTER MODAL
+       ══════════════════════════════════════════════════════════════════════════ -->
+  @if (showReceiptPrinterModal()) {
+    <div class="pos-modal-overlay animate-fade-in" style="z-index:99999;background:rgba(0,0,0,0.65);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center" (click)="closeReceiptPrinter()">
+      <div class="pos-modal-card" style="max-width:520px;width:95vw;padding:0;overflow:hidden;border-radius:24px;background:#ffffff;box-shadow:0 25px 60px rgba(0,0,0,0.3)" (click)="$event.stopPropagation()">
+        <div style="position:relative">
+          <button type="button"
+                  style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;font-size:18px;font-weight:700;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:60;transition:all 0.15s ease"
+                  class="hover:bg-gray-200"
+                  (click)="closeReceiptPrinter()">
+            &times;
+          </button>
+          <app-receipt-printer [order]="receiptModalOrder()" [autoPrint]="true" [showCloseButton]="true" (close)="closeReceiptPrinter()"></app-receipt-printer>
+        </div>
       </div>
     </div>
   }

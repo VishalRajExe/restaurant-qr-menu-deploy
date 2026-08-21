@@ -17,10 +17,11 @@ import { MenuItem } from '../../models/menu-item.model';
 import { Category } from '../../models/category.model';
 import { Order } from '../../services/order.service';
 import { UndoService } from '../../services/undo.service';
+import { ReceiptPrinterComponent } from '../../components/receipt-printer/receipt-printer.component';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, NotificationCenter, RouterLink],
+  imports: [CommonModule, FormsModule, NotificationCenter, RouterLink, ReceiptPrinterComponent],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
@@ -316,6 +317,19 @@ export class AdminDashboard implements OnInit, OnDestroy {
 
   closeOrderTrackingModal() {
     this.trackingOrderModal.set(null);
+  }
+
+  // 3D Thermal Receipt Modal for Admin
+  showReceiptModal = signal<boolean>(false);
+  receiptOrder     = signal<Order | any>(null);
+
+  openOrderReceiptModal(order: Order | any) {
+    this.receiptOrder.set(order);
+    this.showReceiptModal.set(true);
+  }
+
+  closeOrderReceiptModal() {
+    this.showReceiptModal.set(false);
   }
 
   // ── Menu Catalog & Operations ─────────────────────────────────────────────

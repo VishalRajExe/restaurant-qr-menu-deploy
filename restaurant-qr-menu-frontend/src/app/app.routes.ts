@@ -10,6 +10,7 @@ import { OwnerDashboard } from './pages/owner-dashboard/owner-dashboard';
 import { ChefDashboard }  from './pages/chef-dashboard/chef-dashboard';
 import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
 import { CustomerMenu }   from './pages/customer-menu/customer-menu';
+import { ReceiptViewComponent } from './pages/receipt-view/receipt-view.component';
 import { NotFound }       from './pages/not-found/not-found';
 import { ServerError }    from './pages/server-error/server-error';
 
@@ -86,6 +87,10 @@ export const routes: Routes = [
   { path: 't/:tableNumber', component: CustomerMenu },
   { path: 'scan/:restaurantId', component: CustomerMenu },
   { path: 'scan', component: CustomerMenu },
+
+  // Live POS Thermal Receipt Dispenser (accessible to guests, owners, chefs, admins)
+  { path: 'receipt', component: ReceiptViewComponent },
+  { path: 'receipt/:orderNumber', component: ReceiptViewComponent },
 
   // /dashboard → redirects to correct role sub-route
   {
