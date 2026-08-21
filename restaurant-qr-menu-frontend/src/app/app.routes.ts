@@ -77,10 +77,15 @@ export const routes: Routes = [
   { path: 'login',  component: Login },
   { path: 'signup', component: Signup },
 
-  // Guest Digital Menu — no login needed (supports ID, QR token, and slug)
+  // Guest Digital Menu — no login needed (supports ID, QR token, slug, table, and direct /menu)
+  { path: 'menu', component: CustomerMenu },
   { path: 'menu/:restaurantId', component: CustomerMenu },
   { path: 'restaurant/:restaurantId', component: CustomerMenu },
   { path: 'r/:restaurantId', component: CustomerMenu },
+  { path: 'table/:tableNumber', component: CustomerMenu },
+  { path: 't/:tableNumber', component: CustomerMenu },
+  { path: 'scan/:restaurantId', component: CustomerMenu },
+  { path: 'scan', component: CustomerMenu },
 
   // /dashboard → redirects to correct role sub-route
   {

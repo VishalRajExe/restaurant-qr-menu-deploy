@@ -236,14 +236,25 @@ export class CustomerMenu implements OnInit, OnDestroy {
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit() {
     this.route.queryParamMap.subscribe((params: ParamMap) => {
-      const t = params.get('table');
-      if (t && !isNaN(Number(t))) {
-        this.tableNumber.set(Number(t));
+      const t = params.get('table') || params.get('tableNumber') || params.get('t') || params.get('table_id');
+      if (t) {
+        const digits = this.getTableNumberDigits(t);
+        if (digits > 0) {
+          this.tableNumber.set(digits);
+        }
       }
     });
 
     this.route.paramMap.subscribe((params: ParamMap) => {
-      const tokenOrSlug = params.get('restaurantId') || 'gourmet-bistro';
+      const routeTable = params.get('tableNumber');
+      if (routeTable) {
+        const digits = this.getTableNumberDigits(routeTable);
+        if (digits > 0) {
+          this.tableNumber.set(digits);
+        }
+      }
+
+      const tokenOrSlug = params.get('restaurantId') || this.route.snapshot.queryParamMap.get('restaurantId') || '1';
       this.isLoading.set(true);
       this.loadError.set('');
       this.activeCategoryTagId.set('all');

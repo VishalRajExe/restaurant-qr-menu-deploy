@@ -42,9 +42,18 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public CustomerHistoryDto getCustomerOrderHistory(Long restaurantId, String rawPhone) {
         String cleanPhone = validateAndNormalizePhone(rawPhone);
-        Restaurant restaurant = restaurantService.findById(restaurantId);
+        String restaurantName = "All Venues";
+        if (restaurantId != null && restaurantId > 0) {
+            try {
+                Restaurant r = restaurantService.findById(restaurantId);
+                restaurantName = r.getName();
+            } catch (Exception ignored) {}
+        }
 
-        List<Order> allOrders = orderRepository.findByRestaurantIdOrdered(restaurantId);
+        List<Order> allOrders = (restaurantId != null && restaurantId > 0)
+                ? orderRepository.findByRestaurantIdOrdered(restaurantId)
+                : orderRepository.findByCustomerMobileOrOrderNumber(cleanPhone);
+
         List<Order> customerOrders = allOrders.stream()
                 .filter(o -> o.getCustomerMobile() != null && o.getCustomerMobile().replaceAll("\\D", "").equals(cleanPhone))
                 .sorted(Comparator.comparing(Order::getCreatedAt).reversed())
@@ -54,8 +63,8 @@ public class CustomerService {
             return CustomerHistoryDto.builder()
                     .customerMobile(cleanPhone)
                     .customerName("New Guest")
-                    .restaurantId(restaurantId)
-                    .restaurantName(restaurant.getName())
+                    .restaurantId(restaurantId != null ? restaurantId : 0L)
+                    .restaurantName(restaurantName)
                     .totalOrders(0)
                     .totalSpent(BigDecimal.ZERO)
                     .averageOrderValue(BigDecimal.ZERO)
@@ -117,8 +126,8 @@ public class CustomerService {
         return CustomerHistoryDto.builder()
                 .customerMobile(cleanPhone)
                 .customerName(customerName)
-                .restaurantId(restaurantId)
-                .restaurantName(restaurant.getName())
+                .restaurantId(restaurantId != null ? restaurantId : 0L)
+                .restaurantName(restaurantName)
                 .totalOrders(totalOrders)
                 .totalSpent(totalSpent)
                 .averageOrderValue(avgOrderValue)
@@ -131,8 +140,9 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public List<CustomerSummaryDto> getRecentCustomers(Long restaurantId, String search, int limit) {
-        restaurantService.findById(restaurantId);
-        List<Order> orders = orderRepository.findByRestaurantIdOrdered(restaurantId);
+        List<Order> orders = (restaurantId != null && restaurantId > 0)
+                ? orderRepository.findByRestaurantIdOrdered(restaurantId)
+                : orderRepository.findAll().stream().filter(o -> !Boolean.TRUE.equals(o.getIsDeleted())).toList();
 
         Map<String, List<Order>> grouped = orders.stream()
                 .filter(o -> o.getCustomerMobile() != null && !o.getCustomerMobile().isBlank())
@@ -178,7 +188,7 @@ public class CustomerService {
 
         return summaries.stream()
                 .sorted(Comparator.comparing(CustomerSummaryDto::getLastOrderDate).reversed())
-                .limit(limit > 0 ? limit : 20)
+                .limit(limit > 0 ? limit : 200)
                 .toList();
     }
 }

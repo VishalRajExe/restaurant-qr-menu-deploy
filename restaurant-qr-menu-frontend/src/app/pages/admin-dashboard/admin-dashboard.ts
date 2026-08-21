@@ -166,6 +166,81 @@ export class AdminDashboard implements OnInit, OnDestroy {
   customerStatusFilter         = signal<'all' | 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED'>('all');
   trackingOrderModal           = signal<Order | null>(null);
 
+  // Customer Directory Page-wise Signals
+  customerDirectoryPage        = signal<number>(1);
+  customerDirectoryPageSize    = signal<number>(6);
+  customerDirectorySearchQuery = signal<string>('');
+
+  filteredCustomerDirectory = computed(() => {
+    let list = this.customerRecentList();
+    const query = this.customerDirectorySearchQuery().trim().toLowerCase();
+    if (query) {
+      list = list.filter(c => 
+        (c.customerName && c.customerName.toLowerCase().includes(query)) ||
+        (c.customerMobile && c.customerMobile.includes(query))
+      );
+    }
+    return list;
+  });
+
+  customerDirectoryTotalPages = computed(() => {
+    const total = this.filteredCustomerDirectory().length;
+    const size = this.customerDirectoryPageSize();
+    return Math.max(1, Math.ceil(total / size));
+  });
+
+  paginatedCustomerDirectory = computed(() => {
+    const list = this.filteredCustomerDirectory();
+    const page = this.customerDirectoryPage();
+    const size = this.customerDirectoryPageSize();
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  customerPlatformStats = computed(() => {
+    const list = this.customerRecentList();
+    const totalDiners = list.length;
+    const totalOrders = list.reduce((sum, c) => sum + (c.orderCount || 0), 0);
+    const totalRevenue = list.reduce((sum, c) => sum + (c.totalSpent || 0), 0);
+    const avgSpend = totalDiners > 0 ? totalRevenue / totalDiners : 0;
+    return { totalDiners, totalOrders, totalRevenue, avgSpend };
+  });
+
+  prevCustomerDirectoryPage() {
+    if (this.customerDirectoryPage() > 1) {
+      this.customerDirectoryPage.update(p => p - 1);
+    }
+  }
+
+  nextCustomerDirectoryPage() {
+    if (this.customerDirectoryPage() < this.customerDirectoryTotalPages()) {
+      this.customerDirectoryPage.update(p => p + 1);
+    }
+  }
+
+  setCustomerDirectoryPage(p: number) {
+    if (p >= 1 && p <= this.customerDirectoryTotalPages()) {
+      this.customerDirectoryPage.set(p);
+    }
+  }
+
+  onCustomerVenueChange(venueId: any) {
+    this.selectedCustomerRestaurantId.set(venueId);
+    this.customerDirectoryPage.set(1);
+    this.customerHistoryService.fetchRecentCustomers(venueId, '', 100).subscribe();
+  }
+
+  selectCustomerFromDirectory(c: CustomerSummary) {
+    this.customerSearchPhone.set(c.customerMobile);
+    this.searchCustomerHistory();
+  }
+
+  clearSelectedCustomer() {
+    this.customerHistoryResult.set(null);
+    this.customerSearchPhone.set('');
+    this.customerSearchError.set(null);
+  }
+
   filteredCustomerOrders = computed(() => {
     const data = this.customerHistoryResult();
     if (!data || !data.orders) return [];
@@ -263,6 +338,27 @@ export class AdminDashboard implements OnInit, OnDestroy {
     return items;
   });
 
+  getCategoryName(catId: string): string {
+    const found = this.categories().find(c => String(c.id) === String(catId));
+    return found ? found.name : 'All-Day Menu';
+  }
+
+  getItemImage(item: MenuItem): string {
+    if (item.image && (item.image.startsWith('http') || item.image.startsWith('data:'))) {
+      return item.image;
+    }
+    const name = (item.name || '').toLowerCase();
+    if (name.includes('burger')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('salmon') || name.includes('fish') || name.includes('lobster')) return 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('toast') || name.includes('croissant') || name.includes('pancake') || name.includes('breakfast') || name.includes('tartine')) return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('steak') || name.includes('beef') || name.includes('ribeye') || name.includes('duck')) return 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('pasta') || name.includes('tagliolini') || name.includes('fettuccine')) return 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('dessert') || name.includes('chocolate') || name.includes('cake') || name.includes('panna cotta') || name.includes('fondant')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('coffee') || name.includes('brew') || name.includes('drink') || name.includes('wine') || name.includes('beverage')) return 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=600&auto=format&fit=crop&q=80';
+    if (name.includes('shakshuka') || name.includes('egg')) return 'https://images.unsplash.com/photo-1590412200988-a436970781fa?w=600&auto=format&fit=crop&q=80';
+    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
+  }
+
   toggleMenuItemAvailability(item: MenuItem) {
     this.menuService.toggleAvailability(item.id);
     this.toastService.success('Dish Status', `"${item.name}" availability updated`);
@@ -354,6 +450,19 @@ export class AdminDashboard implements OnInit, OnDestroy {
   newCategoryName  = signal<string>('');
   newCategoryIcon  = signal<string>('restaurant');
   isSavingCategory = signal<boolean>(false);
+
+  getCategoryIcon(cat: Category | string): string {
+    const name = typeof cat === 'string' ? cat : (cat?.name || cat?.icon || '');
+    const lower = name.toLowerCase();
+    if (lower.includes('breakfast') || lower.includes('bakery') || lower.includes('pancake')) return 'bakery_dining';
+    if (lower.includes('lunch') || lower.includes('burger') || lower.includes('sandwich')) return 'lunch_dining';
+    if (lower.includes('dinner') || lower.includes('steak') || lower.includes('main')) return 'dinner_dining';
+    if (lower.includes('dessert') || lower.includes('sweet') || lower.includes('cake') || lower.includes('ice cream')) return 'icecream';
+    if (lower.includes('beverage') || lower.includes('drink') || lower.includes('wine') || lower.includes('coffee') || lower.includes('tea')) return 'local_bar';
+    if (lower.includes('pizza')) return 'local_pizza';
+    if (lower.includes('salad') || lower.includes('veg')) return 'nutrition';
+    return 'restaurant';
+  }
 
   saveNewCategory() {
     const name = this.newCategoryName().trim();

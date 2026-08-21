@@ -58,7 +58,7 @@ export class CategoryService {
             id: String(item.id),
             restaurantId: String(restaurantId),
             name: item.name,
-            icon: item.icon || 'Utensils',
+            icon: item.icon || 'restaurant',
             displayOrder: item.displayOrder,
             sortOrder: item.displayOrder
           }));
