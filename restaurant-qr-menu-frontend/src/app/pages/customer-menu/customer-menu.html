@@ -502,14 +502,21 @@
                     </div>
                   </div>
 
-                  <!-- Single Clean Print Receipt Button -->
-                  <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
+                  <!-- Action Buttons: Print & Invoice Together -->
+                  <div style="display:flex;gap:10px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
                     <button class="lez-btn lez-btn-sm"
                             [style.background]="showReceiptAlongside() ? '#334155' : '#ea580c'"
-                            style="flex:1;color:#ffffff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(234,88,12,0.25)"
+                            style="flex:1.2;color:#ffffff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(234,88,12,0.22);border-radius:10px;padding:9px 12px"
                             (click)="toggleReceiptAlongside()">
-                      <span class="material-symbols-outlined text-[16px]">print</span>
+                      <span class="material-symbols-outlined text-[17px]">print</span>
                       <span>{{ showReceiptAlongside() ? 'Hide Receipt' : 'Print Receipt' }}</span>
+                    </button>
+
+                    <button class="lez-btn lez-btn-sm lez-btn-secondary"
+                            style="flex:1;background:#ffffff;border:1.5px solid #fed7aa;color:#ea580c;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:9px 12px;transition:all 0.15s ease"
+                            (click)="printCustomerInvoice(activeOrder())">
+                      <span class="material-symbols-outlined text-[17px]">receipt_long</span>
+                      <span>Invoice</span>
                     </button>
                   </div>
                 }
