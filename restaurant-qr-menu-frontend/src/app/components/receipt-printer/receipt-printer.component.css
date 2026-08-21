@@ -145,7 +145,8 @@
 }
 
 .machine-unit {
-  width: 380px;
+  width: 100%;
+  max-width: 330px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -155,8 +156,9 @@
 
 /* Top 3D Metallic Gold Hood */
 .machine-hood-top {
-  width: 380px;
-  height: 44px;
+  width: 100%;
+  max-width: 330px;
+  height: 40px;
   border-radius: 14px 14px 4px 4px;
   background: linear-gradient(180deg, 
     #ffffff 0%, 
@@ -188,7 +190,8 @@
 
 /* Dark Slit Opening */
 .machine-slot-slit {
-  width: 340px;
+  width: 90%;
+  max-width: 300px;
   height: 12px;
   margin-top: -6px;
   background: #0f0a03;
@@ -201,10 +204,11 @@
 /* Cutter Blade Flash Line */
 .cutter-blade-flash {
   position: absolute;
-  top: 40px;
+  top: 36px;
   left: 50%;
   transform: translateX(-50%);
-  width: 340px;
+  width: 90%;
+  max-width: 300px;
   height: 3px;
   background: linear-gradient(90deg, rgba(255,255,255,0) 0%, #ffffff 50%, rgba(255,255,255,0) 100%);
   box-shadow: 0 0 10px #ffffff;
@@ -225,7 +229,8 @@
 
 /* Bottom Machine Lip Base */
 .machine-hood-bottom {
-  width: 380px;
+  width: 100%;
+  max-width: 330px;
   height: 14px;
   margin-top: -4px;
   border-radius: 0 0 14px 14px;
@@ -244,10 +249,11 @@
 /* Paper Viewport */
 .paper-viewport {
   position: absolute;
-  top: 39px;
+  top: 35px;
   left: 50%;
   transform: translateX(-50%);
-  width: 360px;
+  width: 100%;
+  max-width: 310px;
   clip-path: inset(0px -60px -1200px -60px);
   z-index: 8;
   padding-bottom: 20px;
@@ -261,7 +267,7 @@
    Receipt Paper Component
    ========================================================================== */
 .receipt-paper-wrapper {
-  width: 320px;
+  width: 280px;
   margin: 0 auto;
   background-color: var(--paper-bg);
   position: relative;
@@ -628,7 +634,7 @@
 
 /* Stage Action Controls */
 .stage-info {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   text-align: center;
   width: 100%;
   display: flex;
@@ -636,6 +642,11 @@
   align-items: center;
   gap: 0.35rem;
   z-index: 40;
+  transition: margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.printer-stage.has-printed .stage-info {
+  margin-top: 29rem;
 }
 
 .status-heading {

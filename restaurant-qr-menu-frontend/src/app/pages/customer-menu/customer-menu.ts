@@ -153,7 +153,8 @@ export class CustomerMenu implements OnInit, OnDestroy {
   trackedOrdersList     = signal<Order[]>([]);
   isTracking            = signal<boolean>(false);
 
-  // Receipt Printer Animation Modal
+  // Receipt Printer Alongside & Inline
+  showReceiptAlongside    = signal<boolean>(false);
   showReceiptPrinterModal = signal<boolean>(false);
   receiptModalOrder       = signal<Order | any>(null);
 
@@ -676,8 +677,13 @@ export class CustomerMenu implements OnInit, OnDestroy {
     });
   }
 
+  toggleReceiptAlongside() {
+    this.showReceiptAlongside.update(v => !v);
+  }
+
   closeOrderTracker() {
     this.showOrderTracker.set(false);
+    this.showReceiptAlongside.set(false);
   }
 
   printCustomerInvoice(order?: Order | null) {

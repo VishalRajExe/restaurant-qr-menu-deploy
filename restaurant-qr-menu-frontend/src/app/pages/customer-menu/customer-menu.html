@@ -369,7 +369,7 @@
        ══════════════════════════════════════════════════════════════════════════ -->
   @if (showOrderTracker()) {
     <div class="pos-modal-overlay animate-fade-in" (click)="closeOrderTracker()">
-      <div class="pos-modal-card" (click)="$event.stopPropagation()">
+      <div class="pos-modal-card" [style.max-width]="showReceiptAlongside() ? '920px' : '440px'" style="transition:max-width 0.3s ease;width:95vw" (click)="$event.stopPropagation()">
         
         <div class="pos-modal-header">
           <div style="display:flex;align-items:center;gap:10px">
@@ -388,128 +388,153 @@
 
         <div class="pos-modal-body">
           @if (activeOrder()) {
-            
-            <!-- Order Meta Banner -->
-            <div class="pos-tracker-status-box" [class]="'box-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
-              <div>
-                <div class="pos-tracker-num">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
-                <div style="font-size:11.5px;color:var(--text-secondary)">Table {{ activeOrder()?.tableNumber || '01' }} • {{ activeOrder()?.customerName || 'Diner' }}</div>
-              </div>
-              <div class="pos-tracker-pill" [class]="'status-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
-                ● {{ activeOrder()?.status || 'PENDING' }}
-              </div>
-            </div>
-
-            <!-- Dynamic State Alert Callout -->
-            @if (activeOrder()?.status === 'READY') {
-              <div class="pos-order-alert-ready animate-bounce-subtle">
-                <span class="material-symbols-outlined text-[22px]">notifications_active</span>
-                <div>
-                  <strong>Order is Ready!</strong>
-                  <p>Your meal is freshly prepared and ready for serving at Table {{ activeOrder()?.tableNumber || '01' }}.</p>
-                </div>
-              </div>
-            } @else if (activeOrder()?.status === 'PREPARING') {
-              <div class="pos-order-alert-preparing animate-pulse-subtle">
-                <span class="material-symbols-outlined text-[22px]">local_fire_department</span>
-                <div>
-                  <strong>Cooking in Kitchen</strong>
-                  <p>Chef Antoine is preparing your fresh culinary ingredients right now.</p>
-                </div>
-              </div>
-            } @else if (activeOrder()?.status === 'COMPLETED') {
-              <div class="pos-order-alert-ready">
-                <span class="material-symbols-outlined text-[22px]">task_alt</span>
-                <div>
-                  <strong>Order Served!</strong>
-                  <p>Your order has been delivered to your table. Bon Appétit!</p>
-                </div>
-              </div>
-            }
-
-            <!-- Tracker Timeline -->
-            <div class="pos-tracker-timeline">
+            <div [style.display]="showReceiptAlongside() ? 'flex' : 'block'" style="gap:24px;align-items:flex-start;flex-wrap:wrap">
               
-              <!-- Step 1: Received -->
-              <div class="pos-timeline-step"
-                   [class.done]="isStatusPassed('RECEIVED', activeOrder()?.status)"
-                   [class.active]="isStatusCurrent('RECEIVED', activeOrder()?.status)">
-                <div class="pos-step-icon-wrap">
-                  <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+              <!-- Left Column: Order Status Details & Timeline -->
+              <div [style.flex]="showReceiptAlongside() ? '1 1 380px' : '1 1 100%'" style="min-width:280px">
+                
+                <!-- Order Meta Banner -->
+                <div class="pos-tracker-status-box" [class]="'box-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
+                  <div>
+                    <div class="pos-tracker-num">Order #{{ activeOrder()?.orderNumber || activeOrder()?.id }}</div>
+                    <div style="font-size:11.5px;color:var(--text-secondary)">Table {{ activeOrder()?.tableNumber || '01' }} • {{ activeOrder()?.customerName || 'Diner' }}</div>
+                  </div>
+                  <div class="pos-tracker-pill" [class]="'status-' + (activeOrder()?.status?.toLowerCase() || 'pending')">
+                    ● {{ activeOrder()?.status || 'PENDING' }}
+                  </div>
                 </div>
-                <div class="step-meta">
-                  <div class="step-title">Order Received</div>
-                  <div class="step-sub">Confirmed by dining POS terminal</div>
+
+                <!-- Dynamic State Alert Callout -->
+                @if (activeOrder()?.status === 'READY') {
+                  <div class="pos-order-alert-ready animate-bounce-subtle">
+                    <span class="material-symbols-outlined text-[22px]">notifications_active</span>
+                    <div>
+                      <strong>Order is Ready!</strong>
+                      <p>Your meal is freshly prepared and ready for serving at Table {{ activeOrder()?.tableNumber || '01' }}.</p>
+                    </div>
+                  </div>
+                } @else if (activeOrder()?.status === 'PREPARING') {
+                  <div class="pos-order-alert-preparing animate-pulse-subtle">
+                    <span class="material-symbols-outlined text-[22px]">local_fire_department</span>
+                    <div>
+                      <strong>Cooking in Kitchen</strong>
+                      <p>Chef Antoine is preparing your fresh culinary ingredients right now.</p>
+                    </div>
+                  </div>
+                } @else if (activeOrder()?.status === 'COMPLETED') {
+                  <div class="pos-order-alert-ready">
+                    <span class="material-symbols-outlined text-[22px]">task_alt</span>
+                    <div>
+                      <strong>Order Served!</strong>
+                      <p>Your order has been delivered to your table. Bon Appétit!</p>
+                    </div>
+                  </div>
+                }
+
+                <!-- Tracker Timeline -->
+                <div class="pos-tracker-timeline">
+                  
+                  <!-- Step 1: Received -->
+                  <div class="pos-timeline-step"
+                       [class.done]="isStatusPassed('RECEIVED', activeOrder()?.status)"
+                       [class.active]="isStatusCurrent('RECEIVED', activeOrder()?.status)">
+                    <div class="pos-step-icon-wrap">
+                      <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    </div>
+                    <div class="step-meta">
+                      <div class="step-title">Order Received</div>
+                      <div class="step-sub">Confirmed by dining POS terminal</div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Preparing -->
+                  <div class="pos-timeline-step"
+                       [class.done]="isStatusPassed('PREPARING', activeOrder()?.status)"
+                       [class.active]="isStatusCurrent('PREPARING', activeOrder()?.status)">
+                    <div class="pos-step-icon-wrap">
+                      <span class="material-symbols-outlined text-[18px]">skillet</span>
+                    </div>
+                    <div class="step-meta">
+                      <div class="step-title">Cooking in Kitchen</div>
+                      <div class="step-sub">Chef preparing dishes with fresh ingredients</div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Ready -->
+                  <div class="pos-timeline-step"
+                       [class.done]="isStatusPassed('READY', activeOrder()?.status)"
+                       [class.active]="isStatusCurrent('READY', activeOrder()?.status)">
+                    <div class="pos-step-icon-wrap">
+                      <span class="material-symbols-outlined text-[18px]">room_service</span>
+                    </div>
+                    <div class="step-meta">
+                      <div class="step-title">Ready for Pickup / Serving</div>
+                      <div class="step-sub">Dishes ready at kitchen station</div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: Delivered -->
+                  <div class="pos-timeline-step"
+                       [class.done]="isStatusPassed('DELIVERED', activeOrder()?.status)"
+                       [class.active]="isStatusCurrent('DELIVERED', activeOrder()?.status)">
+                    <div class="pos-step-icon-wrap">
+                      <span class="material-symbols-outlined text-[18px]">task_alt</span>
+                    </div>
+                    <div class="step-meta">
+                      <div class="step-title">Delivered & Served</div>
+                      <div class="step-sub">Delivered to Table {{ activeOrder()?.tableNumber || '01' }}</div>
+                    </div>
+                  </div>
+
                 </div>
+
+                <!-- Ordered Dishes Summary -->
+                @if (activeOrder()?.items && (activeOrder()?.items)!.length > 0) {
+                  <div class="pos-tracker-items-summary">
+                    <div class="pos-summary-heading">Ordered Dishes</div>
+                    <div class="pos-summary-items-list">
+                      @for (item of activeOrder()?.items; track $index) {
+                        <div class="pos-summary-item-row">
+                          <span class="item-name">{{ item.qty }}× {{ item.name }}</span>
+                          <span class="item-price">{{ formatPrice(item.subtotal || (item.price || 0) * item.qty) }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Single Clean Print Receipt Button -->
+                  <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
+                    <button class="lez-btn lez-btn-sm"
+                            [style.background]="showReceiptAlongside() ? '#334155' : '#ea580c'"
+                            style="flex:1;color:#ffffff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(234,88,12,0.25)"
+                            (click)="toggleReceiptAlongside()">
+                      <span class="material-symbols-outlined text-[16px]">print</span>
+                      <span>{{ showReceiptAlongside() ? 'Hide Receipt' : 'Print Receipt' }}</span>
+                    </button>
+                  </div>
+                }
+
               </div>
 
-              <!-- Step 2: Preparing -->
-              <div class="pos-timeline-step"
-                   [class.done]="isStatusPassed('PREPARING', activeOrder()?.status)"
-                   [class.active]="isStatusCurrent('PREPARING', activeOrder()?.status)">
-                <div class="pos-step-icon-wrap">
-                  <span class="material-symbols-outlined text-[18px]">skillet</span>
+              <!-- Right Column: 3D Thermal Receipt Printer Alongside (NO Popup!) -->
+              @if (showReceiptAlongside()) {
+                <div class="animate-fade-in" style="flex:1 1 360px;min-width:320px;border-left:1px solid #e2e8f0;padding-left:16px;display:flex;flex-direction:column;align-items:center">
+                  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px">
+                    <span style="font-size:11.5px;font-weight:800;color:#ea580c;letter-spacing:0.5px;text-transform:uppercase">
+                      🖨️ POS Thermal Receipt
+                    </span>
+                    <button type="button"
+                            class="lez-btn lez-btn-sm lez-btn-secondary"
+                            style="padding:2px 10px;font-size:11.5px;font-weight:700"
+                            (click)="showReceiptAlongside.set(false)">
+                      Close Receipt
+                    </button>
+                  </div>
+                  <app-receipt-printer [order]="activeOrder()" [autoPrint]="true" [showCloseButton]="false"></app-receipt-printer>
                 </div>
-                <div class="step-meta">
-                  <div class="step-title">Cooking in Kitchen</div>
-                  <div class="step-sub">Chef preparing dishes with fresh ingredients</div>
-                </div>
-              </div>
-
-              <!-- Step 3: Ready -->
-              <div class="pos-timeline-step"
-                   [class.done]="isStatusPassed('READY', activeOrder()?.status)"
-                   [class.active]="isStatusCurrent('READY', activeOrder()?.status)">
-                <div class="pos-step-icon-wrap">
-                  <span class="material-symbols-outlined text-[18px]">room_service</span>
-                </div>
-                <div class="step-meta">
-                  <div class="step-title">Ready for Pickup / Serving</div>
-                  <div class="step-sub">Dishes ready at kitchen station</div>
-                </div>
-              </div>
-
-              <!-- Step 4: Delivered -->
-              <div class="pos-timeline-step"
-                   [class.done]="isStatusPassed('DELIVERED', activeOrder()?.status)"
-                   [class.active]="isStatusCurrent('DELIVERED', activeOrder()?.status)">
-                <div class="pos-step-icon-wrap">
-                  <span class="material-symbols-outlined text-[18px]">task_alt</span>
-                </div>
-                <div class="step-meta">
-                  <div class="step-title">Delivered & Served</div>
-                  <div class="step-sub">Delivered to Table {{ activeOrder()?.tableNumber || '01' }}</div>
-                </div>
-              </div>
+              }
 
             </div>
-
-            <!-- Ordered Dishes Summary -->
-            @if (activeOrder()?.items && (activeOrder()?.items)!.length > 0) {
-              <div class="pos-tracker-items-summary">
-                <div class="pos-summary-heading">Ordered Dishes</div>
-                <div class="pos-summary-items-list">
-                  @for (item of activeOrder()?.items; track $index) {
-                    <div class="pos-summary-item-row">
-                      <span class="item-name">{{ item.qty }}× {{ item.name }}</span>
-                      <span class="item-price">{{ formatPrice(item.subtotal || (item.price || 0) * item.qty) }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Customer Print / Invoice Actions -->
-              <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed #cbd5e1">
-                <button class="lez-btn lez-btn-sm lez-btn-primary" style="flex:1.5;background:#ea580c;color:#ffffff;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px" (click)="openReceiptPrinter(activeOrder())">
-                  <span class="material-symbols-outlined text-[16px]">receipt</span>
-                  <span>3D Thermal Receipt</span>
-                </button>
-                <button class="lez-btn lez-btn-sm lez-btn-secondary" style="flex:1;border:1.5px solid #cbd5e1;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px" (click)="printCustomerInvoice(activeOrder())">
-                  <span class="material-symbols-outlined text-[16px]">print</span>
-                  <span>Invoice</span>
-                </button>
-              </div>
-            }
 
           } @else {
             <div style="text-align:center;padding:24px 0">
@@ -812,25 +837,6 @@
           <button class="lez-btn lez-btn-secondary w-full" (click)="closeCustomerReportModal()">Close</button>
         </div>
 
-      </div>
-    </div>
-  }
-
-  <!-- ══════════════════════════════════════════════════════════════════════════
-       3D THERMAL RECEIPT PRINTER MODAL
-       ══════════════════════════════════════════════════════════════════════════ -->
-  @if (showReceiptPrinterModal()) {
-    <div class="pos-modal-overlay animate-fade-in" style="z-index:99999;background:rgba(0,0,0,0.65);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center" (click)="closeReceiptPrinter()">
-      <div class="pos-modal-card" style="max-width:520px;width:95vw;padding:0;overflow:hidden;border-radius:24px;background:#ffffff;box-shadow:0 25px 60px rgba(0,0,0,0.3)" (click)="$event.stopPropagation()">
-        <div style="position:relative">
-          <button type="button"
-                  style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;font-size:18px;font-weight:700;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:60;transition:all 0.15s ease"
-                  class="hover:bg-gray-200"
-                  (click)="closeReceiptPrinter()">
-            &times;
-          </button>
-          <app-receipt-printer [order]="receiptModalOrder()" [autoPrint]="true" [showCloseButton]="true" (close)="closeReceiptPrinter()"></app-receipt-printer>
-        </div>
       </div>
     </div>
   }
