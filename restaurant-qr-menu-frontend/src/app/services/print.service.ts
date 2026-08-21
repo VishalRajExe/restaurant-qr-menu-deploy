@@ -365,6 +365,100 @@ export class PrintService {
     this.executePrintWindow(invoiceContent, `Invoice_${invNum}`);
   }
 
+  /**
+   * Generates and triggers clean printable Guest Bill & Thermal Receipt
+   */
+  printReceiptBill(receiptData: {
+    restaurantName?: string;
+    headerTitle?: string;
+    metaLine?: string;
+    items?: Array<{ name: string; quantity: number; price: number }>;
+    subtotal?: number;
+    taxRate?: number;
+    taxAmount?: number;
+    grandTotal?: number;
+    barcodeNumber?: string;
+  }): void {
+    const restName = receiptData.restaurantName || this.defaultRestaurantInfo.name;
+    const headerTitle = receiptData.headerTitle || 'DINE-IN RECEIPT';
+    const meta = receiptData.metaLine || new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
+    const items = receiptData.items || [];
+    const subtotal = receiptData.subtotal ?? 0;
+    const taxRate = receiptData.taxRate ?? 5;
+    const taxAmount = receiptData.taxAmount ?? 0;
+    const grandTotal = receiptData.grandTotal ?? 0;
+    const barcode = receiptData.barcodeNumber || 'TXN-8849204192';
+
+    const itemsHtml = items.map(item => `
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;font-family:monospace">
+        <span>${item.quantity}× ${item.name}</span>
+        <strong>$${Number(item.price).toFixed(2)}</strong>
+      </div>
+    `).join('');
+
+    const content = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt - ${headerTitle}</title>
+        <meta charset="utf-8">
+        <style>
+          @page { size: 80mm auto; margin: 4mm; }
+          body {
+            font-family: 'Courier New', Courier, monospace, system-ui;
+            margin: 0 auto;
+            padding: 12px;
+            color: #111;
+            background: #fff;
+            max-width: 320px;
+            box-sizing: border-box;
+          }
+          .text-center { text-align: center; }
+          .divider { border-bottom: 1px dashed #555; margin: 10px 0; }
+          .total-row { display: flex; justify-content: space-between; font-size: 13px; margin: 4px 0; font-family: monospace; }
+          .grand-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; margin-top: 8px; padding-top: 6px; border-top: 1px solid #111; font-family: monospace; }
+          .barcode-lines { width: 80%; height: 26px; margin: 8px auto 4px auto; background: repeating-linear-gradient(90deg, #111 0, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 7px, transparent 7px, transparent 9px, #111 9px, #111 10px, transparent 10px, transparent 13px); }
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <div style="font-size:18px;font-weight:900;letter-spacing:0.5px">${restName}</div>
+          <div style="font-size:12px;font-weight:bold;margin-top:2px">${headerTitle}</div>
+          <div style="font-size:22px;font-weight:900;margin:10px 0 2px 0">$${Number(grandTotal).toFixed(2)}</div>
+          <div style="font-size:11px;color:#555">${meta}</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          ${itemsHtml || '<div style="text-align:center;font-size:12px">No items</div>'}
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="total-row"><span>Subtotal:</span><span>$${Number(subtotal).toFixed(2)}</span></div>
+          <div class="total-row"><span>Tax (${taxRate}%):</span><span>$${Number(taxAmount).toFixed(2)}</span></div>
+          <div class="grand-total"><span>TOTAL:</span><span>$${Number(grandTotal).toFixed(2)}</span></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="text-center" style="margin-top:12px">
+          <div style="font-size:12px;font-weight:bold;letter-spacing:1px">HAVE A NICE MEAL!</div>
+          <div class="barcode-lines"></div>
+          <div style="font-size:10px;letter-spacing:1px;color:#555">${barcode}</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    this.executePrintWindow(content, `Receipt_${barcode}`);
+  }
+
   private executePrintWindow(htmlContent: string, title: string): void {
     const printWindow = window.open('', '_blank', 'width=800,height=900,menubar=no,toolbar=no,location=no,status=no');
     if (printWindow) {

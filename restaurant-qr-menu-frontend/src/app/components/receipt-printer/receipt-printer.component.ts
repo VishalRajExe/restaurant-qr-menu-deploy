@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Order } from '../../services/order.service';
+import { PrintService } from '../../services/print.service';
 
 export interface ReceiptItem {
   name: string;
@@ -28,6 +29,7 @@ export interface FormattedReceipt {
   styleUrls: ['./receipt-printer.component.css']
 })
 export class ReceiptPrinterComponent implements OnInit, OnChanges {
+  private printService = inject(PrintService);
   @Input() order: Order | any = null;
   @Input() autoPrint = true;
   @Input() showCloseButton = false;
@@ -341,9 +343,7 @@ export class ReceiptPrinterComponent implements OnInit, OnChanges {
   }
 
   printPhysical() {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+    this.printService.printReceiptBill(this.activeReceipt());
   }
 
   closeModal() {
