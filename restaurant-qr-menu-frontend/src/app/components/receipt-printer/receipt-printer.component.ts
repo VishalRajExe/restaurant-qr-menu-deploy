@@ -140,19 +140,12 @@ export class ReceiptPrinterComponent implements OnInit, OnChanges {
     if (this.autoPrint) {
       setTimeout(() => {
         this.triggerPrint();
-      }, 350);
+      }, 250);
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['order'] && !changes['order'].firstChange) {
-      if (this.isPrinted()) {
-        this.triggerTear();
-        setTimeout(() => {
-          this.triggerPrint();
-        }, 600);
-      }
-    }
+    // Only print on first init or if explicitly triggered, no auto-reprinting on poll updates
   }
 
   private initAudio() {
@@ -337,15 +330,13 @@ export class ReceiptPrinterComponent implements OnInit, OnChanges {
     this.bladeFlashActive.set(true);
     this.paperState.set('tearing');
     this.statusTitle.set("Receipt Torn Off");
-    this.statusSubtext.set("Paper safely cut and detached from thermal slot");
-    this.tear.emit();
+    this.statusSubtext.set("Paper safely detached");
 
     setTimeout(() => {
       this.paperState.set('retracted');
       this.bladeFlashActive.set(false);
       this.isPrinted.set(false);
-      this.statusTitle.set("Ready to Print");
-      this.statusSubtext.set("Click print to dispense a fresh receipt copy");
+      this.tear.emit();
     }, 550);
   }
 

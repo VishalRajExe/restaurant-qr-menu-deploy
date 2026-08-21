@@ -523,21 +523,10 @@
 
               </div>
 
-              <!-- Right Column: 3D Thermal Receipt Printer Alongside (NO Popup!) -->
+              <!-- Right Column: 3D Thermal Receipt Printer Alongside -->
               @if (showReceiptAlongside()) {
-                <div class="animate-fade-in" style="flex:1 1 360px;min-width:320px;border-left:1px solid #e2e8f0;padding-left:16px;display:flex;flex-direction:column;align-items:center">
-                  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px">
-                    <span style="font-size:11.5px;font-weight:800;color:#ea580c;letter-spacing:0.5px;text-transform:uppercase">
-                      🖨️ POS Thermal Receipt
-                    </span>
-                    <button type="button"
-                            class="lez-btn lez-btn-sm lez-btn-secondary"
-                            style="padding:2px 10px;font-size:11.5px;font-weight:700"
-                            (click)="showReceiptAlongside.set(false)">
-                      Close Receipt
-                    </button>
-                  </div>
-                  <app-receipt-printer [order]="activeOrder()" [autoPrint]="true" [showCloseButton]="false"></app-receipt-printer>
+                <div class="animate-fade-in" style="flex:1 1 340px;min-width:300px;border-left:1px solid #e2e8f0;padding-left:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start">
+                  <app-receipt-printer [order]="activeOrder()" [autoPrint]="true" [showCloseButton]="false" (tear)="showReceiptAlongside.set(false)"></app-receipt-printer>
                 </div>
               }
 
